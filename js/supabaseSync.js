@@ -172,16 +172,34 @@
 
   /* ================= DEBOUNCE + TRIGGERS ================= */
   let debounceTimer = null;
+  let lastImmediatePush = 0;
   function scheduleSync() {
+    // The Done button already triggers an immediate push (see below). Skip
+    // the debounced path if that just happened, so a normal save doesn't
+    // fire the request twice.
+    if (Date.now() - lastImmediatePush < 500) return;
     setBadge("Cloud: pending…", "#92400e");
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(() => pushChart(false), DEBOUNCE_MS);
   }
 
   function attachTriggers() {
-    // Any change to the rendered entries list (new/edited/deleted chart
-    // entries) fires this observer — covers saveDraft(), delete buttons,
-    // and the treatment manager without needing to touch app.js.
+    // Primary trigger: the "Done" button (id="save-btn"). app.js already
+    // binds saveDraft() to this same element's click event and registers
+    // it first, so by the time this listener runs, saveDraft() has already
+    // finished mutating `state` and re-rendering — this fires a save to
+    // Supabase (via the Worker) immediately, not debounced.
+    const saveBtn = document.getElementById("save-btn");
+    if (saveBtn) {
+      saveBtn.addEventListener("click", () => {
+        lastImmediatePush = Date.now();
+        pushChart(true);
+      });
+    }
+
+    // Secondary/fallback triggers, debounced — cover actions that change
+    // the chart without going through the Done button: removing an entry
+    // (the trash icon on each row) and edits made via the treatment manager.
     const entriesList = document.getElementById("entries-list");
     if (entriesList) {
       new MutationObserver(scheduleSync).observe(entriesList, {
