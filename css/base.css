@@ -1,0 +1,75 @@
+*,
+*::before,
+*::after { box-sizing: border-box; }
+html, body { margin: 0; min-height: 100%; }
+:root{
+  --bg:#eef2f7;
+  --panel:#ffffff;
+  --panel-soft:#f7f9fc;
+  --ink:#243247;
+  --muted:#708093;
+  --line:#d9e2ec;
+  --board-top:#2b3038;
+  --board-bottom:#232831;
+  --board-line:rgba(255,255,255,.07);
+  --blue:#3b82f6;
+  --green:#21906d;
+  --amber:#d28a26;
+  --red:#d85852;
+  --silver:#8f9daf;
+  --slate:#738598;
+  --cyan:#55a8e8;
+  --teal:#7fc8c9;
+  --shadow:0 20px 56px rgba(18,35,57,.12);
+}
+body{
+  font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);
+  background:radial-gradient(circle at 8% 0%,rgba(255,255,255,.98),transparent 32%),linear-gradient(180deg,#f8fafc 0%,#eaf0f6 100%);
+  -webkit-font-smoothing:antialiased;
+}
+.page{max-width:1680px;margin:0 auto;padding:20px}
+.app-header{position:static;display:grid;gap:8px;margin-bottom:18px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:12px 14px;border:1px solid rgba(217,226,236,.9);border-radius:8px;background:#fff;box-shadow:0 8px 24px rgba(18,35,57,.07)}
+.brand{display:flex;align-items:center;gap:12px;min-width:0}
+.brand-copy{display:grid;align-content:center;gap:4px;min-width:0}
+.contextbar{display:flex;align-items:center;gap:12px;padding:8px 12px;border:1px solid rgba(217,226,236,.9);border-radius:8px;background:#fff;box-shadow:0 5px 18px rgba(18,35,57,.05)}
+.logo{width:46px;height:46px;border-radius:7px;display:grid;place-items:center;
+  /* background:linear-gradient(180deg,#e5f0ff 0%,#c9ddfb 100%); */
+  color:var(--blue);font-size:27px;
+  /* box-shadow:inset 0 0 0 1px rgba(59,130,246,.08) */
+}
+.logo img{display:block;width:100%;height:100%;max-width:100%;max-height:100%;object-fit:contain;object-position:center;border-radius:inherit;box-shadow:inset 0 0 0 1px rgba(59,130,246,.08)}
+.title{margin:0;font-size:20px;line-height:1.05;letter-spacing:-.02em}
+.brand-subtitle{margin:0;color:var(--muted);font-size:10px;font-weight:700;line-height:1.2;letter-spacing:0;text-transform:none}
+.dentition-switch{align-items:center;gap:8px;flex-wrap:wrap;padding:4px 12px 4px 4px;border-right:1px solid var(--line)}
+.dentition-label{font-size:10px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.dentition-pills{display:flex;gap:12px;flex-wrap:wrap;margin-top:5px;}
+.dentition-btn{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--ink);min-height:34px;padding:0 14px;border-radius:6px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.dentition-btn.active{background:#e8f1ff;border-color:#84b3ff;color:#1f4a86}
+.dentition-hint{flex-basis:100%;font-size:10px;line-height:1.1;color:var(--muted)}
+.meta{display:flex;gap:6px;flex:1;flex-wrap:wrap}
+.meta-block small{display:block;font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.meta-block strong{display:block;font-size:16px;font-weight:750;line-height:1.25;color:var(--ink)}
+.meta-block span{display:block;margin-top:4px;font-size:11px;font-weight:550;color:var(--muted)}
+.meta-block span:empty{display:none}
+.meta-card{appearance:none;border:1px solid transparent;border-radius:6px;background:transparent;padding:0;text-align:left;cursor:pointer;position:relative;transition:background .14s ease,border-color .14s ease,box-shadow .14s ease}
+.meta-card .meta-block{padding:7px 36px 7px 12px;min-width:180px}
+.meta-card:hover{background:var(--panel-soft);border-color:var(--line)}
+.meta-card::after{content:"›";position:absolute;right:13px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:500;color:#8b9bad}
+#patient-trigger{min-width:245px;border-color:#bfd5f2;background:#f5f9ff}
+#patient-trigger:hover{border-color:#82afe9;background:#edf5ff;box-shadow:0 4px 12px rgba(59,130,246,.1)}
+#patient-trigger.needs-patient{border-color:#75a9ea;box-shadow:inset 3px 0 0 var(--blue)}
+#patient-trigger.needs-patient strong{color:#1f5fae}
+#patient-trigger.needs-patient::after{content:"Add";font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#2f7ce5}
+.topbar-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn,.pill,.chip,.surface-chip{appearance:none;border:1px solid transparent;font:inherit;cursor:pointer;transition:transform .12s ease,background .12s ease,border-color .12s ease,color .12s ease,opacity .12s ease}
+.btn:hover,.pill:hover,.chip:hover,.surface-chip:hover{transform:translateY(-1px)}
+.btn:disabled,.chip:disabled,.surface-chip:disabled{cursor:not-allowed;transform:none;opacity:.42}
+.btn{height:40px;padding:0 16px;border-radius:6px;font-weight:750}
+.btn.primary{background:linear-gradient(180deg,#5ca3ff 0%,#2f7ce5 100%);color:#fff;box-shadow:0 7px 16px rgba(47,124,229,.2)}
+.contextbar>.topbar-actions{margin-left:auto;align-items:center;flex:none;flex-wrap:nowrap}
+.contextbar>.topbar-actions .btn{height:40px}
+.pdf-icon-btn{width:120px;padding:0 11px;display:inline-flex;align-items:center;justify-content:center;gap:7px;white-space:nowrap}
+.pdf-download-icon{display:block;width:25px;height:25px;object-fit:contain;flex:none}
+.btn.secondary{background:var(--panel-soft);border-color:var(--line);color:var(--ink)}
+.btn:focus-visible,.chip:focus-visible,.dentition-btn:focus-visible,.meta-card:focus-visible,.surface-chip:focus-visible{outline:3px solid rgba(59,130,246,.25);outline-offset:2px}

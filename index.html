@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dental Charting 2</title>
+<link rel="icon" type="image/png" href="./assets/images/reference-teeth.png">
+<link rel="stylesheet" href="./css/base.css?v=4">
+<link rel="stylesheet" href="./css/chart.css?v=8">
+<link rel="stylesheet" href="./css/editor.css">
+<link rel="stylesheet" href="./css/dialogs.css?v=8">
+<link rel="stylesheet" href="./css/layout.css?v=15">
+<link rel="stylesheet" href="./css/print.css?v=2">
+</head>
+<body>
+<div class="page">
+  <header class="app-header">
+    <section class="topbar">
+      <div class="brand">
+      <div class="logo"><img src = "./assets/images/logo.png" alt="Dental Charting Logo"></div>
+        <div class="brand-copy">
+          <h1 class="title">Odontogram</h1>
+          <p class="brand-subtitle">Dental Charting</p>
+        </div>
+      </div>
+      
+    </section>
+
+    <section class="contextbar" aria-label="Chart context">
+      <div class="dentition-switch">
+        <span class="dentition-label">Dentition</span>
+        <div class="dentition-pills" id="dentition-switch">
+          <button class="dentition-btn active" type="button" data-mode="permanent">Permanent</button>
+          <button class="dentition-btn" type="button" data-mode="primary">Primary</button>
+        </div>
+        <span class="dentition-hint" id="dentition-hint"></span>
+      </div>
+      <div class="meta">
+        <button class="meta-card" type="button" id="patient-trigger">
+          <div class="meta-block">
+            <small>Patient</small>
+            <strong id="patient-name-display">Tap to add patient</strong>
+            <span id="patient-sub-display"></span>
+          </div>
+        </button>
+        <button class="meta-card" type="button" id="date-trigger">
+          <div class="meta-block">
+            <small>Date</small>
+            <strong id="visit-date-display">24 June 2026</strong>
+            <span id="visit-date-sub-display"></span>
+          </div>
+        </button>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn secondary" type="button" id="clear-current-btn">Clear Page</button>
+        <button class="btn primary pdf-icon-btn" type="button" id="download-pdf-btn" aria-label="Download PDF" title="Download PDF">
+          <!-- <img class="pdf-download-icon" src="./assets/images/pdf-export-icon.png?v=2" alt=""> -->
+          <span>Download PDF</span>
+        </button>
+      </div>
+    </section>
+  </header>
+
+  <section class="print-patient-card" id="print-patient-card">
+    <div class="print-export-head">
+      <div>
+        <div class="print-export-title">Odontogram</div>
+        <div class="print-export-subtitle">Patient details for exported dental chart</div>
+      </div>
+    </div>
+    <div class="print-patient-grid" id="print-patient-grid"></div>
+  </section>
+
+  <div class="layout">
+    <section class="chart-card">
+      <div class="chart-head">
+        <div>
+          <h2>Clinical Chart</h2>
+          <p>Mouth view showing the root profile and crown surface for every tooth.</p>
+        </div>
+        <div class="chart-head-controls">
+          <div class="chart-view-key" aria-label="Chart view guide">
+            <span><i class="view-key-icon root"></i>Root profile</span>
+            <span><i class="view-key-icon crown"></i>Crown surface</span>
+          </div>
+          <div class="chart-layer-switch" id="chart-view-toggle" aria-label="Chart layer">
+            <button class="chart-layer-btn active" type="button" data-chart-view="existing" aria-pressed="true">Existing</button>
+            <button class="chart-layer-btn" type="button" data-chart-view="planned" aria-pressed="false">Planning</button>
+          </div>
+          <button class="mobile-entry-trigger" id="mobile-entry-trigger" type="button">+ Chart Entry</button>
+          <small class="mobile-entry-hint" id="mobile-entry-hint">Hint: Tap a tooth and add its chart entry.</small>
+        </div>
+      </div>
+
+      <div class="chart-stage-wrap">
+        <div class="chart-stage hidden" id="combined-stage">
+          <div class="orientation-grid">
+            <div class="orientation-side"></div>
+            <div class="orientation-row">
+              <span class="side-label right">R</span>
+              <span class="side-label left">L</span>
+            </div>
+          </div>
+
+          <section class="arch">
+            <div class="arch-grid upper-grid">
+              <div class="arch-label-row upper-label"><div class="arch-label-text">Upper Arch</div></div>
+              <div class="teeth-row upper-root-row" id="upper-front"></div>
+              <div class="teeth-row occ upper-crown-row" id="upper-occ"></div>
+              <div class="teeth-row numbers upper-number-row" id="upper-numbers"></div>
+            </div>
+          </section>
+
+          <div class="arch-divider-line"></div>
+
+          <section class="arch">
+            <div class="arch-grid lower-grid">
+              <div class="teeth-row numbers lower-number-row" id="lower-numbers"></div>
+              <div class="arch-label-row lower lower-label"><div class="arch-label-text">Lower Arch</div></div>
+              <div class="teeth-row occ lower-crown-row" id="lower-occ"></div>
+              <div class="teeth-row lower-root-row" id="lower-front"></div>
+            </div>
+          </section>
+        </div>
+
+        <div class="chart-stage split-stage" id="split-stage">
+          <section class="split-group" data-chart-layer="existing">
+            <div class="split-group-head">
+              <span class="split-status-label existing">Existing</span>
+            </div>
+            <div class="orientation-grid">
+              <div class="orientation-side"></div>
+              <div class="orientation-row">
+                <span class="side-label left">L</span>
+                <span class="side-label right">R</span>
+              </div>
+            </div>
+            <div class="arch-grid upper-grid">
+              <div class="arch-label-row upper-label"><div class="arch-label-text">Upper Arch</div></div>
+              <div class="teeth-row upper-root-row" id="split-existing-upper-front"></div>
+              <div class="teeth-row occ upper-crown-row" id="split-existing-upper-occ"></div>
+              <div class="teeth-row numbers upper-number-row" id="split-existing-upper-numbers"></div>
+            </div>
+            <div class="split-divider"></div>
+            <div class="arch-grid lower-grid">
+              <div class="teeth-row numbers lower-number-row" id="split-existing-lower-numbers"></div>
+              <div class="arch-label-row lower lower-label"><div class="arch-label-text">Lower Arch</div></div>
+              <div class="teeth-row occ lower-crown-row" id="split-existing-lower-occ"></div>
+              <div class="teeth-row lower-root-row" id="split-existing-lower-front"></div>
+            </div>
+          </section>
+
+          <section class="split-group view-hidden" data-chart-layer="planned">
+            <div class="split-group-head">
+              <span class="split-status-label planned">Planning</span>
+            </div>
+            <div class="orientation-grid">
+              <div class="orientation-side"></div>
+              <div class="orientation-row">
+                <span class="side-label left">L</span>
+                <span class="side-label right">R</span>
+              </div>
+            </div>
+            <div class="arch-grid upper-grid">
+              <div class="arch-label-row upper-label"><div class="arch-label-text">Upper Arch</div></div>
+              <div class="teeth-row upper-root-row" id="split-planned-upper-front"></div>
+              <div class="teeth-row occ upper-crown-row" id="split-planned-upper-occ"></div>
+              <div class="teeth-row numbers upper-number-row" id="split-planned-upper-numbers"></div>
+            </div>
+            <div class="split-divider"></div>
+            <div class="arch-grid lower-grid">
+              <div class="teeth-row numbers lower-number-row" id="split-planned-lower-numbers"></div>
+              <div class="arch-label-row lower lower-label"><div class="arch-label-text">Lower Arch</div></div>
+              <div class="teeth-row occ lower-crown-row" id="split-planned-lower-occ"></div>
+              <div class="teeth-row lower-root-row" id="split-planned-lower-front"></div>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="print-page-number print-page-one" aria-hidden="true">1</div>
+
+      <div class="entries-panel">
+        <div class="entries-head">
+          <h3 class="saved-entries-title">Saved Entries</h3>
+          <span id="entries-count">0 items</span>
+        </div>
+        <div class="entries-list" id="entries-list"></div>
+      </div>
+      <section class="print-note-card" id="print-note-card">
+        <div class="entries-head">
+          <h3>Patient note</h3>
+        </div>
+        <div class="print-note-body" id="print-note-body"></div>
+      </section>
+      <div class="print-page-number" aria-hidden="true">2</div>
+    </section>
+
+    <aside class="sidebar">
+      <div class="sidebar-empty" id="sidebar-empty"></div>
+
+      <div class="editor" id="editor">
+        <div class="selected-head">
+          <div class="selected-main">
+            <div class="field-title">Selected tooth</div>
+            <div class="selected-code" id="selected-code">26</div>
+            <div class="selected-name" id="selected-name">Upper left first molar</div>
+            <div class="preview" id="preview-box"></div>
+          </div>
+          <div class="selected-side">
+            <div class="mini-preview" id="mini-preview"></div>
+            <div class="form-actions">
+              <button class="btn secondary" type="button" id="reset-btn">Reset</button>
+              <button class="btn primary" type="button" id="save-btn">Done</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="field selection-field">
+          <div class="field-title">Selection</div>
+          <div class="selection-row">
+            <button class="chip" type="button" id="multi-toggle-btn">Batch select: Off</button>
+            <div class="selected-teeth" id="selected-teeth"></div>
+          </div>
+        </div>
+
+        <div class="field-pair">
+          <div class="field chart-type-field">
+            <div class="field-title">1. Chart type</div>
+            <div class="chip-grid" id="category-grid"></div>
+          </div>
+          <div class="field view-field">
+            <div class="field-title">2. View</div>
+            <div class="chip-grid" id="view-grid"></div>
+            <div class="field-note" id="view-note"></div>
+          </div>
+        </div>
+        <div class="field-pair">
+          <div class="field" id="surface-field">
+            <div class="field-title">3. Surface / area</div>
+            <div class="surface-grid" id="surface-grid"></div>
+            <div class="field-note" id="surface-note"></div>
+          </div>
+          <div class="field treatment-field">
+            <div class="field-heading-row">
+              <div class="field-title">4. Treatment</div>
+              <button class="field-manage-btn" type="button" id="manage-treatments-btn">Edit / Add</button>
+            </div>
+            <div class="chip-grid" id="treatment-grid"></div>
+          </div>
+        </div>
+        <div class="field-pair">
+          <div class="field status-field">
+            <div class="field-title">5. Status</div>
+            <div class="chip-grid" id="status-grid"></div>
+          </div>
+          <div class="field note-field">
+            <div class="field-title">Clinical note</div>
+            <textarea class="note-input" id="note-input" placeholder="Optional note for this tooth"></textarea>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<div class="modal-backdrop mobile-entry-backdrop" id="mobile-entry-modal" aria-hidden="true">
+  <div class="modal mobile-entry-modal" role="dialog" aria-modal="true" aria-labelledby="mobile-entry-title">
+    <div class="modal-head mobile-entry-head">
+      <div class="mobile-entry-heading">
+        <div class="mobile-entry-progress" id="mobile-entry-progress" aria-label="Chart entry progress">
+          <!-- <button class="mobile-entry-stage current" type="button" data-entry-stage="1" aria-label="Go to chart type"><span>1</span><small>Type</small></button> -->
+          <button class="mobile-entry-stage" type="button" data-entry-stage="2" aria-label="Go to view and surface"><span>1</span><small>View</small></button>
+          <button class="mobile-entry-stage" type="button" data-entry-stage="3" aria-label="Go to treatment"><span>2</span><small>Treatment</small></button>
+          <button class="mobile-entry-stage" type="button" data-entry-stage="4" aria-label="Go to status and note"><span>3</span><small>Status</small></button>
+        </div>
+        <h3 id="mobile-entry-title">Chart type</h3>
+      </div>
+      <button class="icon-btn mobile-tooth-close" type="button" id="mobile-entry-close-btn" aria-label="Close chart entry">&#10005;</button>
+    </div>
+    <div class="mobile-entry-content" id="mobile-entry-content"></div>
+    <div class="mobile-entry-footer">
+      <button class="btn secondary" type="button" id="mobile-entry-back-btn">Back</button>
+      <button class="btn primary" type="button" id="mobile-entry-next-btn">Next</button>
+      <button class="btn primary" type="button" id="mobile-entry-done-btn" hidden>Done</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="treatment-manager-modal" aria-hidden="true">
+  <div class="modal treatment-manager-modal" role="dialog" aria-modal="true" aria-labelledby="treatment-manager-title">
+    <div class="modal-head">
+      <div>
+        <h3 id="treatment-manager-title">Manage Treatment Methods</h3>
+        <p>Choose which methods appear, and manage their name, icon, and color.</p>
+      </div>
+      <button class="icon-btn" type="button" id="treatment-manager-close-btn" aria-label="Close">×</button>
+    </div>
+
+    <div class="treatment-manager-section">
+      <div class="manager-section-head">
+        <strong>Existing methods</strong>
+        <span>Changes are saved on this device.</span>
+      </div>
+      <div class="treatment-method-list" id="treatment-method-list"></div>
+    </div>
+
+    <form class="add-treatment-form" id="add-treatment-form">
+      <div class="manager-section-head">
+        <strong>Add treatment method</strong>
+        <span>New methods use standard surface charting.</span>
+      </div>
+      <div class="add-treatment-grid">
+        <label>
+          <span>Name</span>
+          <input name="label" type="text" maxlength="40" placeholder="e.g. Temporary filling" required>
+        </label>
+        <label>
+          <span>Icon</span>
+          <select name="icon" id="new-treatment-icon"></select>
+        </label>
+        <label>
+          <span>Color</span>
+          <input name="color" type="color" value="#3b82f6">
+        </label>
+      </div>
+      <button class="btn secondary add-method-btn" type="submit">+ Click to Add New Method</button>
+    </form>
+
+    <div class="modal-actions manager-actions">
+      <button class="btn secondary" type="button" id="treatment-manager-cancel-btn">Cancel</button>
+      <button class="btn primary" type="button" id="treatment-manager-save-btn">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="patient-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="patient-modal-title">
+    <div class="modal-head">
+      <div>
+        <h3 id="patient-modal-title">Patient information</h3>
+        <p>Update the patient header and keep it for later visits on this browser.</p>
+      </div>
+      <button class="icon-btn" type="button" id="patient-close-btn" aria-label="Close">✕</button>
+    </div>
+    <form class="patient-form" id="patient-form">
+      <div class="patient-grid">
+        <div class="patient-field full">
+          <label for="patient-full-name">Full name</label>
+          <input id="patient-full-name" name="fullName" type="text" placeholder="Type patient full name">
+        </div>
+        <div class="patient-field">
+          <label for="patient-dob-text">Date of birth</label>
+          <div class="date-field-shell">
+            <input class="date-text-input" id="patient-dob-text" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="bday">
+            <button class="date-picker-btn" id="patient-dob-trigger" type="button" aria-label="Open date of birth calendar">📅</button>
+            <input id="patient-dob" name="dob" type="hidden">
+          </div>
+        </div>
+        <div class="patient-field">
+          <label for="patient-id">Patient ID</label>
+          <input id="patient-id" name="patientId" type="text" placeholder="Optional patient ID">
+        </div>
+        <div class="patient-field">
+          <label for="patient-gender">Gender</label>
+          <select id="patient-gender" name="gender">
+            <option value="">Not set</option>
+            <option value="Female">Female</option>
+            <option value="Male">Male</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="patient-field">
+          <label for="patient-phone">Phone</label>
+          <input id="patient-phone" name="phone" type="text" placeholder="Optional phone number">
+        </div>
+        <div class="patient-field">
+          <label for="patient-email">Email</label>
+          <input id="patient-email" name="email" type="email" placeholder="Optional email">
+        </div>
+        <div class="patient-field full">
+          <label for="patient-notes">Basic information / notes</label>
+          <textarea id="patient-notes" name="notes" placeholder="Medical alert, address, or basic information"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" id="patient-clear-btn">Clear</button>
+        <button class="btn secondary" type="button" id="patient-cancel-btn">Cancel</button>
+        <button class="btn primary" type="submit">Save patient</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="date-modal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="date-modal-title">
+    <div class="modal-head">
+      <div>
+        <h3 id="date-modal-title">Visit date</h3>
+        <p>Set the chart date shown in the top bar and used for export.</p>
+      </div>
+      <button class="icon-btn" type="button" id="date-close-btn" aria-label="Close">✕</button>
+    </div>
+    <form class="patient-form" id="date-form">
+      <div class="patient-grid">
+        <div class="patient-field full">
+          <label for="visit-date-text">Visit date</label>
+          <div class="date-field-shell">
+            <input class="date-text-input" id="visit-date-text" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off">
+            <button class="date-picker-btn" id="visit-date-trigger" type="button" aria-label="Open visit date calendar">📅</button>
+            <input id="visit-date-input" name="visitDate" type="hidden">
+          </div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn secondary" type="button" id="date-today-btn">Today</button>
+        <button class="btn secondary" type="button" id="date-cancel-btn">Cancel</button>
+        <button class="btn primary" type="submit">Save date</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="date-popover" id="date-popover" hidden>
+  <div class="date-popover-head">
+    <button class="date-nav-btn" id="date-prev-btn" type="button" aria-label="Previous">‹</button>
+    <button class="date-title-btn" id="date-title-btn" type="button">June 2026</button>
+    <button class="date-nav-btn" id="date-next-btn" type="button" aria-label="Next">›</button>
+  </div>
+  <div class="date-view" id="date-view"></div>
+  <div class="date-popover-actions">
+    <button class="btn secondary" id="date-clear-btn" type="button">Clear</button>
+    <button class="btn secondary" id="date-popover-today-btn" type="button">Today</button>
+    <button class="btn secondary" id="date-popover-close-btn" type="button">Close</button>
+  </div>
+</div>
+
+<div class="modal-backdrop mobile-tooth-backdrop" id="mobile-tooth-modal" aria-hidden="true">
+  <div class="modal mobile-tooth-modal" role="dialog" aria-modal="true" aria-labelledby="mobile-tooth-modal-title">
+    <div class="modal-head mobile-tooth-modal-head">
+      <div>
+        <span class="mobile-tooth-kicker">Selected tooth</span>
+        <h3 id="mobile-tooth-modal-title">Tooth</h3>
+        <p id="mobile-tooth-modal-name"></p>
+      </div>
+      <button class="icon-btn mobile-tooth-close" type="button" id="mobile-tooth-close-btn" aria-label="Close tooth details">&#10005;</button>
+    </div>
+    <p class="mobile-tooth-instruction">Tap the enlarged root or crown surface to select it.</p>
+    <nav class="mobile-tooth-navigation" aria-label="Move between teeth">
+      <button class="mobile-tooth-nav-btn" type="button" id="mobile-tooth-prev-btn">
+        <span aria-hidden="true">&#8592;</span>
+        <small id="mobile-tooth-prev-number">Previous</small>
+      </button>
+      <span class="mobile-tooth-nav-hint">Wrong tooth?<br>Move left or right</span>
+      <button class="mobile-tooth-nav-btn" type="button" id="mobile-tooth-next-btn">
+        <small id="mobile-tooth-next-number">Next</small>
+        <span aria-hidden="true">&#8594;</span>
+      </button>
+    </nav>
+    <div class="mobile-tooth-views">
+      <section class="mobile-tooth-view" aria-labelledby="mobile-root-label">
+        <strong id="mobile-root-label">Root view</strong>
+        <div class="mobile-tooth-art root" id="mobile-tooth-root"></div>
+      </section>
+      <section class="mobile-tooth-view" aria-labelledby="mobile-crown-label">
+        <strong id="mobile-crown-label">Crown view</strong>
+        <div class="mobile-tooth-art crown" id="mobile-tooth-crown"></div>
+      </section>
+    </div>
+    <div class="mobile-tooth-selection" id="mobile-tooth-selection"></div>
+    <button class="mobile-optional-molar-btn" type="button" id="mobile-optional-molar-btn" hidden></button>
+    <div class="modal-actions mobile-tooth-actions">
+      <button class="btn primary" type="button" id="mobile-tooth-done-btn">Done</button>
+      <button class="btn secondary" type="button" id="mobile-tooth-bottom-close-btn">Close</button>
+    </div>
+  </div>
+</div>
+
+<script defer src="./js/tooth-silhouettes.js"></script>
+<script defer src="./js/app.js?v=12"></script>
+<script defer src="./js/supabaseSync.js?v=1"></script>
+</body>
+</html>

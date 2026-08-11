@@ -1,0 +1,324 @@
+@media (max-width:1280px){
+  .layout{grid-template-columns:1fr}
+  .sidebar{height:auto}
+  .selected-head{grid-template-columns:minmax(0,1fr) minmax(180px,22%)}
+  .selected-side{max-width:none}
+  #treatment-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+}
+@media (max-width:900px){
+  .page{padding:12px}
+  .app-header{position:static}
+  .topbar{padding:12px}
+  .contextbar{display:grid;grid-template-columns:1fr;padding:10px}
+  .contextbar>.topbar-actions{justify-self:end}
+  .dentition-switch{border-right:0;border-bottom:1px solid var(--line);padding:4px 4px 10px}
+  .meta{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+  .meta-card .meta-block{min-width:0}
+  .chart-head{flex-direction:column}
+  .chart-view-key{justify-content:flex-start}
+  .field-pair{grid-template-columns:1fr}
+  #treatment-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media (max-width:600px){
+  .page{padding:8px}
+  .topbar,.chart-card,.sidebar{border-radius:8px}
+  .topbar{align-items:center;flex-wrap:wrap;gap:10px;padding:10px}
+  .brand{flex:1 1 165px;min-width:0}
+  .topbar-actions{flex:0 1 auto;margin-left:auto;gap:6px}
+  .contextbar{border-radius:8px}
+  .title{font-size:16px}
+  .brand-copy{gap:3px}
+  .brand-subtitle{font-size:9px;font-weight:700}
+  .dentition-switch{align-items:flex-start}
+  .dentition-label{flex-basis:100%}
+  .dentition-btn{min-height:32px;padding-inline:12px;font-size:11px}
+  .meta{grid-template-columns:1fr}
+  .meta-block small{font-size:9px;margin-bottom:3px}
+  .meta-block strong{font-size:14px;line-height:1.2}
+  .meta-block span{margin-top:3px;font-size:10px;line-height:1.3}
+  .meta-card .meta-block{padding:8px 32px 8px 10px}
+  .meta-card::after{right:10px;font-size:18px}
+  .topbar-actions{display:grid;grid-template-columns:auto auto}
+  .contextbar>.topbar-actions{width:100%;grid-template-columns:1fr 1fr;justify-self:stretch}
+  .contextbar>.topbar-actions .btn,.contextbar>.topbar-actions .pdf-icon-btn{width:100%}
+  .topbar-actions .btn{padding-inline:11px;font-size:11px}
+  .chart-head{padding:13px}
+  .chart-head h2{font-size:16px}
+  .chart-head p{font-size:10px;line-height:1.35}
+  .chart-head-controls{width:100%;grid-template-columns:auto auto;justify-content:start;justify-items:start;gap:6px 8px;flex:none}
+  .chart-head-controls .chart-view-key{grid-column:1 / -1}
+  .chart-head-controls .chart-layer-switch{grid-column:1}
+  .mobile-entry-trigger {
+    display: inline-flex;
+    grid-column: 2;
+    align-items: center;
+    justify-content: center;
+
+    height: 38px;
+    min-height: 38px;
+    margin-top: 8px;
+    align-self: start;
+
+    padding: 3px 11px;
+    border: 1px solid #b9cee8;
+    border-radius: 7px;
+    background: #eef6ff;
+    color: #24537f;
+    font: inherit;
+    font-size: 10px;
+    font-weight: 800;
+    cursor: pointer;
+  }  
+.mobile-entry-trigger:disabled{border-color:var(--line);background:#f4f5f7;color:#9aa6b2;cursor:not-allowed}
+  .mobile-entry-hint{display:block;grid-column:1 / -1;color:var(--muted);font-size:10px;line-height:1.35}
+  .layout>.sidebar{display:none}
+/* Keep the edge badges inside the clipped chart viewport. */
+.split-stage .teeth-row .tooth:first-child .review-badge {
+  left: calc(50% + 16px);
+}
+
+.split-stage .teeth-row .tooth:last-child .review-badge {
+  left: calc(50% - 16px);
+}
+
+/* Place upper corner badges beside the outer roots, at the red-marker position. */
+.split-stage .upper-root-row .tooth:first-child .review-badge {
+  top: 12px;
+  left: 52%;
+}
+
+.split-stage .upper-root-row .tooth:last-child .review-badge {
+  top: 12px;
+  left: 40%;
+}
+
+/* Place lower corner badges beside and just below the outer roots. */
+.split-stage .lower-root-row .tooth:first-child .review-badge.bottom
+ {
+  bottom: 18px;
+  left: 50%;
+}
+
+.split-stage .lower-root-row .tooth:last-child .review-badge.bottom {
+  bottom: 18px;
+  left: 40%;
+}
+
+  .chart-layer-switch{display:inline-grid;grid-template-columns:auto auto;align-items:center;align-self:start;width:max-content;max-width:100%;height:38px;margin-top:8px;padding:3px;gap:3px;border:1px solid var(--line);border-radius:7px;background:var(--panel-soft)}
+  .split-group.view-hidden{display:none}
+  /* Keep the complete 16-tooth arch visible on phones instead of forcing a
+     desktop-width horizontal scroller. */
+  .chart-stage{min-width:0;width:100%;overflow:hidden;padding:12px 4px 8px;border-radius:6px}
+  .chart-stage .arch-grid,.chart-stage .orientation-grid{grid-template-columns:48px minmax(0,1fr) 48px}
+  .chart-stage .teeth-row,.chart-stage .orientation-row{width:100%;grid-template-columns:repeat(16,minmax(0,1fr));}
+  .chart-stage .art-core.front.upper{transform:scale(.42,-.42)}
+  .chart-stage .art-core.front.lower{transform:scale(.42)}
+  .chart-stage .art-core.occ{transform:scale(.68)}
+  .chart-stage .tooth:hover .tooth-art{transform:translateY(-2px) scale(1.03)}
+  .chart-stage .tooth.active .tooth-art{transform:translateY(-px) scale(1.04)}
+  /* Mobile mouth view. Each upper tooth gets its own radial position while the
+     row retains sixteen equal tap targets. Desktop and the lower arch are not
+     touched by these split-stage selectors. */
+  /*decrease 18px to widen the available tooth row.*/
+    .split-stage .surface-region {
+    pointer-events: none;
+  }
+  .split-stage > .split-group .surface-region {
+    pointer-events: none;
+  }
+
+  #mobile-tooth-modal .surface-region {
+    pointer-events: auto;
+  }
+  .split-stage .upper-grid{display:grid;grid-template-columns:18px minmax(0,1fr) 18px;grid-template-rows:118px 72px 30px;padding-bottom:1px}
+  .split-stage .upper-grid .upper-label{grid-row:1 / span 2;align-items:flex-start}
+  .split-stage .upper-grid .upper-label .arch-label-text {
+    margin-top: 30px;
+    white-space: nowrap;
+  }
+    .split-stage .upper-grid .tooth {
+    min-height: 48px;
+    align-items: center;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .split-stage .upper-grid .tooth,
+  .split-stage .upper-grid .number{
+    --arch-y:0px;
+    --arch-r:0deg;
+    transform:translateY(var(--arch-y)) rotate(var(--arch-r));
+    transform-origin:50% 50%;
+  }
+  .split-stage .upper-grid .upper-crown-row {
+  width: 110%;
+  margin-inline: -4%;
+}
+  .split-stage .upper-grid .upper-root-row {
+  width: 114%;
+  margin-inline: -6%;
+}
+
+  .split-stage .upper-grid .upper-number-row {
+  width: 110%;
+  margin-inline: -4%;
+}
+
+/* Upper arch Review badge */
+.split-stage .upper-root-row .review-badge {
+  top: 10px;
+}
+
+/* Lower arch Review badge */
+.split-stage .lower-root-row .review-badge.bottom {
+  bottom: 12px;
+}
+
+      /*decrease first value to make crown teeth smaller and increase their gaps.*/
+  .split-stage .upper-grid .upper-root-row .art-core{transform:scale(.33,-.36)}
+      /*decrease .50 to make crown teeth smaller and increase their gaps.*/
+  .split-stage .upper-grid .upper-crown-row .art-core{transform:scale(.48)}
+  .split-stage .upper-grid .upper-root-row .tooth{--arch-y:calc(var(--arch-depth) * 1.15);--arch-r:var(--arch-angle)}
+  /*adjust px value to let crown moves upward or downwards*/
+  .split-stage .upper-grid .upper-crown-row .tooth{--arch-y:calc(var(--arch-depth) - 50px);--arch-r:var(--arch-angle)}
+    /*adjust px value to let numbers moves upward or downwards*/
+  .split-stage .upper-grid .upper-number-row .number{--arch-y:calc((var(--arch-depth) * 1) - 85px);--arch-r:var(--arch-angle)}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(1){--arch-depth:44px;--arch-angle:-23deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(2){--arch-depth:34px;--arch-angle:-19deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(3){--arch-depth:25px;--arch-angle:-15deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(4){--arch-depth:17px;--arch-angle:-12deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(5){--arch-depth:10px;--arch-angle:-9deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(6){--arch-depth:5px;--arch-angle:-6deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(7){--arch-depth:2px;--arch-angle:-3deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(8){--arch-depth:0px;--arch-angle:-1deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(9){--arch-depth:0px;--arch-angle:1deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(10){--arch-depth:2px;--arch-angle:3deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(11){--arch-depth:5px;--arch-angle:6deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(12){--arch-depth:10px;--arch-angle:9deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(13){--arch-depth:17px;--arch-angle:12deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(14){--arch-depth:25px;--arch-angle:15deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(15){--arch-depth:34px;--arch-angle:19deg}
+  .split-stage .upper-grid :is(.tooth,.number):nth-child(16){--arch-depth:44px;--arch-angle:23deg}
+
+  .split-stage .split-divider {
+  transform: translateY(-40px);
+}
+
+  /* Mobile lower mouth arch: outer molars stay high while the incisors form
+     the bottom of the U. The negative margin closes the space to the upper. */
+  .split-stage .lower-grid{display:grid;grid-template-columns:18px minmax(0,1fr) 18px;grid-template-rows:52px 74px 106px;margin-top:-64px;padding-bottom:0}
+  .split-stage .lower-grid .lower-label {
+    grid-column: 1;
+    grid-row: 3;
+    align-items: flex-end;
+    justify-content: flex-start;
+    transform: translateY(-30px);   
+    z-index: 2;
+  } 
+  .split-stage .lower-grid .lower-label .arch-label-text {
+  margin-top: 0;
+  margin-left: 0;
+  white-space: nowrap;
+  width: max-content;
+  }
+  .split-stage .lower-grid .tooth{min-height:48px;align-items:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+  .split-stage .lower-grid .tooth,
+  .split-stage .lower-grid .number{--lower-y:0px;--lower-r:0deg;transform:translateY(var(--lower-y)) rotate(var(--lower-r));transform-origin:50% 50%}
+  .split-stage .lower-grid .lower-number-row{width:110%;margin-inline:-4%}
+  .split-stage .lower-grid .lower-crown-row{width:110%;margin-inline:-4%}
+  .split-stage .lower-grid .lower-root-row{width:114%;margin-inline:-6%}
+  .split-stage .lower-grid .lower-crown-row .art-core{transform:scale(.48)}
+  .split-stage .lower-grid .lower-root-row .art-core{transform:scale(.33,.36)}
+  .split-stage .lower-grid .lower-number-row .number{--lower-y:calc(var(--lower-depth) + 12px);--lower-r:var(--lower-angle)}
+  .split-stage .lower-grid .lower-crown-row .tooth {
+    --lower-y: calc(var(--lower-depth) - 30px);
+    --lower-r: var(--lower-angle);
+  }
+  .split-stage .lower-grid .lower-root-row .tooth{--lower-y:calc(var(--lower-depth) - 80px);--lower-r:var(--lower-angle)}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(1){--lower-depth:0px;--lower-angle:23deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(2){--lower-depth:10px;--lower-angle:19deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(3){--lower-depth:19px;--lower-angle:15deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(4){--lower-depth:27px;--lower-angle:12deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(5){--lower-depth:34px;--lower-angle:9deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(6){--lower-depth:39px;--lower-angle:6deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(7){--lower-depth:42px;--lower-angle:3deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(8){--lower-depth:44px;--lower-angle:1deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(9){--lower-depth:44px;--lower-angle:-1deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(10){--lower-depth:42px;--lower-angle:-3deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(11){--lower-depth:39px;--lower-angle:-6deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(12){--lower-depth:34px;--lower-angle:-9deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(13){--lower-depth:27px;--lower-angle:-12deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(14){--lower-depth:19px;--lower-angle:-15deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(15){--lower-depth:10px;--lower-angle:-19deg}
+  .split-stage .lower-grid :is(.tooth,.number):nth-child(16){--lower-depth:0px;--lower-angle:-23deg}
+  /* .split-stage{padding:10px;} */
+  .split-group{padding:14px 4px 10px;border-radius:6px}
+.split-group-head {
+  display: grid;
+  grid-template-columns: 1fr;
+  place-items: center;
+  padding-bottom: 10px;
+}
+
+.split-group-head .split-status-label {
+  grid-column: 1;
+  justify-self: center;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+
+  .entries-panel{padding:12px}
+  .entries-head{margin-bottom:8px}
+  .entries-head h3{font-size:14px}
+  .entries-head span{font-size:10px}
+  .entry-row{gap:4px;padding-right:4px}
+  .entry-open{grid-template-columns:38px minmax(0,1fr);gap:7px;padding:7px 4px}
+  .entry-preview{width:36px;height:32px}
+  .entry-text{grid-template-columns:1fr;grid-template-areas:"title" "meta" "note";gap:2px;white-space:normal}
+  .entry-title,.entry-meta,.entry-note{font-size:10px;line-height:1.25}
+  .entry-remove{display:grid;place-items:center;width:36px;height:36px;min-width:36px;padding:0;border-radius:6px}
+  .entry-remove-text{display:none}
+  .entry-remove-icon{display:block}
+  .sidebar{padding:15px}
+  .selected-head{grid-template-columns:minmax(0,1fr) 112px;gap:12px}
+  .selected-side{max-width:112px}
+  .mini-preview{width:82px;height:92px;min-height:92px}
+  #treatment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .surface-pad{grid-template-columns:repeat(3,48px)}
+  .surface-chip{width:48px}
+  .note-input{height:150px;min-height:150px}
+  .form-actions{display:grid;grid-template-columns:1fr 1fr}
+  .form-actions .btn{width:100%;min-width:0}
+  .patient-grid{grid-template-columns:1fr}
+  .modal-head{margin-bottom:10px}
+  .modal-head h3,.mobile-entry-head h3{font-size:16px;line-height:1.2}
+  .modal-head p{margin-top:4px;font-size:10px;line-height:1.35}
+  .patient-form{gap:10px}
+  .patient-grid{gap:10px}
+  .patient-field{gap:4px}
+  .patient-field label{font-size:10px}
+  .patient-field input,.patient-field textarea,.patient-field select{min-height:38px;padding:8px 10px;font-size:12px}
+  .patient-field textarea{min-height:68px}
+  .date-text-input{min-height:40px;padding:8px 10px;font-size:12px}
+  .date-field-shell{grid-template-columns:minmax(0,1fr) 40px;gap:7px}
+  .date-picker-btn{width:40px;height:40px;font-size:15px}
+  .modal-actions{gap:8px}
+  .modal-actions .btn{height:38px;padding-inline:12px;font-size:11px}
+  .icon-btn{width:36px;height:36px;border-radius:10px;font-size:14px}
+  .treatment-method-row{grid-template-columns:24px 30px minmax(0,1fr)}
+  .treatment-method-row .method-icon-select,.treatment-method-row .method-color-input,.treatment-method-row .method-remove-btn{grid-column:3}
+  .add-treatment-grid{grid-template-columns:1fr 1fr}
+  .patient-field.full{grid-column:auto}
+  .modal{padding:14px;border-radius:8px}
+  .date-popover{padding:14px;border-radius:8px}
+  .date-weekdays,.date-days{gap:4px}
+  .date-grid-btn{min-height:42px;border-radius:13px}
+
+@media (max-width:420px){
+  .brand{flex-basis:150px;gap:8px}
+  .logo{width:40px;height:40px}
+  .title{font-size:16px}
+  .dentition-label{font-size:9px}
+  .topbar-actions .btn{height:36px;padding-inline:8px;font-size:10px}
+}
+}

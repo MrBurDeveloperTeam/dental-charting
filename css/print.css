@@ -1,0 +1,53 @@
+@media print{
+  @page{size:A4 portrait;margin:8mm}
+  body{background:#fff}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .page{max-width:none;padding:0}
+  .topbar,.contextbar{display:none!important}
+  .sidebar,.topbar-actions{display:none!important}
+  .layout{display:block}
+  .chart-card {
+    background: #fff;
+    border: none !important;
+    border-radius: 0;
+    box-shadow: none !important;
+  }
+  .chart-head{display:none!important}
+  /* .chart-stage-wrap{overflow:visible;padding-inline:1.2%;box-sizing:border-box} */
+  .chart-stage{
+    min-width:0;
+    width:100%;
+    zoom:.8;
+  }
+  .split-group{
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .split-group.view-hidden{display:grid!important}
+  .chart-layer-switch{display:none!important}
+  .print-page-one{break-after:page;page-break-after:always}
+  .entries-panel{padding:0;background:#fff;break-before:page;page-break-before:always}
+  .entries-head h3.saved-entries-title{font-size:0}
+  .entries-head h3.saved-entries-title::before{content:"Summary";font-size:16px}
+  .entries-list{max-height:none;overflow:visible}
+  .entry-row{break-inside:avoid}
+  .entry-remove{display:none!important}
+  .print-patient-card{padding:6px 0 8px!important;border:none!important;border-radius:0!important;box-shadow:none!important;margin-bottom:8px!important;background:#fff!important}
+  .print-export-head{margin-bottom:6px}
+  .print-export-title{font-size:16px}
+  .print-export-subtitle{display:none}
+  .print-patient-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 8px}
+  .print-info-item{padding:2px 4px;border:none;background:transparent;border-radius:0}
+  .print-info-item .print-label{font-size:8px;margin-bottom:1px}
+  .print-info-item .print-value{font-size:11px;line-height:1.2}
+  .tooth-art,.tooth.active .tooth-art,.tooth:hover .tooth-art{filter:none!important;transform:none!important}
+  .chart-stage svg{filter:none!important}
+  .chart-stage svg [fill^="url(#cg"]{fill:#f7f4ee!important}
+  .chart-stage svg [fill^="url(#og"]{fill:#f7f4ee!important}
+  .chart-stage svg [fill^="url(#rg"]{fill:#d3a06a!important}
+  .chart-stage svg [fill^="url(#sg"]{display:none!important}
+  .chart-stage svg [fill="#d7ae80"],.chart-stage svg [fill="#d8b28b"]{display:none!important}
+  .chart-stage svg [stroke^="url(#gg"]{stroke:#c6beb2!important;opacity:.32!important}
+  .chart-stage .surface-region{stroke-width:1.1!important}
+  .print-patient-card,.print-note-card{display:block}
+}
