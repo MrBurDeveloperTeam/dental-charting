@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dental Charting 2</title>
-<link rel="icon" type="image/png" href="./assets/images/reference-teeth.png">
-<link rel="stylesheet" href="./css/base.css?v=4">
+<title>Dental Charting</title>
+<link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon_charting.png">
+<link rel="stylesheet" href="./css/base.css?v=6">
 <link rel="stylesheet" href="./css/chart.css?v=8">
 <link rel="stylesheet" href="./css/editor.css">
 <link rel="stylesheet" href="./css/dialogs.css?v=8">
-<link rel="stylesheet" href="./css/layout.css?v=15">
+<link rel="stylesheet" href="./css/layout.css?v=17">
 <link rel="stylesheet" href="./css/print.css?v=2">
 </head>
 <body>
@@ -17,13 +17,22 @@
   <header class="app-header">
     <section class="topbar">
       <div class="brand">
-      <div class="logo"><img src = "./assets/images/logo.png" alt="Dental Charting Logo"></div>
+        <div class="logo"><img src="./assets/images/logo.PNG" alt="Odontogram tooth logo"></div>
         <div class="brand-copy">
           <h1 class="title">Odontogram</h1>
           <p class="brand-subtitle">Dental Charting</p>
         </div>
       </div>
-      
+      <nav class="app-nav" aria-label="Dental chart navigation">
+        <span class="app-nav-item active" aria-current="page">Chart</span>
+        <span class="app-nav-item">Patient record</span>
+      </nav>
+      <button class="back-to-appointments" id="back-to-appointments" type="button" aria-label="Back to Appointments">
+        <svg class="back-to-appointments-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 7 5 12l5 5M5 12h11M14 5h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+        </svg>
+        <span>Back to Appointments</span>
+      </button>
     </section>
 
     <section class="contextbar" aria-label="Chart context">
@@ -333,63 +342,7 @@
   </div>
 </div>
 
-<div class="modal-backdrop" id="patient-modal" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="patient-modal-title">
-    <div class="modal-head">
-      <div>
-        <h3 id="patient-modal-title">Patient information</h3>
-        <p>Update the patient header and keep it for later visits on this browser.</p>
-      </div>
-      <button class="icon-btn" type="button" id="patient-close-btn" aria-label="Close">✕</button>
-    </div>
-    <form class="patient-form" id="patient-form">
-      <div class="patient-grid">
-        <div class="patient-field full">
-          <label for="patient-full-name">Full name</label>
-          <input id="patient-full-name" name="fullName" type="text" placeholder="Type patient full name">
-        </div>
-        <div class="patient-field">
-          <label for="patient-dob-text">Date of birth</label>
-          <div class="date-field-shell">
-            <input class="date-text-input" id="patient-dob-text" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="bday">
-            <button class="date-picker-btn" id="patient-dob-trigger" type="button" aria-label="Open date of birth calendar">📅</button>
-            <input id="patient-dob" name="dob" type="hidden">
-          </div>
-        </div>
-        <div class="patient-field">
-          <label for="patient-id">Patient ID</label>
-          <input id="patient-id" name="patientId" type="text" placeholder="Optional patient ID">
-        </div>
-        <div class="patient-field">
-          <label for="patient-gender">Gender</label>
-          <select id="patient-gender" name="gender">
-            <option value="">Not set</option>
-            <option value="Female">Female</option>
-            <option value="Male">Male</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="patient-field">
-          <label for="patient-phone">Phone</label>
-          <input id="patient-phone" name="phone" type="text" placeholder="Optional phone number">
-        </div>
-        <div class="patient-field">
-          <label for="patient-email">Email</label>
-          <input id="patient-email" name="email" type="email" placeholder="Optional email">
-        </div>
-        <div class="patient-field full">
-          <label for="patient-notes">Basic information / notes</label>
-          <textarea id="patient-notes" name="notes" placeholder="Medical alert, address, or basic information"></textarea>
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn secondary" type="button" id="patient-clear-btn">Clear</button>
-        <button class="btn secondary" type="button" id="patient-cancel-btn">Cancel</button>
-        <button class="btn primary" type="submit">Save patient</button>
-      </div>
-    </form>
-  </div>
-</div>
+<div id="react-root"></div>
 
 <div class="modal-backdrop" id="date-modal" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="date-modal-title">
@@ -475,6 +428,7 @@
   </div>
 </div>
 
+<script type="module" src="/src/main.tsx"></script>
 <script defer src="./js/tooth-silhouettes.js"></script>
 <script defer src="./js/app.js?v=12"></script>
 <script defer src="./js/supabaseSync.js?v=1"></script>

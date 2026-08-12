@@ -1,4 +1,4 @@
-.layout{display:grid;grid-template-columns:minmax(620px,1.08fr) minmax(480px,.92fr);gap:18px;align-items:stretch}
+.layout{display:grid;grid-template-columns:minmax(620px,1.08fr) minmax(480px,.92fr);gap:18px;align-items:stretch;padding: 15px 40px;}
 .chart-card,.sidebar{border-radius:8px;background:var(--panel)}
 .chart-card{padding:0;min-width:0;border:1px solid rgba(217,226,236,.92);box-shadow:0 18px 48px rgba(18,35,57,.09);overflow:hidden}
 .print-patient-card,.print-note-card,.print-page-number{display:none}

@@ -1,5 +1,5 @@
 @media (max-width:1280px){
-  .layout{grid-template-columns:1fr}
+  .layout{grid-template-columns:1fr; padding: 0px;}
   .sidebar{height:auto}
   .selected-head{grid-template-columns:minmax(0,1fr) minmax(180px,22%)}
   .selected-side{max-width:none}
@@ -9,6 +9,7 @@
   .page{padding:12px}
   .app-header{position:static}
   .topbar{padding:12px}
+  .app-nav{display:none}
   .contextbar{display:grid;grid-template-columns:1fr;padding:10px}
   .contextbar>.topbar-actions{justify-self:end}
   .dentition-switch{border-right:0;border-bottom:1px solid var(--line);padding:4px 4px 10px}
@@ -20,12 +21,18 @@
   #treatment-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (max-width:600px){
+  .patient-modal{height:calc(100dvh - 20px);padding:16px}
+  .patient-tabs{margin-bottom:14px}
+  .patient-tab{padding:9px 8px;font-size:12px}
+  .patient-search-bar{grid-template-columns:1fr}
+  .patient-search-bar .btn{width:100%}
+  .existing-patient-panel{min-height:360px}
   .page{padding:8px}
-  .topbar,.chart-card,.sidebar{border-radius:8px}
+  .chart-card,.sidebar{border-radius:8px}
   .topbar{align-items:center;flex-wrap:wrap;gap:10px;padding:10px}
+  .header-status{font-size:10px}
   .brand{flex:1 1 165px;min-width:0}
   .topbar-actions{flex:0 1 auto;margin-left:auto;gap:6px}
-  .contextbar{border-radius:8px}
   .title{font-size:16px}
   .brand-copy{gap:3px}
   .brand-subtitle{font-size:9px;font-weight:700}
