@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dental Charting 2</title>
+<title>Dental Charting</title>
 <link rel="icon" type="image/png" href="./assets/images/reference-teeth.png">
-<link rel="stylesheet" href="./css/base.css?v=5">
+<link rel="stylesheet" href="./css/base.css?v=6">
 <link rel="stylesheet" href="./css/chart.css?v=8">
 <link rel="stylesheet" href="./css/editor.css">
 <link rel="stylesheet" href="./css/dialogs.css?v=8">
-<link rel="stylesheet" href="./css/layout.css?v=16">
+<link rel="stylesheet" href="./css/layout.css?v=17">
 <link rel="stylesheet" href="./css/print.css?v=2">
 </head>
 <body>
@@ -27,10 +27,12 @@
         <span class="app-nav-item active" aria-current="page">Chart</span>
         <span class="app-nav-item">Patient record</span>
       </nav>
-      <div class="header-status" aria-label="Application status">
-        <span class="header-status-dot" aria-hidden="true"></span>
-        Ready to chart
-      </div>
+      <button class="back-to-appointments" id="back-to-appointments" type="button" aria-label="Back to Appointments">
+        <svg class="back-to-appointments-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M10 7 5 12l5 5M5 12h11M14 5h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+        </svg>
+        <span>Back to Appointments</span>
+      </button>
     </section>
 
     <section class="contextbar" aria-label="Chart context">

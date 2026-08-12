@@ -1,5 +1,5 @@
 @media (max-width:1280px){
-  .layout{grid-template-columns:1fr}
+  .layout{grid-template-columns:1fr; padding: 0px;}
   .sidebar{height:auto}
   .selected-head{grid-template-columns:minmax(0,1fr) minmax(180px,22%)}
   .selected-side{max-width:none}
