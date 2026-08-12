@@ -27,7 +27,7 @@ body{
   background:radial-gradient(circle at 8% 0%,rgba(255,255,255,.98),transparent 32%),linear-gradient(180deg,#f8fafc 0%,#eaf0f6 100%);
   -webkit-font-smoothing:antialiased;
 }
-.page{max-width:1680px;margin:0 auto;padding:20px}
+/* .page{max-width:1680px;margin:0 auto;padding:20px} */
 .app-header{position:static;display:grid;gap:0;margin-bottom:18px;border:1px solid rgba(217,226,236,.95);background:#fff;box-shadow:0 8px 24px rgba(18,35,57,.06)}
 .topbar{display:flex;align-items:center;gap:28px;min-height:68px;padding:10px 16px;border-bottom:1px solid var(--line);background:#fff}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}
