@@ -6,8 +6,8 @@ from PIL import Image, ImageFilter
 
 
 PROJECT = Path(__file__).resolve().parents[1]
-SOURCE = PROJECT / "assets" / "images" / "teeth" / "primary-reference-corrected.png"
-OUTPUT = PROJECT / "assets" / "images" / "teeth" / "primary"
+SOURCE = PROJECT / "public" / "assets" / "images" / "teeth" / "primary-reference-corrected.png"
+OUTPUT = PROJECT / "public" / "assets" / "images" / "teeth" / "primary"
 
 UPPER_NUMBERS = [17, 16, 55, 54, 53, 52, 51, 61, 62, 63, 64, 65, 26, 27]
 UPPER_CENTERS = [95, 214, 340, 468, 588, 706, 816, 921, 1028, 1140, 1248, 1361, 1473, 1585]

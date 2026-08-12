@@ -3,8 +3,8 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = Path(r"C:\Users\USER\Downloads\primary teeth chart.png")
-OUT = ROOT / "assets/images/teeth/primary"
-REFERENCE = ROOT / "assets/images/teeth/primary-reference-corrected.png"
+OUT = ROOT / "public/assets/images/teeth/primary"
+REFERENCE = ROOT / "public/assets/images/teeth/primary-reference-corrected.png"
 CENTERS = {55: 350, 54: 480, 64: 1245, 65: 1358}
 
 def extract(im, center, half_width, y_range, target_size):

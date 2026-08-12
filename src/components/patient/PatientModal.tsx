@@ -1,7 +1,7 @@
 /**
  * Patient modal markup extracted from index.html.
  *
- * During the compatibility phase, js/app.js continues to bind the existing
+ * During the compatibility phase, public/js/app.js continues to bind the existing
  * element IDs and owns validation, local storage, rendering, and open/close
  * behavior. Keeping those IDs stable prevents any functional change.
  */

@@ -6,8 +6,8 @@ from PIL import Image
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE_ROOT = ROOT / "assets" / "images" / "teeth"
-OUTPUT = ROOT / "js" / "tooth-silhouettes.js"
+SOURCE_ROOT = ROOT / "public" / "assets" / "images" / "teeth"
+OUTPUT = ROOT / "public" / "js" / "tooth-silhouettes.js"
 
 
 def is_primary(number):
@@ -33,7 +33,7 @@ def display_size(number, view):
             height = (84 if upper else 88) if kind == "molar" else (88 if upper else 90) if kind == "canine" else (80 if upper else 82)
         else:
             width = (52 if upper else 48) if kind == "wisdom" else (56 if upper else 52) if kind == "molar" else (40 if upper else 36) if kind == "premolar" else 32 if kind == "canine" else (40 if central else 36) if upper else (28 if central else 30)
-            # Keep these in sync with the tooth-specific overrides in js/app.js.
+            # Keep these in sync with the overrides in public/js/app.js.
             if number == 13:
                 width = 38
             elif number == 12:
