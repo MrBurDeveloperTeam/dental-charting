@@ -1,4 +1,10 @@
 .modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:100;overscroll-behavior: contain;}
+.auth-gate{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 0%,rgba(255,255,255,.98),transparent 42%),linear-gradient(180deg,#f8fafc 0%,#eaf0f6 100%)}
+.auth-gate-dialog{width:min(460px,100%);padding:32px;border:1px solid var(--line);border-radius:12px;background:#fff;box-shadow:0 28px 70px rgba(15,23,42,.18);text-align:center}
+.auth-gate-icon{width:58px;height:58px;margin:0 auto 18px;border-radius:50%;display:grid;place-items:center;background:#edf5ff;color:#2563eb;font-size:26px;font-weight:800}
+.auth-gate-dialog h1{margin:0;color:var(--ink);font-size:24px}
+.auth-gate-dialog p{margin:12px 0 0;color:var(--muted);font-size:14px;line-height:1.6}
+.auth-gate-actions{display:flex;justify-content:center;gap:10px;margin-top:24px}
 .modal-backdrop.show{display:flex}
 .modal{width:min(1500px, 100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:8px;background:#fff;box-shadow:0 28px 70px rgba(15,23,42,.28);padding:18px}
 .patient-modal{width:min(1200px,100%);height:min(780px,calc(100vh - 36px));padding:24px;overflow:hidden;display:grid;grid-template-rows:auto auto minmax(0,1fr);overscroll-behavior: contain;}
