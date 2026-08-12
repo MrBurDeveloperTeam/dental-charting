@@ -1,11 +1,28 @@
-.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:100}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.48);display:none;align-items:center;justify-content:center;padding:18px;z-index:100;overscroll-behavior: contain;}
 .modal-backdrop.show{display:flex}
-.modal{width:min(680px,100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:8px;background:#fff;box-shadow:0 28px 70px rgba(15,23,42,.28);padding:18px}
+.modal{width:min(1500px, 100%);max-height:calc(100vh - 36px);overflow:auto;border-radius:8px;background:#fff;box-shadow:0 28px 70px rgba(15,23,42,.28);padding:18px}
+.patient-modal{width:min(1200px,100%);height:min(780px,calc(100vh - 36px));padding:24px;overflow:hidden;display:grid;grid-template-rows:auto auto minmax(0,1fr);overscroll-behavior: contain;}
 .modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
 .modal-head h3{margin:0;font-size:22px}
 .modal-head p{margin:6px 0 0;font-size:13px;color:var(--muted)}
 .icon-btn{appearance:none;border:1px solid var(--line);background:#fff;width:34px;height:34px;border-radius:12px;font:inherit;cursor:pointer}
+.patient-modal>.patient-form{min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding-right:6px}
 .patient-form{display:grid;gap:12px}
+.patient-tabs{display:flex;gap:4px;margin-bottom:20px;padding:4px;border:1px solid var(--line);border-radius:8px;background:var(--panel-soft)}
+.patient-tab{flex:1;min-height:44px;padding:10px 16px;border:0;border-radius:6px;background:transparent;color:var(--muted);font:inherit;font-weight:800;cursor:pointer}
+.patient-tab.active{background:#fff;color:var(--ink);box-shadow:0 1px 4px rgba(15,23,42,.12)}
+.existing-patient-panel{display:grid;grid-template-rows:auto auto minmax(0,1fr);gap:18px;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-gutter:stable;padding-right:6px}
+.existing-patient-panel[hidden],.patient-form[hidden]{display:none}
+.patient-search-copy h4{margin:0;font-size:18px;color:var(--ink)}
+.patient-search-copy p{margin:5px 0 0;color:var(--muted);font-size:13px}
+.patient-search-bar{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+.patient-search-bar input{width:100%;min-height:48px;padding:11px 14px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:inherit}
+.patient-search-bar input:focus{outline:2px solid rgba(11,142,161,.2);border-color:#0b8ea1}
+.patient-search-results{min-height:280px;border:1px dashed var(--line);border-radius:8px;background:var(--panel-soft);display:grid;place-items:center;padding:24px}
+.patient-search-empty{display:grid;justify-items:center;gap:7px;color:var(--muted);text-align:center}
+.patient-search-empty strong{color:var(--ink);font-size:15px}
+.patient-search-empty p{margin:0;font-size:12px}
+.patient-search-icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid var(--line);color:#0b8ea1;font-size:28px}
 .patient-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .patient-field{display:grid;gap:6px}
 .patient-field label{font-size:12px;font-weight:700;color:var(--ink)}

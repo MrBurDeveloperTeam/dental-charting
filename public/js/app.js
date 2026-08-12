@@ -33,6 +33,7 @@ const STORAGE_PATIENT_KEY="dental-charting-2-patient";
 const STORAGE_VISIT_KEY="dental-charting-2-visit";
 const STORAGE_MODE_KEY="dental-charting-2-mode";
 const STORAGE_TREATMENTS_KEY="dental-charting-2-treatment-methods";
+const PATIENT_TEXT_FIELDS=["fullName","dob","patientId","idNumber","gender","taxNumber","phone","email","guardianName","guardianRelationship","address","emergencyContactName","emergencyContactPhone","allergies","medicalConditions","medications","source","preferredDentist","insurance","notes"];
 const BUILTIN_TREATMENT_IDS=new Set(Object.keys(TREATMENTS));
 const TREATMENT_ICON_OPTIONS=[{id:"filling",label:"Filling square"},{id:"circle",label:"Circle"},{id:"seal",label:"Sealant curve"},{id:"cross",label:"Cross"},{id:"bolt",label:"Fracture bolt"},{id:"canal",label:"Root canal"},{id:"crown",label:"Crown"},{id:"veneer",label:"Veneer"},{id:"implant",label:"Implant"}];
 loadTreatmentMethods();
@@ -146,7 +147,8 @@ function crownCutY(n){const t=toothType(n);if(t==="molar"||t==="wisdom")return 5
 function frontSurfaceEndY(n){const t=toothType(n),u=isUpper(n); if(t==="molar"||t==="wisdom") return u?68:68; if(t==="premolar") return u?60:61; if(t==="canine") return u?54:58; return u?68:58}
 function lighten(h,a=40){if(!h.startsWith("#"))return h;const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return`rgb(${Math.min(255,r+a)}, ${Math.min(255,g+a)}, ${Math.min(255,b+a)})`}
 function darken(h,a=25){if(!h.startsWith("#"))return h;const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);return`rgb(${Math.max(0,r-a)}, ${Math.max(0,g-a)}, ${Math.max(0,b-a)})`}
-function loadPatient(){try{const raw=localStorage.getItem(STORAGE_PATIENT_KEY); if(!raw) return {fullName:"",dob:"",patientId:"",gender:"",phone:"",email:"",notes:""}; const parsed=JSON.parse(raw); return {fullName:parsed.fullName||"",dob:parsed.dob||"",patientId:parsed.patientId||"",gender:parsed.gender||"",phone:parsed.phone||"",email:parsed.email||"",notes:parsed.notes||""}}catch{return {fullName:"",dob:"",patientId:"",gender:"",phone:"",email:"",notes:""}}}
+function emptyPatient(){const value={emailIsGuardian:false}; PATIENT_TEXT_FIELDS.forEach(field=>value[field]=""); return value}
+function loadPatient(){try{const saved=JSON.parse(localStorage.getItem(STORAGE_PATIENT_KEY)||"null"); const value=emptyPatient(); if(!saved||typeof saved!=="object") return value; PATIENT_TEXT_FIELDS.forEach(field=>value[field]=saved[field]||""); value.emailIsGuardian=Boolean(saved.emailIsGuardian); return value}catch{return emptyPatient()}}
 function persistPatient(){localStorage.setItem(STORAGE_PATIENT_KEY,JSON.stringify(patient))}
 function loadVisit(){try{const raw=localStorage.getItem(STORAGE_VISIT_KEY); if(!raw) return {date:new Date().toISOString().slice(0,10)}; const parsed=JSON.parse(raw); return {date:parsed.date||new Date().toISOString().slice(0,10)}}catch{return {date:new Date().toISOString().slice(0,10)}}}
 function persistVisit(){localStorage.setItem(STORAGE_VISIT_KEY,JSON.stringify(visit))}
@@ -395,11 +397,11 @@ function selectDateValue(value,{close=true}={}){
   renderDatePopover();
   if(close) closeDatePopover();
 }
-function fillPatientForm(){els.patientForm.fullName.value=patient.fullName; els.patientForm.dob.value=patient.dob; syncDateField("dob"); els.patientForm.patientId.value=patient.patientId; els.patientForm.gender.value=patient.gender; els.patientForm.phone.value=patient.phone; els.patientForm.email.value=patient.email; els.patientForm.notes.value=patient.notes}
-function openPatientModal(){fillPatientForm(); els.patientModal.classList.add("show"); els.patientModal.setAttribute("aria-hidden","false"); setTimeout(()=>els.patientForm.fullName.focus(),0)}
-function closePatientModal(){closeDatePopover(); els.patientModal.classList.remove("show"); els.patientModal.setAttribute("aria-hidden","true")}
+function fillPatientForm(){PATIENT_TEXT_FIELDS.forEach(field=>{const input=els.patientForm.elements.namedItem(field); if(input) input.value=patient[field]||""}); const guardianInput=els.patientForm.elements.namedItem("emailIsGuardian"); if(guardianInput) guardianInput.checked=Boolean(patient.emailIsGuardian); syncDateField("dob")}
+function openPatientModal(){fillPatientForm(); els.patientModal.classList.add("show"); els.patientModal.setAttribute("aria-hidden","false"); document.body.style.overflow="hidden"; setTimeout(()=>els.patientForm.fullName.focus(),0)}
+function closePatientModal(){closeDatePopover(); els.patientModal.classList.remove("show"); els.patientModal.setAttribute("aria-hidden","true");document.body.style.overflow = "";}
 function clearPatientForm(){els.patientForm.reset(); els.patientForm.gender.value=""; syncDateField("dob")}
-function savePatientFromForm(e){e.preventDefault(); if(!commitDateField("dob",{emptyOk:true})){els.patientDobText.focus(); return} patient.fullName=els.patientForm.fullName.value.trim(); patient.dob=els.patientForm.dob.value; patient.patientId=els.patientForm.patientId.value.trim(); patient.gender=els.patientForm.gender.value; patient.phone=els.patientForm.phone.value.trim(); patient.email=els.patientForm.email.value.trim(); patient.notes=els.patientForm.notes.value.trim(); persistPatient(); renderPatientHeader(); closePatientModal()}
+function savePatientFromForm(e){e.preventDefault(); if(!commitDateField("dob",{emptyOk:true})){els.patientDobText.focus(); return} PATIENT_TEXT_FIELDS.forEach(field=>{const input=els.patientForm.elements.namedItem(field); if(input) patient[field]=input.value.trim()}); const guardianInput=els.patientForm.elements.namedItem("emailIsGuardian"); patient.emailIsGuardian=Boolean(guardianInput&&guardianInput.checked); patient.email=patient.email.toLowerCase(); persistPatient(); renderPatientHeader(); closePatientModal()}
 function fillDateForm(){els.dateForm.visitDate.value=visit.date; syncDateField("visit")}
 function openDateModal(){fillDateForm(); els.dateModal.classList.add("show"); els.dateModal.setAttribute("aria-hidden","false"); setTimeout(()=>els.visitDateTrigger.focus(),0)}
 function closeDateModal(){closeDatePopover(); els.dateModal.classList.remove("show"); els.dateModal.setAttribute("aria-hidden","true")}

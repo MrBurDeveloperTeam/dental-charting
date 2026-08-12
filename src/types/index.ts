@@ -10,9 +10,23 @@ export interface Patient {
   fullName: string;
   dob: string;
   patientId: string;
+  idNumber: string;
   gender: string;
+  taxNumber: string;
   phone: string;
   email: string;
+  emailIsGuardian: boolean;
+  guardianName: string;
+  guardianRelationship: string;
+  address: string;
+  emergencyContactName: string;
+  emergencyContactPhone: string;
+  allergies: string;
+  medicalConditions: string;
+  medications: string;
+  source: string;
+  preferredDentist: string;
+  insurance: string;
   notes: string;
 }
 export type PatientDraft = Omit<Patient, "id">;

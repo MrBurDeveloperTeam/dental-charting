@@ -21,6 +21,12 @@
   #treatment-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (max-width:600px){
+  .patient-modal{height:calc(100dvh - 20px);padding:16px}
+  .patient-tabs{margin-bottom:14px}
+  .patient-tab{padding:9px 8px;font-size:12px}
+  .patient-search-bar{grid-template-columns:1fr}
+  .patient-search-bar .btn{width:100%}
+  .existing-patient-panel{min-height:360px}
   .page{padding:8px}
   .chart-card,.sidebar{border-radius:8px}
   .topbar{align-items:center;flex-wrap:wrap;gap:10px;padding:10px}
