@@ -53,10 +53,6 @@ export function PatientModal() {
         </div>
 
         <section className="existing-patient-panel" id="existing-patient-panel" role="tabpanel" hidden={activeTab !== "existing"}>
-          <div className="patient-search-copy">
-            <h4>Search existing patients</h4>
-            <p>Search by name, IC/ID, or phone number.</p>
-          </div>
           <div className="patient-search-bar">
             <input id="patient-search-input" type="search" placeholder="Search by name, IC/ID, or phone..." aria-label="Search existing patients" />
             <button className="btn primary" id="patient-search-btn" type="button">Search</button>
