@@ -1,4 +1,4 @@
-@media (max-width:1280px){
+@media (max-width:1300px){
   .layout{grid-template-columns:1fr; padding: 0px;}
   .sidebar{height:auto}
   .selected-head{grid-template-columns:minmax(0,1fr) minmax(180px,22%)}
@@ -21,9 +21,15 @@
   #treatment-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
 @media (max-width:600px){
-  .patient-modal{height:calc(100dvh - 20px);padding:16px}
+  .modal.patient-modal{height:calc(100dvh - 20px);padding:0;border-radius:18px;grid-template-rows:78px 62px minmax(0,1fr)}
+  .patient-modal>.modal-head{padding:14px 18px}
+  .patient-modal-title-icon{width:42px;height:42px}
   .patient-tabs{margin-bottom:14px}
-  .patient-tab{padding:9px 8px;font-size:12px}
+  .patient-tabs{margin:0;padding:0}
+  .patient-tab{min-width:0;min-height:62px;padding:9px 8px;font-size:12px}
+  .existing-patient-panel{padding:20px 18px}
+  .patient-grid{padding:20px 18px 12px}
+  .modal-actions{padding:12px 18px}
   .patient-search-bar{grid-template-columns:1fr}
   .patient-search-bar .btn{width:100%}
   .existing-patient-panel{min-height:360px}
@@ -328,4 +334,256 @@
   .dentition-label{font-size:9px}
   .topbar-actions .btn{height:36px;padding-inline:8px;font-size:10px}
 }
+}
+
+/* ============================================
+   Dental charting UI consistency layer
+   ============================================ */
+:root{
+  --ui-type-xs:10px;
+  --ui-type-sm:12px;
+  --ui-type-md:14px;
+  --ui-type-lg:18px;
+  --ui-type-xl:20px;
+}
+
+body{font-size:var(--ui-type-md)}
+.title{font-size:var(--ui-type-xl)}
+.app-nav-item{font-size:17px}
+.back-to-appointments{font-size:13px}
+.brand-subtitle,.dentition-label,.meta-block small,.field-title,.chart-tools-label{font-size:var(--ui-type-xs)}
+.meta-block strong{font-size:16px}
+.meta-block span,.chart-head p,.selected-name,.field-note{font-size:var(--ui-type-sm)}
+.chart-head h2,.modal-head h3,.patient-modal>.modal-head h3{font-size:var(--ui-type-xl)}
+.sidebar-empty h3,.patient-search-copy h4,.entries-head h3{font-size:var(--ui-type-lg)}
+.patient-tab{font-size:15px}
+.patient-section-title{font-size:var(--ui-type-sm)}
+.patient-field label,.add-treatment-grid label{font-size:var(--ui-type-sm)}
+.patient-field input,.patient-field textarea,.patient-field select,.date-text-input,.note-input{font-size:var(--ui-type-md)}
+.btn,.chip,.surface-chip,.dentition-btn,.chart-layer-btn,.entry-remove,.method-remove-btn,.date-grid-btn,.date-title-btn,.date-nav-btn,.icon-btn,.mobile-tooth-nav-btn,.mobile-optional-molar-btn,.mobile-entry-stage{font-size:var(--ui-type-sm)}
+
+/* Buttons use one square visual language throughout the charting application. */
+button,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.btn,
+.pill,
+.chip,
+.surface-chip,
+.dentition-btn,
+.meta-card,
+.back-to-appointments,
+.chart-layer-btn,
+.entry-remove,
+.entry-open,
+.icon-btn,
+.date-picker-btn,
+.date-nav-btn,
+.date-title-btn,
+.date-grid-btn,
+.method-remove-btn,
+.mobile-tooth-nav-btn,
+.mobile-optional-molar-btn,
+.mobile-entry-stage{
+  border-radius:var(--button-radius)!important;
+}
+
+/* Keep the patient dialog styling from before the chart-wide consistency pass. */
+.patient-modal>.modal-head h3{font-size:21px}
+.patient-modal .patient-tab{font-size:15px}
+.patient-modal .patient-field label{font-size:12px}
+.patient-modal .patient-field input,
+.patient-modal .patient-field textarea,
+.patient-modal .patient-field select,
+.patient-modal .date-text-input{font-size:16px}
+.patient-modal .btn{font-size:13px;border-radius:var(--button-radius)!important}
+.patient-modal .icon-btn{font-size:0;border-radius:50%!important}
+.patient-modal .date-picker-btn{font-size:0;border-radius:var(--button-radius)!important}
+
+/* Header controls intentionally follow the rounded navigation language. */
+.topbar .back-to-appointments{border-radius:var(--button-radius)!important}
+.contextbar .dentition-pills{border-radius:16px!important}
+.contextbar .dentition-btn{border-radius:var(--button-radius)!important}
+.contextbar .meta-card-icon{border-radius:50%!important}
+.contextbar .topbar-actions .btn{border-radius:var(--button-radius)!important}
+.patient-tab,.meta-card,.mobile-entry-stage{border-radius:0!important}
+
+/* Separate the desktop navigation indicator from the header divider. */
+@media (min-width:601px){
+  .app-nav-item{position:relative;border-bottom-color:transparent}
+  .app-nav-item.active{border-bottom-color:transparent!important}
+  .app-nav-item.active::after{
+    content:"";
+    position:absolute;
+    right:0;
+    bottom:8px;
+    left:0;
+    height:3px;
+    background:var(--primary);
+  }
+}
+
+@media (max-width:1200px) and (min-width:901px){
+  .contextbar{grid-template-columns:300px minmax(450px,1fr) auto}
+  .dentition-switch{padding-inline:18px;gap:12px}
+  .dentition-btn{padding-inline:14px}
+  .meta-card{padding-inline:18px;gap:12px}
+  .contextbar>.topbar-actions{padding-inline:16px}
+  .contextbar>.topbar-actions .btn{padding-inline:15px}
+  .pdf-icon-btn{min-width:170px}
+}
+
+/* Continue the Date divider into the chart/sidebar divider on wide screens. */
+@media (min-width:1568px){
+  .contextbar{grid-template-columns:398px minmax(530px,1fr) clamp(640px,40vw,800px)}
+}
+
+/* Keep the compact laptop view guide on a single horizontal line. */
+@media (max-width:1900px) and (min-width:901px){
+  .chart-head>div:first-child{min-width:0;flex:1 1 auto}
+  .chart-head-controls{width:max-content;flex:0 0 auto}
+  .chart-view-key{width:max-content;flex-wrap:nowrap;justify-content:flex-start;gap:8px;padding-inline:12px;white-space:nowrap}
+  .chart-view-key span{font-size:9px}
+}
+
+@media (max-width:600px){
+  .page{padding:0}
+  .app-header{width:100%;overflow:hidden}
+  .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;min-height:58px;gap:6px;padding:6px 8px}
+  .brand{grid-column:1;grid-row:1;min-width:0;padding-right:0;border-right:0;gap:9px}
+  .logo{width:38px;height:38px;border-radius:10px}
+  .logo img{border-radius:9px}
+  .title{font-size:18px;white-space:nowrap}
+  .brand-subtitle{font-size:9px}
+  .back-to-appointments{grid-column:2;grid-row:1;min-width:158px;height:36px;padding:0 9px;gap:5px;font-size:10px}
+  .back-to-appointments-icon{width:15px;height:15px}
+  .app-nav{display:flex;grid-column:1 / -1;grid-row:2;align-self:stretch;width:calc(100% + 16px);height:40px;margin:0 -8px -6px;padding:0 8px;border-top:1px solid var(--line);background:#fff}
+  .app-nav-item{flex:1 1 0;justify-content:center;min-width:0;height:40px;padding:0 8px;font-size:12px;border-bottom-width:2px}
+
+  .contextbar{display:grid;grid-template-columns:minmax(0,1fr);min-height:0;padding:0 8px 8px}
+  .dentition-switch{display:grid;justify-items:start;gap:7px;width:100%;padding:10px 4px;border-right:0;border-bottom:1px solid var(--line)}
+  .dentition-label{font-size:9px}
+  .dentition-pills{justify-self:start;margin:0;padding:3px;border-radius:10px!important}
+  .dentition-btn{min-height:30px;padding:0 12px;font-size:10px}
+
+  .meta{display:grid;grid-template-columns:1fr;width:100%;border-right:0}
+  .meta-card{grid-template-columns:34px minmax(0,1fr);min-height:52px;gap:10px;padding:5px 8px;border-right:0;border-bottom:1px solid var(--line)}
+  .meta-card:last-child{border-bottom:0}
+  .meta-card-icon{width:34px;height:34px}
+  .meta-card-icon svg{width:18px;height:18px}
+  .meta-card .meta-block{padding:0 24px 0 0}
+  .meta-block small{margin-bottom:2px;font-size:8px}
+  .meta-block strong{font-size:13px;line-height:1.15}
+  #patient-trigger.needs-patient .meta-block small::after{margin-left:6px;padding:2px 6px;font-size:8px}
+  .meta-card::after{right:8px;font-size:16px}
+
+  .contextbar>.topbar-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:min(100%,300px);padding:6px 0 0;justify-self:end}
+  .contextbar>.topbar-actions .btn,.contextbar>.topbar-actions .pdf-icon-btn{width:100%;min-width:0;height:38px;padding:0 9px;gap:6px;font-size:11px;line-height:1}
+  .context-action-icon{width:16px;height:16px}
+}
+
+@media (max-width:390px){
+  .topbar{grid-template-columns:minmax(0,1fr) 150px}
+  .back-to-appointments{min-width:0;width:150px;padding-inline:7px;font-size:9px}
+  .title{font-size:17px}
+  .app-nav-item{font-size:11px}
+  .contextbar>.topbar-actions{grid-template-columns:repeat(2,minmax(0,1fr));width:min(100%,270px)}
+  .contextbar>.topbar-actions .btn,.contextbar>.topbar-actions .pdf-icon-btn{font-size:10px}
+}
+
+@media (max-width:600px){
+  .modal.patient-modal{grid-template-rows:78px 56px minmax(0,1fr)}
+  .patient-tabs{display:flex;width:100%;min-width:0;height:56px;overflow:hidden}
+  .patient-modal .patient-tab{flex:1 1 0;width:50%;min-width:0;min-height:56px;padding:7px 5px;gap:6px;font-size:10px;line-height:1.1;letter-spacing:.02em;white-space:nowrap}
+  .patient-modal .patient-tab::before{width:15px;height:15px;flex-basis:15px;background-size:15px 15px}
+}
+
+@media (max-width:360px){
+  .patient-modal .patient-tab{padding-inline:3px;gap:4px;font-size:9px;letter-spacing:0}
+  .patient-modal .patient-tab::before{width:14px;height:14px;flex-basis:14px;background-size:14px 14px}
+}
+
+@media (max-width:600px){
+  .date-modal-card{width:calc(100% - 20px);border-radius:16px}
+  .date-modal-card>.modal-head{align-items:flex-start;padding:22px 20px 12px}
+  .date-modal-card>.modal-head h3{font-size:18px;line-height:1.2}
+  .date-modal-card>.modal-head p{max-width:250px;margin-top:5px;font-size:11px;line-height:1.4}
+  .date-modal-card>.modal-head .icon-btn{width:32px;height:32px}
+  .date-modal-card>.modal-head .icon-btn::before{font-size:24px}
+  .date-modal-card .patient-grid{padding:8px 20px 22px}
+  .date-modal-card .patient-field{gap:8px}
+  .date-modal-card .patient-field label{font-size:11px}
+  .date-modal-card .date-field-shell{grid-template-columns:minmax(0,1fr) 54px;gap:10px}
+  .date-modal-card .date-text-input{min-height:54px;padding:12px 14px;border-radius:12px;font-size:14px}
+  .date-modal-card .date-picker-btn{width:54px;height:54px;border-width:2px;background-size:23px 23px}
+  .date-modal-card .modal-actions{display:grid;grid-template-columns:auto auto minmax(118px,1fr);gap:8px;padding:16px 20px;background:#fff}
+  .date-modal-card .btn{height:42px;min-width:0;padding:0 12px;font-size:10px}
+  .date-modal-card .btn.primary{min-width:118px}
+}
+
+@media (max-width:360px){
+  .date-modal-card{width:calc(100% - 12px)}
+  .date-modal-card>.modal-head{padding-inline:16px}
+  .date-modal-card .patient-grid{padding-inline:16px}
+  .date-modal-card .modal-actions{grid-template-columns:auto auto minmax(104px,1fr);padding:14px 16px}
+  .date-modal-card .btn{padding-inline:9px;font-size:10px}
+  .date-modal-card .btn.primary{min-width:104px}
+}
+
+@media (max-width:600px){
+  .chart-workspace{width:100%;border-right:0}
+  .chart-card{width:calc(100% - 12px);margin:16px 6px 0;border-radius:8px}
+  .chart-stage{padding-right:0;padding-left:0}
+  .split-stage{padding-right:0;padding-left:0}
+
+  .entries-panel{margin:16px 8px 0;padding:0;border-radius:14px}
+  .entries-panel>.entries-head{min-height:56px;padding:0 18px}
+  .entries-panel>.entries-list{padding:12px 18px 16px}
+  .entries-panel .entry-empty{padding:12px}
+}
+
+@media (max-width:360px){
+  .entries-panel{margin-inline:6px}
+  .entries-panel>.entries-head{padding-inline:14px}
+  .entries-panel>.entries-list{padding:10px 14px 14px}
+}
+
+@media (max-width:600px){
+  .patient-modal>.modal-head h3{font-size:19px}
+  .existing-patient-panel{grid-template-rows:auto auto minmax(0,1fr);gap:16px;padding:18px 16px 20px}
+  .patient-search-copy p{font-size:12px;line-height:1.4}
+  .patient-search-bar{display:grid;grid-template-columns:minmax(0,1fr) 96px;gap:6px;align-items:center}
+  .patient-search-bar input{min-width:0;min-height:44px;padding:9px 11px;border-radius:10px;font-size:12px;line-height:1.3}
+  .patient-search-bar input::placeholder{font-size:12px}
+  .patient-search-bar .btn.primary{width:96px;min-width:96px;height:44px;padding:0 9px;gap:5px;border-radius:10px!important;font-size:11px}
+  .patient-search-bar .btn.primary::before{width:15px;height:15px;margin-right:4px;background-size:15px 15px;vertical-align:-3px}
+  .patient-search-results{min-height:220px;padding:16px}
+  .patient-search-icon{width:66px;height:66px}
+  .patient-search-icon::before{width:26px;height:26px;background-size:26px 26px}
+  .patient-search-empty{gap:5px}
+  .patient-search-empty strong{font-size:13px}
+  .patient-search-empty p{font-size:10px}
+
+  .patient-modal .patient-grid{gap:10px;padding:16px 16px 12px}
+  .patient-modal .patient-section-title{gap:9px;margin-top:6px;font-size:10px;letter-spacing:.11em}
+  .patient-modal .patient-field{gap:4px}
+  .patient-modal .patient-field label{font-size:9px;line-height:1.25}
+  .patient-modal .patient-field input,
+  .patient-modal .patient-field textarea,
+  .patient-modal .patient-field select,
+  .patient-modal .date-text-input{min-height:40px;padding:8px 10px;border-radius:10px;font-size:12px;line-height:1.3}
+  .patient-modal .patient-field input::placeholder,
+  .patient-modal .patient-field textarea::placeholder,
+  .patient-modal .date-text-input::placeholder{font-size:12px}
+  .patient-modal .patient-field textarea{min-height:64px}
+  .patient-modal .date-field-shell{grid-template-columns:minmax(0,1fr) 40px;gap:6px}
+  .patient-modal .date-picker-btn{width:40px;height:40px;border-radius:10px!important;background-size:17px 17px}
+  .patient-modal .modal-actions{gap:7px;padding:10px 16px}
+  .patient-modal .modal-actions .btn{height:38px;padding:0 12px;font-size:10px}
+}
+
+@media (max-width:360px){
+  .patient-search-bar{grid-template-columns:minmax(0,1fr) 88px}
+  .patient-search-bar .btn.primary{width:88px;min-width:88px;padding-inline:7px;font-size:10px}
 }

@@ -14,45 +14,50 @@ export function PatientModal() {
     <div className="modal-backdrop" id="patient-modal" aria-hidden="true">
       <div className="modal patient-modal" role="dialog" aria-modal="true" aria-labelledby="patient-modal-title">
         <div className="modal-head">
-          <div>
-            <h3 id="patient-modal-title">Patient information</h3>
-            <p>Find an existing patient or add a new patient to begin charting.</p>
+          <div className="patient-modal-title-group">
+            <span className="patient-modal-title-icon" aria-hidden="true">
+              <svg width="22" height="22" style={{ width: 22, height: 22 }} viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M5.5 21v-2.5a6.5 6.5 0 0 1 13 0V21"/></svg>
+            </span>
+            <div className="patient-modal-title-copy">
+              <h3 id="patient-modal-title">Patient</h3>
+            </div>
           </div>
           <button className="icon-btn" type="button" id="patient-close-btn" aria-label="Close">✕</button>
         </div>
 
         <div className="patient-tabs" role="tablist" aria-label="Patient options">
-          <button className={`patient-tab ${activeTab === "existing" ? "active" : ""}`} type="button" role="tab" aria-selected={activeTab === "existing"} aria-controls="existing-patient-panel" onClick={() => setActiveTab("existing")}>Existing Patient</button>
-          <button className={`patient-tab ${activeTab === "new" ? "active" : ""}`} type="button" role="tab" aria-selected={activeTab === "new"} aria-controls="patient-form" onClick={() => setActiveTab("new")}>New Patient</button>
+          <button className={`patient-tab ${activeTab === "existing" ? "active" : ""}`} type="button" role="tab" aria-selected={activeTab === "existing"} aria-controls="existing-patient-panel" onClick={() => setActiveTab("existing")}><span aria-hidden="true">⌕</span> Search Patient</button>
+          <button className={`patient-tab ${activeTab === "new" ? "active" : ""}`} type="button" role="tab" aria-selected={activeTab === "new"} aria-controls="patient-form" onClick={() => setActiveTab("new")}><span aria-hidden="true">♙</span> Add New Patient</button>
         </div>
 
         <section className="existing-patient-panel" id="existing-patient-panel" role="tabpanel" hidden={activeTab !== "existing"}>
           <div className="patient-search-copy">
             <h4>Search existing patients</h4>
-            <p>Search by patient name, phone number, IC/ID, or email address.</p>
+            <p>Search by name, IC/ID, or phone number.</p>
           </div>
           <div className="patient-search-bar">
-            <input id="patient-search-input" type="search" placeholder="Search name, phone, IC/ID, or email" aria-label="Search existing patients" />
+            <input id="patient-search-input" type="search" placeholder="Search by name, IC/ID, or phone..." aria-label="Search existing patients" />
             <button className="btn primary" id="patient-search-btn" type="button">Search</button>
           </div>
           <div className="patient-search-results" id="patient-search-results" aria-live="polite">
             <div className="patient-search-empty">
               <span className="patient-search-icon" aria-hidden="true">⌕</span>
-              <strong>Search for a patient</strong>
-              <p>Matching patients will appear here for selection.</p>
+              <strong>No results yet</strong>
+              <p>Enter a search term above and press Search.</p>
             </div>
           </div>
         </section>
 
         <form className="patient-form" id="patient-form" role="tabpanel" hidden={activeTab !== "new"}>
           <div className="patient-grid">
+            <div className="patient-section-title full"><span>Personal Information</span></div>
             <div className="patient-field full">
-              <label htmlFor="patient-full-name">Full name</label>
-              <input id="patient-full-name" name="fullName" type="text" placeholder="Type patient full name" required />
+              <label htmlFor="patient-full-name">Full Name <span className="patient-required">*</span></label>
+              <input id="patient-full-name" name="fullName" type="text" placeholder="e.g. Sarah Lim Mei Ling" required />
             </div>
 
             <div className="patient-field">
-              <label htmlFor="patient-dob-text">Date of birth</label>
+              <label htmlFor="patient-dob-text">Date of birth <span className="patient-required">*</span></label>
               <div className="date-field-shell">
                 <input className="date-text-input" id="patient-dob-text" type="text" inputMode="numeric" placeholder="DD/MM/YYYY" autoComplete="bday" />
                 <button className="date-picker-btn" id="patient-dob-trigger" type="button" aria-label="Open date of birth calendar">📅</button>
@@ -64,64 +69,66 @@ export function PatientModal() {
             <input id="patient-id" name="patientId" type="hidden" />
 
             <div className="patient-field">
-              <label htmlFor="patient-id-number">IC/ID</label>
-              <input id="patient-id-number" name="idNumber" type="text" placeholder="Identity card / ID number" />
+              <label htmlFor="patient-id-number">IC / ID Number <span className="patient-required">*</span></label>
+              <input id="patient-id-number" name="idNumber" type="text" placeholder="e.g. 900101-14-1234" />
             </div>
 
             <div className="patient-field">
-              <label htmlFor="patient-gender">Gender</label>
+              <label htmlFor="patient-gender">Gender <span className="patient-required">*</span></label>
               <select id="patient-gender" name="gender" defaultValue="">
-                <option value="">Select</option>
+                <option value="">Select gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
-                <option value="other">Other</option>
               </select>
             </div>
 
             <div className="patient-field">
               <label htmlFor="patient-tax-number">Tax Number</label>
-              <input id="patient-tax-number" name="taxNumber" type="text" placeholder="Optional tax number" />
+              <input id="patient-tax-number" name="taxNumber" type="text" placeholder="e.g. TN-123456" />
             </div>
 
+            <div className="patient-section-title full"><span>Contact Information</span></div>
             <div className="patient-field">
-              <label htmlFor="patient-phone">Phone</label>
-              <input id="patient-phone" name="phone" type="tel" placeholder="Phone number" required />
+              <label htmlFor="patient-phone">Phone <span className="patient-required">*</span></label>
+              <input id="patient-phone" name="phone" type="tel" placeholder="e.g. +60 12-345 6789" required />
             </div>
 
             <div className="patient-field">
               <label htmlFor="patient-email">Email</label>
-              <input id="patient-email" name="email" type="email" placeholder="Optional email" />
+              <input id="patient-email" name="email" type="email" placeholder="e.g. sarah@email.com" />
             </div>
 
-            <div className="patient-field full">
+            <div className="patient-field patient-guardian-email-toggle">
               <label>
                 <input id="patient-email-is-guardian" name="emailIsGuardian" type="checkbox" />
                 {' '}This email belongs to the patient's parent or legal guardian
               </label>
             </div>
 
-            <div className="patient-field">
-              <label htmlFor="patient-guardian-name">Parent / Guardian Name</label>
-              <input id="patient-guardian-name" name="guardianName" type="text" placeholder="Enter full name" />
+            <div className="patient-field full">
+              <label htmlFor="patient-address">Address</label>
+              <input id="patient-address" name="address" type="text" placeholder="Street, City, State, Postcode" />
             </div>
 
-            <div className="patient-field">
+            <div className="patient-section-title full patient-guardian-conditional patient-guardian-section-title"><span>Parent / Guardian</span></div>
+            <div className="patient-field patient-guardian-conditional">
+              <label htmlFor="patient-guardian-name">Guardian Name</label>
+              <input id="patient-guardian-name" name="guardianName" type="text" placeholder="e.g. Lim Ah Kow" />
+            </div>
+
+            <div className="patient-field patient-guardian-conditional">
               <label htmlFor="patient-guardian-relationship">Relationship to Patient</label>
               <select id="patient-guardian-relationship" name="guardianRelationship" defaultValue="">
-                <option value="">Select</option>
+                <option value="">Select relationship</option>
                 <option value="parent">Parent</option>
                 <option value="legal-guardian">Legal guardian</option>
                 <option value="other-responsible-adult">Other responsible adult</option>
               </select>
             </div>
 
-            <div className="patient-field full">
-              <label htmlFor="patient-address">Address</label>
-              <input id="patient-address" name="address" type="text" placeholder="Patient address" />
-            </div>
-
+            <div className="patient-section-title full"><span>Emergency Contact</span></div>
             <div className="patient-field">
-              <label htmlFor="patient-emergency-name">Emergency Contact Name</label>
+              <label htmlFor="patient-emergency-name">Contact Name</label>
               <input id="patient-emergency-name" name="emergencyContactName" type="text" />
             </div>
 
@@ -130,6 +137,7 @@ export function PatientModal() {
               <input id="patient-emergency-phone" name="emergencyContactPhone" type="tel" />
             </div>
 
+            <div className="patient-section-title full"><span>Medical Information</span></div>
             <div className="patient-field full">
               <label htmlFor="patient-allergies">Allergies</label>
               <textarea id="patient-allergies" name="allergies" />
@@ -145,6 +153,7 @@ export function PatientModal() {
               <textarea id="patient-medications" name="medications" />
             </div>
 
+            <div className="patient-section-title full"><span>Additional Information</span></div>
             <div className="patient-field">
               <label htmlFor="patient-source">Source</label>
               <select id="patient-source" name="source" defaultValue="">
@@ -162,7 +171,11 @@ export function PatientModal() {
 
             <div className="patient-field">
               <label htmlFor="patient-preferred-dentist">Preferred Dentist</label>
-              <input id="patient-preferred-dentist" name="preferredDentist" type="text" placeholder="No preference" />
+              <select id="patient-preferred-dentist" name="preferredDentist" defaultValue="">
+                <option value="">Select</option>
+                <option value="">No preferred Dentist</option>
+                /*preferred dentist fetch from staff dentist that the user created */
+              </select>
             </div>
 
             <div className="patient-field">
