@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dental Charting</title>
 <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon_charting.png">
-<link rel="stylesheet" href="./css/base.css?v=6">
-<link rel="stylesheet" href="./css/chart.css?v=8">
-<link rel="stylesheet" href="./css/editor.css">
-<link rel="stylesheet" href="./css/dialogs.css?v=9">
-<link rel="stylesheet" href="./css/layout.css?v=17">
+<link rel="stylesheet" href="./css/base.css?v=13">
+<link rel="stylesheet" href="./css/chart.css?v=14">
+<link rel="stylesheet" href="./css/editor.css?v=5">
+<link rel="stylesheet" href="./css/dialogs.css?v=23">
+<link rel="stylesheet" href="./css/layout.css?v=43">
 <link rel="stylesheet" href="./css/print.css?v=2">
 </head>
 <body>
@@ -29,7 +29,7 @@
       </nav>
       <button class="back-to-appointments" id="back-to-appointments" type="button" aria-label="Back to Appointments">
         <svg class="back-to-appointments-icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M10 7 5 12l5 5M5 12h11M14 5h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-3" />
+          <path d="m14 7-5 5 5 5M9 12h10" />
         </svg>
         <span>Back to Appointments</span>
       </button>
@@ -46,6 +46,9 @@
       </div>
       <div class="meta">
         <button class="meta-card" type="button" id="patient-trigger">
+          <span class="meta-card-icon patient-context-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5"/><path d="M5.5 20v-2a6.5 6.5 0 0 1 13 0v2"/></svg>
+          </span>
           <div class="meta-block">
             <small>Patient</small>
             <strong id="patient-name-display">Tap to add patient</strong>
@@ -53,6 +56,9 @@
           </div>
         </button>
         <button class="meta-card" type="button" id="date-trigger">
+          <span class="meta-card-icon date-context-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01"/></svg>
+          </span>
           <div class="meta-block">
             <small>Date</small>
             <strong id="visit-date-display">24 June 2026</strong>
@@ -61,9 +67,12 @@
         </button>
       </div>
       <div class="topbar-actions">
-        <button class="btn secondary" type="button" id="clear-current-btn">Clear Page</button>
+        <button class="btn secondary" type="button" id="clear-current-btn">
+          <svg class="context-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
+          <span>Clear Page</span>
+        </button>
         <button class="btn primary pdf-icon-btn" type="button" id="download-pdf-btn" aria-label="Download PDF" title="Download PDF">
-          <!-- <img class="pdf-download-icon" src="./assets/images/pdf-export-icon.png?v=2" alt=""> -->
+          <svg class="context-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5"/></svg>
           <span>Download PDF</span>
         </button>
       </div>
@@ -81,11 +90,12 @@
   </section>
 
   <div class="layout">
-    <section class="chart-card">
+    <section class="chart-workspace">
       <div class="chart-head">
         <div>
           <h2>Clinical Chart</h2>
           <p>Mouth view showing the root profile and crown surface for every tooth.</p>
+          <p class="primary-chart-hint"><strong>Primary dentition:</strong> Double-click a primary tooth to swap it with its permanent successor. Double-click a faded 6/7 position to add the molar, or an active 6/7 molar to hide it.</p>
         </div>
         <div class="chart-head-controls">
           <div class="chart-view-key" aria-label="Chart view guide">
@@ -101,6 +111,7 @@
         </div>
       </div>
 
+      <div class="chart-card">
       <div class="chart-stage-wrap">
         <div class="chart-stage hidden" id="combined-stage">
           <div class="orientation-grid">
@@ -187,6 +198,7 @@
         </div>
       </div>
       <div class="print-page-number print-page-one" aria-hidden="true">1</div>
+      </div>
 
       <div class="entries-panel">
         <div class="entries-head">
@@ -243,7 +255,7 @@
             <div class="field-note" id="view-note"></div>
           </div>
         </div>
-        <div class="field-pair">
+        <div class="field-pair treatment-row">
           <div class="field" id="surface-field">
             <div class="field-title">3. Surface / area</div>
             <div class="surface-grid" id="surface-grid"></div>
@@ -345,7 +357,7 @@
 <div id="react-root"></div>
 
 <div class="modal-backdrop" id="date-modal" aria-hidden="true">
-  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="date-modal-title">
+  <div class="modal date-modal-card" role="dialog" aria-modal="true" aria-labelledby="date-modal-title">
     <div class="modal-head">
       <div>
         <h3 id="date-modal-title">Visit date</h3>
