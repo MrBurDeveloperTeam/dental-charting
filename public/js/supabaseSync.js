@@ -32,7 +32,6 @@
   //   <script>window.DENTAL_SYNC_API_BASE = "https://app.snabbb.com";</script>
   const API_BASE = window.DENTAL_SYNC_API_BASE || "https://app.snabbb.com";
   const CHART_ENDPOINT = API_BASE + "/api/dental/chart";
-  const PATIENTS_ENDPOINT = API_BASE + "/api/patients";
   const DEBOUNCE_MS = 1000;
 
   /* ================= STATUS BADGE ================= */
@@ -222,19 +221,10 @@
     setBadge("Cloud: creating patient…", "#1d4ed8");
 
     try {
-      const res = await fetch(PATIENTS_ENDPOINT, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(payload),
-      });
-      const data = await res.json().catch(() => null);
-      if (res.status === 401 || res.status === 403) {
-        throw new Error("Your login has expired. Sign in again before creating a patient.");
-      }
-      if (!res.ok) throw new Error(data?.error || "Unable to create patient");
+      if (!window.dentalPatients) throw new Error("Dental patient access is not ready. Refresh and try again.");
+      const data = await window.dentalPatients.create(payload);
 
-      const created = normalizePatient(data?.patient || data);
+      const created = normalizePatient(data);
       if (!created.patientId) throw new Error("The patient was created without a patient ID.");
 
       Object.assign(patient, created);
@@ -301,19 +291,9 @@
     renderPatientSearchMessage("Loading patients…", "Searching your clinic's patient records.", "loading");
 
     try {
-      const url = new URL(PATIENTS_ENDPOINT);
-      url.searchParams.set("limit", "50");
-      url.searchParams.set("debug", "1");
-      if (query) url.searchParams.set("query", query);
-      const res = await fetch(url, { method: "GET", credentials: "include", headers: { Accept: "application/json" } });
+      if (!window.dentalPatients) throw new Error("Dental patient access is not ready. Refresh and try again.");
+      const rows = await window.dentalPatients.search(query);
       if (requestId !== patientSearchRequest) return;
-      if (res.status === 401 || res.status === 403) {
-        renderPatientSearchMessage("Login required", "Sign in again before searching patient records.", "error");
-        return;
-      }
-      const payload = await res.json().catch(() => null);
-      if (!res.ok) throw new Error(payload?.error || "Unable to load patients");
-      const rows = Array.isArray(payload) ? payload : (payload?.patients || []);
       renderPatientResults(rows);
     } catch (error) {
       if (requestId !== patientSearchRequest) return;
