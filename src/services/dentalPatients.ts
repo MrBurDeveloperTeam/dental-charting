@@ -1,6 +1,80 @@
 import { getSupabaseClient } from "../lib/supabaseClient";
 
-type PatientInput = Record<string, unknown>;
+type PatientInput = {
+  name: unknown;
+  phone?: unknown;
+  email?: unknown;
+  emailIsGuardian?: unknown;
+  guardianName?: unknown;
+  guardianRelationship?: unknown;
+  idNumber?: unknown;
+  address?: unknown;
+  dob?: unknown;
+  gender?: unknown;
+  taxNumber?: unknown;
+  emergencyContactName?: unknown;
+  emergencyContactPhone?: unknown;
+  allergies?: unknown;
+  medicalConditions?: unknown;
+  medications?: unknown;
+  source?: unknown;
+  preferredDentist?: unknown;
+  insurance?: unknown;
+  notes?: unknown;
+};
+
+export type DentalDentist = {
+  id: string;
+  name: string;
+};
+
+const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+function requiredText(value: unknown, label: string) {
+  const text = String(value ?? "").trim();
+  if (!text) throw new Error(`${label} is required.`);
+  return text;
+}
+
+function optionalText(value: unknown) {
+  const text = String(value ?? "").trim();
+  return text || null;
+}
+
+export function buildNewPatientPayload(input: PatientInput, clinicId: string, userId: string) {
+  const preferredDentistId = optionalText(input.preferredDentist);
+  const emailIsGuardian = Boolean(input.emailIsGuardian);
+  if (preferredDentistId && !uuidPattern.test(preferredDentistId)) {
+    throw new Error("The selected preferred dentist is invalid.");
+  }
+
+  // Explicit allowlist: database-generated and existing-row identifiers are
+  // deliberately absent, so this payload can only describe a new patient row.
+  return {
+    clinic_id: clinicId,
+    name: requiredText(input.name, "Patient name"),
+    phone: optionalText(input.phone),
+    email: optionalText(input.email)?.toLowerCase() ?? null,
+    id_number: optionalText(input.idNumber),
+    address: optionalText(input.address),
+    created_by: userId,
+    dob: optionalText(input.dob),
+    gender: optionalText(input.gender),
+    tax_number: optionalText(input.taxNumber),
+    emergency_contact_name: optionalText(input.emergencyContactName),
+    emergency_contact_phone: optionalText(input.emergencyContactPhone),
+    allergies: optionalText(input.allergies),
+    medical_conditions: optionalText(input.medicalConditions),
+    medications: optionalText(input.medications),
+    source: optionalText(input.source),
+    preferred_dentist_id: preferredDentistId,
+    insurance: optionalText(input.insurance),
+    notes: optionalText(input.notes),
+    email_is_guardian: emailIsGuardian,
+    guardian_name: emailIsGuardian ? optionalText(input.guardianName) : null,
+    guardian_relationship: emailIsGuardian ? optionalText(input.guardianRelationship) : null,
+  };
+}
 
 const apiBase = (import.meta.env.VITE_API_BASE_URL || "https://app.snabbb.com/api")
   .replace(/\/$/, "");
@@ -98,33 +172,27 @@ export async function searchDentalPatients(query = "") {
   return data || [];
 }
 
+export async function listDentalDentists(): Promise<DentalDentist[]> {
+  const supabase = getSupabaseClient();
+  const { clinicId } = await getClinicSession();
+  const { data, error } = await supabase
+    .from("apt_staff")
+    .select("id,name")
+    .eq("clinic_id", clinicId)
+    .eq("role", "dentist")
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return (data || []).map((row) => ({
+    id: String(row.id),
+    name: String(row.name || "Unnamed dentist"),
+  }));
+}
+
 export async function createDentalPatient(input: PatientInput) {
   const supabase = getSupabaseClient();
   const { clinicId, userId } = await getClinicSession();
-  const payload = {
-    clinic_id: clinicId,
-    created_by: userId,
-    name: input.name,
-    phone: input.phone || null,
-    email: input.email || null,
-    email_is_guardian: Boolean(input.emailIsGuardian),
-    guardian_name: input.guardianName || null,
-    guardian_relationship: input.guardianRelationship || null,
-    id_number: input.idNumber || null,
-    address: input.address || null,
-    dob: input.dob || null,
-    gender: input.gender || null,
-    tax_number: input.taxNumber || null,
-    emergency_contact_name: input.emergencyContactName || null,
-    emergency_contact_phone: input.emergencyContactPhone || null,
-    allergies: input.allergies || null,
-    medical_conditions: input.medicalConditions || null,
-    medications: input.medications || null,
-    source: input.source || null,
-    preferred_dentist_id: input.preferredDentist || null,
-    insurance: input.insurance || null,
-    notes: input.notes || null,
-  };
+  const payload = buildNewPatientPayload(input, clinicId, userId);
 
   const { data, error } = await supabase
     .from("apt_patients")
@@ -138,4 +206,5 @@ export async function createDentalPatient(input: PatientInput) {
 export const dentalPatients = {
   search: searchDentalPatients,
   create: createDentalPatient,
+  listDentists: listDentalDentists,
 };
