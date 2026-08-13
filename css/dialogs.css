@@ -25,10 +25,18 @@
 .patient-search-bar input{width:100%;min-height:48px;padding:11px 14px;border:1px solid var(--line);border-radius:6px;background:#fff;color:var(--ink);font:inherit}
 .patient-search-bar input:focus{outline:2px solid rgba(11,142,161,.2);border-color:#0b8ea1}
 .patient-search-results{min-height:280px;border:1px dashed var(--line);border-radius:8px;background:var(--panel-soft);display:grid;place-items:center;padding:24px}
+.patient-search-results.has-results{display:block;place-items:initial;padding:8px;border-style:solid;overflow-y:auto}
 .patient-search-empty{display:grid;justify-items:center;gap:7px;color:var(--muted);text-align:center}
 .patient-search-empty strong{color:var(--ink);font-size:15px}
 .patient-search-empty p{margin:0;font-size:12px}
 .patient-search-icon{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#fff;border:1px solid var(--line);color:#0b8ea1;font-size:28px}
+.patient-search-result{width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 16px;border:0;border-bottom:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.patient-search-result:last-child{border-bottom:0}
+.patient-search-result:hover,.patient-search-result:focus-visible{background:#edf5ff;outline:none}
+.patient-search-result-main{min-width:0;display:grid;gap:4px}
+.patient-search-result-main strong{font-size:14px}
+.patient-search-result-main span{overflow:hidden;text-overflow:ellipsis;color:var(--muted);font-size:12px;white-space:nowrap}
+.patient-search-result-action{flex:0 0 auto;color:#1f67c1;font-size:12px;font-weight:800}
 .patient-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 .patient-field{display:grid;gap:6px}
 .patient-field label{font-size:12px;font-weight:700;color:var(--ink)}
