@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { DentalDentist } from "../../services/dentalPatients";
 
 /**
  * Patient modal markup extracted from index.html.
@@ -9,6 +10,27 @@ import { useState } from "react";
  */
 export function PatientModal() {
   const [activeTab, setActiveTab] = useState<"existing" | "new">("existing");
+  const [dentists, setDentists] = useState<DentalDentist[]>([]);
+  const [dentistsState, setDentistsState] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+
+  async function openNewPatientForm() {
+    setActiveTab("new");
+
+    // The legacy chart bridge fills this shared form with the currently selected
+    // patient when the modal opens. Creating a patient is a separate operation,
+    // so clear those values without changing the patient selected for the chart.
+    (document.getElementById("patient-form") as HTMLFormElement | null)?.reset();
+
+    if (dentistsState === "loading" || dentistsState === "loaded") return;
+    setDentistsState("loading");
+    try {
+      setDentists(await window.dentalPatients.listDentists());
+      setDentistsState("loaded");
+    } catch (error) {
+      console.error("Unable to load preferred dentists", error);
+      setDentistsState("error");
+    }
+  }
 
   return (
     <div className="modal-backdrop" id="patient-modal" aria-hidden="true">
@@ -27,7 +49,7 @@ export function PatientModal() {
 
         <div className="patient-tabs" role="tablist" aria-label="Patient options">
           <button className={`patient-tab ${activeTab === "existing" ? "active" : ""}`} type="button" role="tab" aria-selected={activeTab === "existing"} aria-controls="existing-patient-panel" onClick={() => setActiveTab("existing")}><span aria-hidden="true">⌕</span> Search Patient</button>
-          <button className={`patient-tab ${activeTab === "new" ? "active" : ""}`} type="button" role="tab" aria-selected={activeTab === "new"} aria-controls="patient-form" onClick={() => setActiveTab("new")}><span aria-hidden="true">♙</span> Add New Patient</button>
+          <button className={`patient-tab ${activeTab === "new" ? "active" : ""}`} type="button" role="tab" aria-selected={activeTab === "new"} aria-controls="patient-form" onClick={openNewPatientForm}><span aria-hidden="true">♙</span> Add New Patient</button>
         </div>
 
         <section className="existing-patient-panel" id="existing-patient-panel" role="tabpanel" hidden={activeTab !== "existing"}>
@@ -172,10 +194,14 @@ export function PatientModal() {
             <div className="patient-field">
               <label htmlFor="patient-preferred-dentist">Preferred Dentist</label>
               <select id="patient-preferred-dentist" name="preferredDentist" defaultValue="">
-                <option value="">Select</option>
-                <option value="">No preferred Dentist</option>
-                /*preferred dentist fetch from staff dentist that the user created */
+                <option value="">
+                  {dentistsState === "loading" ? "Loading dentists…" : "No preferred Dentist"}
+                </option>
+                {dentists.map((dentist) => (
+                  <option key={dentist.id} value={dentist.id}>{dentist.name}</option>
+                ))}
               </select>
+              {dentistsState === "error" && <small>Could not load dentists. Close and try again.</small>}
             </div>
 
             <div className="patient-field">
