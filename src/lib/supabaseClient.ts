@@ -11,6 +11,9 @@ export function getSupabaseClient(): SupabaseClient {
     import.meta.env.VITE_SUPABASE_ANON_KEY
   )?.trim();
 
+  console.log("Supabase URL:", url);
+  console.log("Supabase Publishable Key:", publishableKey);
+
   if (!url || !publishableKey) {
     throw new Error(
       "Dental cloud access is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY."
