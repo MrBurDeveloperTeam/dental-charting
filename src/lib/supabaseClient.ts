@@ -13,6 +13,7 @@ export function getSupabaseClient(): SupabaseClient {
 
   console.log("Supabase URL:", url);
   console.log("Supabase Publishable Key:", publishableKey);
+  console.log(import.meta.env)
 
   if (!url || !publishableKey) {
     throw new Error(
