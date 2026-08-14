@@ -650,9 +650,10 @@ function pdfFileName(){
   return `${patientName}_${visitDate}`;
 }
 function downloadPdf(){
-  const previousTitle=document.title;
+  const previousTitle=document.title,summaryHeading=document.querySelector(".saved-entries-title"),previousHeading=summaryHeading?.textContent;
   document.title=pdfFileName();
-  window.addEventListener("afterprint",()=>{document.title=previousTitle},{once:true});
+  if(summaryHeading)summaryHeading.textContent="Summary";
+  window.addEventListener("afterprint",()=>{document.title=previousTitle;if(summaryHeading)summaryHeading.textContent=previousHeading||"Saved Entries"},{once:true});
   window.print();
 }
 function pickCategory(c){draft.category=c; normalizeDraft(); renderAll()}
