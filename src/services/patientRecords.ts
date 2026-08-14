@@ -5,7 +5,7 @@ export type PatientRecordEntry = { id: string; chart_visit_id: string; tooth_num
 type AppointmentRow = { id: string; date: string; start_time?: string; status?: string; dentist_id?: string };
 export type PatientRecord = {
   id: string; visitDate: string; lastUpdated: string;
-  patient: Record<string, unknown> & { id: string; name?: string; gender?: string; id_number?: string; phone?: string; preferred_dentist_id?: string };
+  patient: Record<string, unknown> & { id: string; name?: string; dob?: string; gender?: string; id_number?: string; phone?: string; email?: string; preferred_dentist_id?: string };
   appointment: { id: string; date: string; start_time?: string; status?: string; dentist_id?: string } | null;
   dentist: { id: string; name: string } | null; entries: PatientRecordEntry[]; statuses: string[];
 };

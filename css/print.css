@@ -28,12 +28,12 @@
      leak into the PDF. */
   .chart-stage-wrap{overflow:visible!important}
   .chart-stage,.split-stage{min-width:720px!important;width:100%!important;overflow:visible!important;padding:16px!important;border-radius:20px!important}
-  .split-stage{display:grid!important;gap:16px!important}
+  .split-stage{display:grid!important;gap:8px!important}
   .split-group{
     display:grid!important;
     gap:0!important;
     margin-top:0!important;
-    padding:16px 8px 12px!important;
+    padding:12px 8px 8px!important;
     border-radius:0!important;
     break-inside: avoid;
     page-break-inside: avoid;
@@ -42,8 +42,8 @@
   .split-group-head{display:grid!important;grid-template-columns:70px repeat(16,minmax(30px,1fr)) 70px!important;place-items:initial!important;padding:0 0 4px!important}
   .split-group-head .split-status-label{grid-column:9 / span 2!important;justify-self:center!important;margin-bottom:0!important}
   .split-stage .arch-grid,.split-stage .orientation-grid{grid-template-columns:70px minmax(0,1fr) 70px!important}
-  .split-stage .upper-grid{grid-template-rows:108px 58px 22px!important;padding-bottom:0!important}
-  .split-stage .lower-grid{grid-template-rows:22px 58px 108px!important;margin-top:0!important;padding-bottom:30px!important}
+  .split-stage .upper-grid{grid-template-rows:100px 52px 20px!important;padding-bottom:0!important}
+  .split-stage .lower-grid{grid-template-rows:20px 52px 100px!important;margin-top:0!important;padding-bottom:22px!important}
   .split-stage .upper-grid .upper-label{grid-column:1!important;grid-row:1 / span 2!important;align-items:center!important}
   .split-stage .lower-grid .lower-label{grid-column:1!important;grid-row:2 / span 2!important;align-items:center!important;justify-content:flex-start!important;transform:none!important}
   .split-stage .arch-label-text{width:auto!important;margin:17px 0 10px!important;white-space:normal!important}
@@ -51,15 +51,15 @@
   .split-stage .upper-root-row,.split-stage .upper-crown-row,.split-stage .upper-number-row,
   .split-stage .lower-root-row,.split-stage .lower-crown-row,.split-stage .lower-number-row{width:94%!important;margin-inline:auto!important}
   .split-stage .tooth,.split-stage .number{transform:none!important}
-  .split-stage .upper-root-row .art-core{transform:scale(.59,-.59)!important}
-  .split-stage .lower-root-row .art-core{transform:scale(.59)!important}
-  .split-stage .upper-crown-row .art-core,.split-stage .lower-crown-row .art-core{transform:scale(.9)!important}
+  .split-stage .upper-root-row .art-core{transform:scale(.54,-.54)!important}
+  .split-stage .lower-root-row .art-core{transform:scale(.54)!important}
+  .split-stage .upper-crown-row .art-core,.split-stage .lower-crown-row .art-core{transform:scale(.82)!important}
   .split-stage .split-divider{transform:none!important}
   .chart-layer-switch{display:none!important}
   .print-page-one{break-after:page;page-break-after:always}
   .entries-panel{margin:0!important;padding:0;background:#fff;break-before:page;page-break-before:always}
-  .entries-head h3.saved-entries-title{font-size:0}
-  .entries-head h3.saved-entries-title::before{content:"Summary";font-size:16px}
+  .entries-head h3.saved-entries-title{font-size:16px!important}
+  .entries-head h3.saved-entries-title::before{content:none!important}
   .entries-list{max-height:none;overflow:visible}
   .entries-panel>.entries-head{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;min-height:96px!important;padding:18px 28px!important}
   .entries-panel>.entries-list{padding:18px 28px 22px!important}

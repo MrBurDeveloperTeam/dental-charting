@@ -43,11 +43,16 @@ export default function App() {
       <PatientModal />
       {view === "records" ? <PatientRecordsPage onOpenRecord={openRecord} /> : <DentalChartPage />}
       {view === "review" && selectedRecord && document.getElementById("record-review-summary-root") && createPortal(
-        <section className="record-review-summary" aria-label="Selected dental record details">
-          <div><small>Chart visit</small><strong>{new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(selectedRecord.visitDate))}</strong></div>
-          <div><small>Appointment</small><strong>{selectedRecord.appointment ? `${new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(selectedRecord.appointment.date))}${selectedRecord.appointment.start_time ? ` · ${selectedRecord.appointment.start_time.slice(0, 5)}` : ""}` : "No linked appointment"}</strong></div>
-          <div><small>Dentist</small><strong>{selectedRecord.dentist?.name || "Not assigned"}</strong></div>
-          <div><small>Recent entries</small><strong>{selectedRecord.entries.length} · {selectedRecord.statuses.map((status) => status === "watch" ? "Review" : status.charAt(0).toUpperCase() + status.slice(1)).join(", ")}</strong></div>
+        <section className="record-review-panel" aria-label="Patient referral details">
+          <div className="record-review-toolbar"><button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button></div>
+          <div className="record-review-summary">
+            <div><small>Name</small><strong>{String(selectedRecord.patient.name || "—")}</strong></div>
+            <div><small>Date of birth</small><strong>{selectedRecord.patient.dob ? new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${selectedRecord.patient.dob}T00:00:00`)) : "—"}</strong></div>
+            <div><small>IC</small><strong>{String(selectedRecord.patient.id_number || "—")}</strong></div>
+            <div><small>Gender</small><strong>{selectedRecord.patient.gender ? String(selectedRecord.patient.gender).charAt(0).toUpperCase() + String(selectedRecord.patient.gender).slice(1) : "—"}</strong></div>
+            <div><small>Phone</small><strong>{String(selectedRecord.patient.phone || "—")}</strong></div>
+            <div><small>Email</small><strong>{String(selectedRecord.patient.email || "—")}</strong></div>
+          </div>
         </section>,
         document.getElementById("record-review-summary-root")!,
       )}
