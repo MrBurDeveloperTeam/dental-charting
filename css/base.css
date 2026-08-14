@@ -89,9 +89,11 @@ body{
 .btn{height:40px;padding:0 16px;border-radius:var(--button-radius);font-weight:750}
 .btn.primary{background:var(--primary);color:#fff;box-shadow:0 7px 16px rgba(26,120,232,.2)}
 .btn.primary:hover{background:var(--primary-dark)}
+.btn.finish-visit-btn{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 7px 16px rgba(33,144,109,.2)}
+.btn.finish-visit-btn:hover{background:#197a5c;border-color:#197a5c}
 .contextbar>.topbar-actions{margin:0;padding:0 28px;align-items:center;justify-content:flex-end;flex:none;flex-wrap:nowrap}
 .contextbar>.topbar-actions .btn{height:42px;border-radius:var(--button-radius)!important;padding:0 22px;font-size:14px;font-weight:700}
-.contextbar>.topbar-actions #clear-current-btn,.contextbar>.topbar-actions #download-pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;line-height:1}
+.contextbar>.topbar-actions #finish-visit-btn,.contextbar>.topbar-actions #download-pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;line-height:1}
 .pdf-icon-btn{padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap}
 .context-action-icon{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
 .contextbar>.topbar-actions .btn>span{display:block;line-height:1}

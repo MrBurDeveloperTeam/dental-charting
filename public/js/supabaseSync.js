@@ -50,7 +50,7 @@
     badge.style.background = color || "#1f2937";
   }
   setBadge("Cloud: idle", "#4b5563");
-  badge.addEventListener("click", () => pushChart(true));
+  badge.addEventListener("click", () => pullDatabaseChart());
 
   /* ================= HELPERS ================= */
   function currentPatientId() {
@@ -309,6 +309,117 @@
     });
   }
 
+  function applyDatabaseEntries(rows) {
+    clearChartForPatientSelection();
+    (rows || []).forEach((row) => {
+      const dentition = row.dentition === "primary" ? "primary" : "permanent";
+      const tooth = Number(row.tooth_number);
+      if (!state[dentition][tooth]) state[dentition][tooth] = { entries: [] };
+      state[dentition][tooth].entries.push({
+        id: row.id,
+        tooth,
+        treatment: row.treatment,
+        category: row.chart_type,
+        status: row.status,
+        layer: row.layer,
+        view: row.view,
+        surfaces: Array.isArray(row.surfaces) ? row.surfaces : [],
+        note: row.clinical_note || "",
+      });
+    });
+    if (typeof renderAll === "function") renderAll();
+  }
+
+  function chartContext() {
+    return {
+      patientId: currentPatientId(),
+      visitDate: (visit && visit.date) || new Date().toISOString().slice(0, 10),
+      dentistId: (patient && patient.preferredDentist) || null,
+    };
+  }
+
+  async function pullDatabaseChart() {
+    if (!currentPatientId()) return;
+    setBadge("Cloud: loading…", "#1d4ed8");
+    try {
+      if (!window.dentalCharts) throw new Error("Dental chart access is not ready. Refresh and try again.");
+      const result = await window.dentalCharts.load(chartContext());
+      applyDatabaseEntries(result.entries);
+      setBadge(result.entries.length ? "Cloud: loaded ✓" : "Cloud: no saved entries", "#15803d");
+    } catch (error) {
+      console.error("Unable to load dental chart", error);
+      setBadge("Cloud: load failed", "#b91c1c");
+    }
+  }
+
+  async function saveDatabaseEntries(event) {
+    const context = chartContext();
+    if (!context.patientId) return;
+    setBadge("Cloud: saving…", "#1d4ed8");
+    try {
+      for (const entry of event.detail.entries || []) {
+        const saved = await window.dentalCharts.saveEntry(context, {
+          id: entry.id,
+          dentition: event.detail.dentition,
+          toothNumber: entry.tooth,
+          chartType: entry.category,
+          view: entry.view,
+          surfaces: entry.surfaces,
+          treatment: entry.treatment,
+          status: entry.status,
+          layer: entry.layer,
+          clinicalNote: entry.note,
+        });
+        entry.id = saved.id;
+      }
+      if (typeof renderAll === "function") renderAll();
+      setBadge("Cloud: saved ✓", "#15803d");
+    } catch (error) {
+      console.error("Unable to save dental chart entry", error);
+      setBadge("Cloud: save failed", "#b91c1c");
+      window.alert(error?.message || "Unable to save the dental chart entry.");
+      await pullDatabaseChart();
+    }
+  }
+
+  async function deleteDatabaseEntry(event) {
+    try {
+      await window.dentalCharts.deleteEntry(chartContext(), event.detail.id);
+      setBadge("Cloud: entry removed ✓", "#15803d");
+    } catch (error) {
+      console.error("Unable to remove dental chart entry", error);
+      setBadge("Cloud: delete failed", "#b91c1c");
+      window.alert(error?.message || "Unable to remove the dental chart entry.");
+      await pullDatabaseChart();
+    }
+  }
+
+  async function deleteDatabaseEntries(event) {
+    try {
+      await window.dentalCharts.deleteEntries(chartContext(), event.detail.ids || []);
+      selectedEntryIds.clear();
+      await pullDatabaseChart();
+      setBadge("Entries removed ✓", "#15803d");
+    } catch (error) {
+      console.error("Unable to remove selected dental chart entries", error);
+      window.alert(error?.message || "Unable to remove the selected entries.");
+      await pullDatabaseChart();
+    }
+  }
+
+  function finishVisit() {
+    localStorage.removeItem("dental-charting-2-patient");
+    localStorage.removeItem("dental-charting-2-visit");
+    Object.assign(patient, emptyPatient());
+    visit.date = new Date().toISOString().slice(0, 10);
+    clearChartForPatientSelection();
+    selectedEntryIds.clear();
+    if (typeof renderAll === "function") renderAll();
+    document.querySelector('[aria-controls="existing-patient-panel"]')?.click();
+    if (typeof openPatientModal === "function") openPatientModal();
+    setBadge("Ready for next patient", "#15803d");
+  }
+
   function selectExistingPatient(row) {
     const selected = normalizePatient(row);
     if (!selected.patientId) {
@@ -320,7 +431,7 @@
     if (typeof persistPatient === "function") persistPatient();
     if (typeof renderAll === "function") renderAll();
     if (typeof closePatientModal === "function") closePatientModal();
-    pullChart();
+    pullDatabaseChart();
   }
 
   /* ================= NETWORK ================= */
@@ -328,6 +439,9 @@
   let pendingPush = false;
 
   async function pushChart(manual) {
+    // Legacy compatibility only. Entry persistence now uses explicit CRUD.
+    return pullDatabaseChart();
+    /* istanbul ignore next */
     const patientId = currentPatientId();
     if (!patientId) {
       setBadge("Cloud: add patient ID to sync", "#92400e");
@@ -367,6 +481,8 @@
   }
 
   async function pullChart() {
+    return pullDatabaseChart();
+    /* istanbul ignore next */
     const patientId = currentPatientId();
     if (!patientId) return;
     setBadge("Cloud: loading…", "#1d4ed8");
@@ -415,8 +531,7 @@
     const saveBtn = document.getElementById("save-btn");
     if (saveBtn) {
       saveBtn.addEventListener("click", () => {
-        lastImmediatePush = Date.now();
-        pushChart(true);
+        // app.js dispatches dental-chart:save-entries with the saved rows.
       });
     }
 
@@ -425,12 +540,13 @@
     // (the trash icon on each row) and edits made via the treatment manager.
     const entriesList = document.getElementById("entries-list");
     if (entriesList) {
-      new MutationObserver(scheduleSync).observe(entriesList, {
-        childList: true,
-        subtree: true,
-        characterData: true,
-      });
+      // Entry changes are persisted through explicit create/update/delete events.
     }
+
+    document.addEventListener("dental-chart:save-entries", saveDatabaseEntries);
+    document.addEventListener("dental-chart:delete-entry", deleteDatabaseEntry);
+    document.addEventListener("dental-chart:delete-entries", deleteDatabaseEntries);
+    document.addEventListener("dental-chart:finish-visit", finishVisit);
 
     // Create the patient in Supabase before allowing local/chart persistence.
     const patientForm = document.getElementById("patient-form");
@@ -449,14 +565,14 @@
 
     // Visit date saved.
     const dateForm = document.getElementById("date-form");
-    if (dateForm) dateForm.addEventListener("submit", () => setTimeout(scheduleSync, 50));
+    if (dateForm) dateForm.addEventListener("submit", () => setTimeout(pullDatabaseChart, 50));
   }
 
   /* ================= INIT ================= */
   function init() {
     attachTriggers();
     if (currentPatientId()) {
-      pullChart();
+      pullDatabaseChart();
     } else {
       setBadge("Cloud: idle", "#4b5563");
     }
@@ -469,5 +585,5 @@
   }
 
   // Exposed for manual use from the console or future UI hooks.
-  window.dentalCloudSync = { push: () => pushChart(true), pull: pullChart, searchPatients: searchExistingPatients };
+  window.dentalCloudSync = { pull: pullDatabaseChart, searchPatients: searchExistingPatients };
 })();
