@@ -9,6 +9,7 @@ import type { PatientRecord } from "./services/patientRecords";
 export default function App() {
   const [view, setView] = useState<"chart" | "records" | "review">("chart");
   const [selectedRecord, setSelectedRecord] = useState<PatientRecord | null>(null);
+  const [reviewLayer, setReviewLayer] = useState<"existing" | "planned">("existing");
 
   useEffect(() => {
     const chartNav = document.getElementById("chart-nav-item");
@@ -34,6 +35,7 @@ export default function App() {
 
   const openRecord = (record: PatientRecord) => {
     setSelectedRecord(record);
+    setReviewLayer("existing");
     setView("review");
     window.setTimeout(() => document.dispatchEvent(new CustomEvent("dental-chart:open-record", { detail: { patient: record.patient, visitDate: record.visitDate } })), 0);
   };
@@ -44,7 +46,7 @@ export default function App() {
       {view === "records" ? <PatientRecordsPage onOpenRecord={openRecord} /> : <DentalChartPage />}
       {view === "review" && selectedRecord && document.getElementById("record-review-summary-root") && createPortal(
         <section className="record-review-panel" aria-label="Patient referral details">
-          <div className="record-review-toolbar"><button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button></div>
+          <div className="record-review-toolbar"><button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button><button className="record-review-download" type="button" onClick={() => document.getElementById("download-pdf-btn")?.click()}><span aria-hidden="true">⇩</span> Download PDF</button></div>
           <div className="record-review-summary">
             <div><small>Name</small><strong>{String(selectedRecord.patient.name || "—")}</strong></div>
             <div><small>Date of birth</small><strong>{selectedRecord.patient.dob ? new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${selectedRecord.patient.dob}T00:00:00`)) : "—"}</strong></div>
@@ -52,6 +54,12 @@ export default function App() {
             <div><small>Gender</small><strong>{selectedRecord.patient.gender ? String(selectedRecord.patient.gender).charAt(0).toUpperCase() + String(selectedRecord.patient.gender).slice(1) : "—"}</strong></div>
             <div><small>Phone</small><strong>{String(selectedRecord.patient.phone || "—")}</strong></div>
             <div><small>Email</small><strong>{String(selectedRecord.patient.email || "—")}</strong></div>
+            <div><small>Visit date</small><strong>{new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${selectedRecord.visitDate}T00:00:00`))}</strong></div>
+            <div><small>Appointment</small><strong>{selectedRecord.appointment ? `${new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${selectedRecord.appointment.date}T00:00:00`))}${selectedRecord.appointment.start_time ? ` · ${selectedRecord.appointment.start_time.slice(0, 5)}` : ""}` : "No linked appointment"}</strong></div>
+            <div><small>Dentist</small><strong>{selectedRecord.dentist?.name || "Not assigned"}</strong></div>
+          </div>
+          <div className="record-review-layer-switch" aria-label="Chart layer">
+            {(["existing", "planned"] as const).map((layer) => <button key={layer} type="button" className={reviewLayer === layer ? "active" : ""} aria-pressed={reviewLayer === layer} onClick={() => { setReviewLayer(layer); (document.querySelector(`[data-chart-view="${layer}"]`) as HTMLButtonElement | null)?.click(); }}>{layer === "existing" ? "Existing" : "Planning"}</button>)}
           </div>
         </section>,
         document.getElementById("record-review-summary-root")!,

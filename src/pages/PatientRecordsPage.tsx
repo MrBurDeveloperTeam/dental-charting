@@ -6,7 +6,6 @@ type SortField = "patient" | "visit" | "appointment" | "dentist" | "status" | "u
 type SortState = { field: SortField; direction: "asc" | "desc" };
 const statusLabel = (status: string) => status === "watch" ? "Review" : status.charAt(0).toUpperCase() + status.slice(1);
 const formatDate = (value?: string, time = false) => value ? new Intl.DateTimeFormat("en-MY", time ? { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" } : { day: "2-digit", month: "short", year: "numeric" }).format(new Date(value)) : "—";
-const initials = (name = "Patient") => name.split(/\s+/).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
 
 function SortButton({ field, children, sort, onSort }: { field: SortField; children: React.ReactNode; sort: SortState; onSort: (field: SortField) => void }) {
   const active = sort.field === field;
@@ -55,7 +54,7 @@ export function PatientRecordsPage({ onOpenRecord }: { onOpenRecord: (record: Pa
     </tr></thead><tbody>
       {loading && <tr><td className="patient-record-empty" colSpan={9}>Loading recent patient records…</td></tr>}{error && <tr><td className="patient-record-empty error" colSpan={9}>{error}</td></tr>}
       {!loading && !error && visible.map((record) => <tr key={record.id} tabIndex={0} onClick={() => onOpenRecord(record)} onKeyDown={(event) => event.key === "Enter" && onOpenRecord(record)}>
-        <td data-label="Patient"><div className="patient-record-person"><span>{initials(String(record.patient.name || "Patient"))}</span><strong>{String(record.patient.name || "Unknown patient")}</strong></div></td><td data-label="IC / ID">{String(record.patient.id_number || "—")}</td><td data-label="Chart visit">{formatDate(record.visitDate)}</td>
+        <td data-label="Patient"><div className="patient-record-person"><strong>{String(record.patient.name || "Unknown patient")}</strong></div></td><td data-label="IC / ID">{String(record.patient.id_number || "—")}</td><td data-label="Chart visit">{formatDate(record.visitDate)}</td>
         <td data-label="Appointment">{record.appointment ? <><strong>{formatDate(record.appointment.date)}</strong><small>{record.appointment.start_time?.slice(0, 5)}</small></> : <em>Not linked</em>}</td><td data-label="Dentist">{record.dentist?.name || "Not assigned"}</td><td data-label="Entries"><strong>{record.entries.length}</strong></td>
         <td data-label="Status"><div className="patient-record-statuses">{record.statuses.map((value) => <span className={`status-${value}`} key={value}>{statusLabel(value)}</span>)}</div></td><td data-label="Last updated">{formatDate(record.lastUpdated, true)}</td><td className="patient-record-chevron">›</td>
       </tr>)}{!loading && !error && !visible.length && <tr><td className="patient-record-empty" colSpan={9}>No records match your search and filters.</td></tr>}
