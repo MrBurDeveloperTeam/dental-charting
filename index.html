@@ -6,11 +6,12 @@
 <title>Dental Charting</title>
 <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon_charting.png">
 <link rel="stylesheet" href="./css/base.css?v=13">
-<link rel="stylesheet" href="./css/chart.css?v=14">
-<link rel="stylesheet" href="./css/editor.css?v=5">
+<link rel="stylesheet" href="./css/chart.css?v=15">
+<link rel="stylesheet" href="./css/editor.css?v=6">
 <link rel="stylesheet" href="./css/dialogs.css?v=23">
 <link rel="stylesheet" href="./css/layout.css?v=43">
-<link rel="stylesheet" href="./css/print.css?v=2">
+<link rel="stylesheet" href="./css/print.css?v=4">
+<link rel="stylesheet" href="./css/patient-records.css?v=1">
 </head>
 <body>
 <div class="page">
@@ -24,8 +25,8 @@
         </div>
       </div>
       <nav class="app-nav" aria-label="Dental chart navigation">
-        <span class="app-nav-item active" aria-current="page">Chart</span>
-        <span class="app-nav-item">Patient record</span>
+        <button class="app-nav-item active" id="chart-nav-item" type="button" aria-current="page">Chart</button>
+        <button class="app-nav-item" id="patient-record-nav-item" type="button">Patient record</button>
       </nav>
       <button class="back-to-appointments" id="back-to-appointments" type="button" aria-label="Back to Appointments">
         <svg class="back-to-appointments-icon" viewBox="0 0 24 24" aria-hidden="true">
@@ -79,6 +80,8 @@
       </div>
     </section>
   </header>
+
+  <div id="record-review-summary-root"></div>
 
   <section class="print-patient-card" id="print-patient-card">
     <div class="print-export-head">
@@ -474,7 +477,7 @@
 
 <script type="module" src="/src/main.tsx"></script>
 <script defer src="./js/tooth-silhouettes.js"></script>
-<script defer src="./js/app.js?v=20"></script>
-<script defer src="./js/supabaseSync.js?v=5"></script>
+<script defer src="./js/app.js?v=23"></script>
+<script defer src="./js/supabaseSync.js?v=6"></script>
 </body>
 </html>

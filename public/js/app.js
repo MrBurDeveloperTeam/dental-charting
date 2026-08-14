@@ -279,6 +279,25 @@ const dateTargets={
 };
 function isoToday(){return new Date().toISOString().slice(0,10)}
 function parseIsoDate(value){if(!value) return null; const date=new Date(`${value}T00:00:00`); return Number.isNaN(date.getTime())?null:date}
+function hasSelectedPatient(){return Boolean(patient.patientId&&patient.patientId.trim()&&patient.fullName&&patient.fullName.trim())}
+function hasValidVisitDate(){
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(visit.date||""))return false;
+  const date=parseIsoDate(visit.date);
+  if(!date||visit.date>isoToday())return false;
+  return buildIso(date.getFullYear(),date.getMonth(),date.getDate())===visit.date;
+}
+function canStartCharting(){return hasSelectedPatient()&&hasValidVisitDate()}
+function chartPrerequisiteMessage(){
+  if(!hasSelectedPatient()&&!hasValidVisitDate())return "Select a patient and set a valid visit date before starting the dental chart.";
+  if(!hasSelectedPatient())return "Select or add a patient before starting the dental chart.";
+  return "Set a valid visit date before starting the dental chart.";
+}
+function updateChartPrerequisiteState(){
+  const locked=!canStartCharting(),workspace=document.querySelector(".chart-workspace"),mobileTrigger=document.getElementById("mobile-entry-trigger");
+  workspace?.classList.toggle("chart-locked",locked);
+  workspace?.setAttribute("aria-disabled",String(locked));
+  if(mobileTrigger)mobileTrigger.disabled=locked;
+}
 function formatInputDate(value){const date=parseIsoDate(value); if(!date) return ""; const day=`${date.getDate()}`.padStart(2,"0"); const month=`${date.getMonth()+1}`.padStart(2,"0"); return `${day}/${month}/${date.getFullYear()}`}
 function formatHeaderDate(value){const date=parseIsoDate(value); if(!date) return "Date not set"; return `${`${date.getDate()}`.padStart(2,"0")} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`}
 function monthKeyFromIso(value){return (value||isoToday()).slice(0,7)}
@@ -312,7 +331,7 @@ function syncDateField(targetName){
   const error=document.getElementById(`${targetName}-date-error`); if(error) error.hidden=true;
 }
 function clearDateFieldError(targetName){const target=dateTargets[targetName]; target.textInput.classList.remove("invalid"); target.textInput.removeAttribute("aria-invalid"); target.textInput.setCustomValidity(""); const error=document.getElementById(`${targetName}-date-error`); if(error) error.hidden=true}
-function showDateFieldError(targetName){const target=dateTargets[targetName]; target.textInput.classList.add("invalid"); target.textInput.setAttribute("aria-invalid","true"); target.textInput.setCustomValidity(""); const error=document.getElementById(`${targetName}-date-error`); if(error) error.hidden=false}
+function showDateFieldError(targetName,message="*Enter a valid date as DD/MM/YYYY, example: 14/08/2026"){const target=dateTargets[targetName]; target.textInput.classList.add("invalid"); target.textInput.setAttribute("aria-invalid","true"); target.textInput.setCustomValidity(""); const error=document.getElementById(`${targetName}-date-error`); if(error){error.textContent=message;error.hidden=false}}
 function commitDateField(targetName,{emptyOk=true,fallbackToday=false}={}){
   const target=dateTargets[targetName];
   const parsed=parseTypedDate(target.textInput.value);
@@ -322,6 +341,7 @@ function commitDateField(targetName,{emptyOk=true,fallbackToday=false}={}){
     else if(emptyOk) target.valueInput.value="";
     else {showDateFieldError(targetName); return false}
   }else{
+    if(parsed>isoToday()){showDateFieldError(targetName,"*Date cannot be later than today."); return false}
     target.valueInput.value=parsed;
   }
   syncDateField(targetName);
@@ -334,13 +354,10 @@ function printFieldHTML(label,value,wide=false){return `<div class="print-info-i
 function renderPatientHeader(){const hasPatient=Boolean(patient.fullName); els.patientTrigger.classList.toggle("needs-patient",!hasPatient); els.patientNameDisplay.textContent=patient.fullName||"Add patient details"; const parts=[]; if(patient.dob) parts.push(formatDobLabel(patient.dob)); if(patient.patientId) parts.push(`ID ${patient.patientId}`); els.patientSubDisplay.textContent=parts.join(" · ")||"Click to add patient information"; els.patientTrigger.title=parts.join(" · ")||"Click to add patient details"}
 function renderVisitHeader(){els.visitDateDisplay.textContent=formatVisitDate(visit.date); els.visitDateSubDisplay.textContent="Click to change visit date"; els.dateTrigger.title="Click to change visit date"}
 function renderPrintSections(){
-  const age=calcAge(patient.dob);
   const fields=[
     ["Patient",patient.fullName||"Not set"],
-    ["Patient ID",patient.patientId||"—"],
     ["Visit date",formatVisitDate(visit.date)],
     ["Date of birth",patient.dob?formatInputDate(patient.dob):"—"],
-    ["Age",age!==null?`${age} years`:"—"],
     ["Dentition",activeDentition().label],
     ["Gender",patient.gender||"—"],
     ["Phone",patient.phone||"—"],
@@ -355,6 +372,8 @@ function renderDatePopover(){
   els.dateClearBtn.disabled=!target.allowClear;
   const selected=target.valueInput.value;
   const base=monthStartFromKey(datePicker.cursor);
+  const today=isoToday(),todayMonth=today.slice(0,7),todayYear=Number(today.slice(0,4));
+  els.dateNextBtn.disabled=datePicker.view==="day"?datePicker.cursor>=todayMonth:(datePicker.view==="month"?base.getFullYear()>=todayYear:(base.getFullYear()-(base.getFullYear()%12)+12)>todayYear);
   if(datePicker.view==="day"){
     els.dateTitleBtn.textContent=`${MONTHS_LONG[base.getMonth()]} ${base.getFullYear()}`;
     const first=new Date(base); const firstDay=(first.getDay()+6)%7;
@@ -367,19 +386,20 @@ function renderDatePopover(){
       if(cell.getMonth()!==base.getMonth()) classes.push("muted");
       if(sameDay(iso,selected)) classes.push("active");
       if(sameDay(iso,isoToday())) classes.push("today");
-      cells+=`<button class="${classes.join(" ")}" type="button" data-date-action="select-day" data-iso="${iso}">${cell.getDate()}</button>`;
+      const future=iso>today;if(future)classes.push("future");
+      cells+=`<button class="${classes.join(" ")}" type="button" data-date-action="select-day" data-iso="${iso}"${future?" disabled":""}>${cell.getDate()}</button>`;
     }
     els.dateView.innerHTML=`${cells}</div>`;
     return;
   }
   if(datePicker.view==="month"){
     els.dateTitleBtn.textContent=`${base.getFullYear()}`;
-    els.dateView.innerHTML=`<div class="date-months">${MONTHS.map((month,index)=>{const iso=buildIso(base.getFullYear(),index,1);const active=selected&&selected.slice(0,7)===iso.slice(0,7)?" active":"";return `<button class="date-grid-btn${active}" type="button" data-date-action="select-month" data-month="${index}">${month}</button>`}).join("")}</div>`;
+    els.dateView.innerHTML=`<div class="date-months">${MONTHS.map((month,index)=>{const iso=buildIso(base.getFullYear(),index,1);const active=selected&&selected.slice(0,7)===iso.slice(0,7)?" active":"",future=iso.slice(0,7)>todayMonth;return `<button class="date-grid-btn${active}${future?" future":""}" type="button" data-date-action="select-month" data-month="${index}"${future?" disabled":""}>${month}</button>`}).join("")}</div>`;
     return;
   }
   const startYear=base.getFullYear()-(base.getFullYear()%12);
   els.dateTitleBtn.textContent=`${startYear}–${startYear+11}`;
-  els.dateView.innerHTML=`<div class="date-years">${Array.from({length:12},(_,index)=>{const year=startYear+index;const active=selected&&selected.slice(0,4)===String(year)?" active":"";return `<button class="date-grid-btn${active}" type="button" data-date-action="select-year" data-year="${year}">${year}</button>`}).join("")}</div>`;
+  els.dateView.innerHTML=`<div class="date-years">${Array.from({length:12},(_,index)=>{const year=startYear+index,active=selected&&selected.slice(0,4)===String(year)?" active":"",future=year>todayYear;return `<button class="date-grid-btn${active}${future?" future":""}" type="button" data-date-action="select-year" data-year="${year}"${future?" disabled":""}>${year}</button>`}).join("")}</div>`;
 }
 function positionDatePopover(){
   if(!datePicker.open||!datePicker.anchor) return;
@@ -430,12 +450,12 @@ function fillPatientForm(){PATIENT_TEXT_FIELDS.forEach(field=>{const input=els.p
 function openPatientModal(){fillPatientForm(); els.patientModal.classList.add("show"); els.patientModal.setAttribute("aria-hidden","false"); document.body.style.overflow="hidden"; setTimeout(()=>els.patientForm.fullName.focus(),0)}
 function closePatientModal(){closeDatePopover(); els.patientModal.classList.remove("show"); els.patientModal.setAttribute("aria-hidden","true");document.body.style.overflow = "";}
 function clearPatientForm(){els.patientForm.reset(); els.patientForm.gender.value=""; syncDateField("dob")}
-function savePatientFromForm(e){e.preventDefault(); if(!commitDateField("dob",{emptyOk:true})){els.patientDobText.focus(); return} PATIENT_TEXT_FIELDS.forEach(field=>{const input=els.patientForm.elements.namedItem(field); if(input) patient[field]=input.value.trim()}); const guardianInput=els.patientForm.elements.namedItem("emailIsGuardian"); patient.emailIsGuardian=Boolean(guardianInput&&guardianInput.checked); patient.email=patient.email.toLowerCase(); persistPatient(); renderPatientHeader(); closePatientModal()}
+function savePatientFromForm(e){e.preventDefault(); if(!commitDateField("dob",{emptyOk:true})){els.patientDobText.focus(); return} PATIENT_TEXT_FIELDS.forEach(field=>{const input=els.patientForm.elements.namedItem(field); if(input) patient[field]=input.value.trim()}); const guardianInput=els.patientForm.elements.namedItem("emailIsGuardian"); patient.emailIsGuardian=Boolean(guardianInput&&guardianInput.checked); patient.email=patient.email.toLowerCase(); persistPatient(); renderAll(); closePatientModal()}
 function fillDateForm(){els.dateForm.visitDate.value=visit.date; syncDateField("visit")}
 function openDateModal(){fillDateForm(); els.dateModal.classList.add("show"); els.dateModal.setAttribute("aria-hidden","false"); setTimeout(()=>els.visitDateTrigger.focus(),0)}
 function closeDateModal(){closeDatePopover(); els.dateModal.classList.remove("show"); els.dateModal.setAttribute("aria-hidden","true")}
 function setVisitToday(){els.dateForm.visitDate.value=isoToday(); syncDateField("visit")}
-function saveVisitFromForm(e){e.preventDefault(); if(!commitDateField("visit",{emptyOk:false,fallbackToday:false})){els.visitDateText.focus(); return} visit.date=els.dateForm.visitDate.value; persistVisit(); renderVisitHeader(); closeDateModal()}
+function saveVisitFromForm(e){e.preventDefault(); if(!commitDateField("visit",{emptyOk:false,fallbackToday:false})){els.visitDateText.focus(); return} visit.date=els.dateForm.visitDate.value; persistVisit(); renderAll(); closeDateModal()}
 function mkGrads(id, fill){const c=fill==="#F5F2EC"?null:fill;const hi=c?lighten(c,68):"#fffefd",mid=c?lighten(c,20):"#f3eee7",lo=c?darken(c,20):"#c5b9ac",groove=c?darken(c,32):"#a98f77";return`<defs><linearGradient id="cg${id}" x1="12%" y1="4%" x2="88%" y2="96%"><stop offset="0%" stop-color="${hi}"/><stop offset="27%" stop-color="${mid}"/><stop offset="62%" stop-color="${c||"#e8dfd5"}"/><stop offset="86%" stop-color="${lo}"/><stop offset="100%" stop-color="${c?darken(c,24):"#b8aa9b"}"/></linearGradient><radialGradient id="sg${id}" cx="27%" cy="18%" r="68%"><stop offset="0%" stop-color="rgba(255,255,255,.98)"/><stop offset="42%" stop-color="rgba(255,255,255,.38)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient><linearGradient id="rg${id}" x1="10%" y1="0%" x2="90%" y2="100%"><stop offset="0%" stop-color="#f4d8ae"/><stop offset="45%" stop-color="#d6a66f"/><stop offset="100%" stop-color="#9f683e"/></linearGradient><linearGradient id="gg${id}" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="${lighten(groove,10)}"/><stop offset="100%" stop-color="${groove}"/></linearGradient><filter id="ds${id}" x="-40%" y="-30%" width="180%" height="185%"><feDropShadow dx="1.5" dy="5" stdDeviation="2.8" flood-color="#080b10" flood-opacity=".52"/></filter></defs>`}
 const WO=`stroke="rgba(126,108,89,.58)" stroke-width="1.15"`; const RO=`stroke="rgba(116,83,54,.62)" stroke-width="1.02"`;
 function upperIncisorSVG(n,f,c){const id=`u${n}`,w=c?40:36,x=w/2,cw=c?16:14,rw=c?7:6;return`<svg viewBox="0 0 ${w} 100" width="${w}" height="100" filter="url(#ds${id})">${mkGrads(id,f)}<path d="M${x-cw},48 C${x-cw-1},35 ${x-cw+2},17 ${x-10},7 C${x-6},2 ${x-1},0 ${x},0 C${x+1},0 ${x+6},2 ${x+10},7 C${x+cw-2},17 ${x+cw+1},35 ${x+cw},48 C${x+cw-1},61 ${x+9},67 ${x},70 C${x-9},67 ${x-cw+1},61 ${x-cw},48 Z" fill="url(#cg${id})" ${WO}/><path d="M${x-3},5 C${x-7},18 ${x-8},36 ${x-7},56" fill="none" stroke="url(#gg${id})" stroke-width="1" opacity=".14"/><ellipse cx="${x-7}" cy="18" rx="${cw*.42}" ry="14" fill="url(#sg${id})" opacity=".44"/><ellipse cx="${x}" cy="70" rx="${rw+4}" ry="2.6" fill="#d8b28b" opacity=".58"/><path d="M${x-rw},68 C${x-rw-1},56 ${x-rw},42 ${x-rw+1},28 C${x-rw+2},18 ${x-rw+3},8 ${x},0 C${x+rw-3},8 ${x+rw-2},18 ${x+rw-1},28 C${x+rw},42 ${x+rw+1},56 ${x+rw},68 C${x+rw-1},82 ${x+4},93 ${x},100 C${x-4},93 ${x-rw+1},82 ${x-rw},68 Z" fill="url(#rg${id})" ${RO}/></svg>`}
@@ -606,10 +626,11 @@ function entrySurfaceLabel(entry){const mode=treatmentFor(entry.treatment).mode;
 function toothTooltipText(n){if(isGhostPrimarySlot(n)) return "Double-click to add this permanent molar"; const items=entriesForTooth(n); if(!items.length) return ""; return items.map(entry=>{const treatment=treatmentFor(entry.treatment); const details=[]; details.push(treatment.label); details.push(statusLabel(entry.status)); if(treatment.mode!=="whole"){details.push(entry.view==="occ"?"Crown":"Root"); details.push(entrySurfaceLabel(entry))} if(entry.note) details.push(`Note: ${entry.note}`); return details.join(" · ")}).join("\n")}
 function tooltipOnLeft(n){const order=isUpper(n)?activeUpper():activeLower(); return order.indexOf(n)>=Math.max(0,order.length-4)}
 function normalizeDraft(){if(!draft.tooth)return; const avail=Object.entries(TREATMENTS).filter(([,t])=>t.category===draft.category); if(!avail.find(([id])=>id===draft.treatment)) draft.treatment=avail[0][0]; const t=treatmentFor(draft.treatment); if(!t.views.includes(draft.view)) draft.view=t.views[0]; if(t.mode==="surface"){const allowed=new Set(availableSurfaceCodes(draft.tooth,draft.view)); draft.surfaces=draft.surfaces.filter(s=>allowed.has(s)); if(!draft.surfaces.length) draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view)} else draft.surfaces=[]}
-function openTooth(n,v,surface=null,preserve=false,statusContext="existing"){editingEntry=null; draft.tooth=n; draft.view=v; draft.layer=statusContext; if(!preserve){draft.category="restoration"; draft.treatment="composite"; draft.status=statusContext; draft.note=""; els.noteInput.value=""} else {draft.status=statusContext} draft.surfaces=surface?[surface]:defaultSurfaceFor(n,v); if(selection.multi){if(!selection.teeth.includes(n)) selection.teeth.push(n)} else selection.teeth=[n]; normalizeDraft(); renderAll()}
+function openTooth(n,v,surface=null,preserve=false,statusContext="existing"){if(!canStartCharting())return; editingEntry=null; draft.tooth=n; draft.view=v; draft.layer=statusContext; if(!preserve){draft.category="restoration"; draft.treatment="composite"; draft.status=statusContext; draft.note=""; els.noteInput.value=""} else {draft.status=statusContext} draft.surfaces=surface?[surface]:defaultSurfaceFor(n,v); if(selection.multi){if(!selection.teeth.includes(n)) selection.teeth.push(n)} else selection.teeth=[n]; normalizeDraft(); renderAll()}
 function resetDraft(){if(!draft.tooth)return; draft.category="restoration"; draft.treatment="composite"; draft.view="occ"; draft.status="existing"; draft.layer="existing"; draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view); draft.note=""; els.noteInput.value=""; normalizeDraft(); renderAll()}
 function clearCurrentTooth(){const targets=selection.multi&&selection.teeth.length?selection.teeth:(draft.tooth?[draft.tooth]:[]); if(!targets.length)return; targets.forEach(n=>activeState()[n].entries=[]); draft.note=""; els.noteInput.value=""; renderAll()}
 function saveDraft(){
+  if(!canStartCharting()){window.alert(chartPrerequisiteMessage());return}
   const targets=selection.multi&&selection.teeth.length?selection.teeth:(draft.tooth?[draft.tooth]:[]);
   if(!targets.length)return;
   normalizeDraft();
@@ -623,7 +644,17 @@ function saveDraft(){
   document.dispatchEvent(new CustomEvent("dental-chart:save-entries",{detail:{dentition:chartMode,entries:savedEntries}}));
   editingEntry=null; selection.multi=false; selection.teeth=[]; draft.tooth=null; draft.category="restoration"; draft.treatment="composite"; draft.view="occ"; draft.status="existing"; draft.layer="existing"; draft.surfaces=[]; draft.note=""; els.noteInput.value=""; renderAll();
 }
-function downloadPdf(){window.print()}
+function pdfFileName(){
+  const patientName=(patient.fullName||"Patient").trim().replace(/[<>:"/\\|?*\x00-\x1F]/g,"-").replace(/[. ]+$/g,"")||"Patient";
+  const visitDate=visit.date||isoToday();
+  return `${patientName}_${visitDate}`;
+}
+function downloadPdf(){
+  const previousTitle=document.title;
+  document.title=pdfFileName();
+  window.addEventListener("afterprint",()=>{document.title=previousTitle},{once:true});
+  window.print();
+}
 function pickCategory(c){draft.category=c; normalizeDraft(); renderAll()}
 function pickView(v){draft.view=v; normalizeDraft(); renderAll()}
 function pickTreatment(t){draft.treatment=t; draft.category=treatmentFor(t).category; normalizeDraft(); renderAll()}
@@ -650,7 +681,7 @@ function finishMobileToothSelection(){
   if(canChart)openMobileEntryWizard();
 }
 function openMobileEntryWizard(){
-  if(!isMobileToothModalViewport()||!draft.tooth||isGhostPrimarySlot(draft.tooth))return;
+  if(!canStartCharting()||!isMobileToothModalViewport()||!draft.tooth||isGhostPrimarySlot(draft.tooth))return;
   closeMobileToothModal();
   mobileEntryOpen=true;
   // mobileEntryStep=1;
@@ -935,7 +966,7 @@ function renderEntryPreview(entry){const treatment=treatmentFor(entry.treatment)
 function renderEntries(){const items=flatEntries();const validIds=new Set(items.map(item=>item.id));[...selectedEntryIds].forEach(id=>{if(!validIds.has(id))selectedEntryIds.delete(id)});els.entriesCount.textContent=`${items.length} item${items.length===1?"":"s"}`;const selectAll=document.getElementById("entries-select-all"),deleteSelected=document.getElementById("entries-delete-selected");if(selectAll){selectAll.checked=items.length>0&&selectedEntryIds.size===items.length;selectAll.indeterminate=selectedEntryIds.size>0&&selectedEntryIds.size<items.length;selectAll.disabled=!items.length}if(deleteSelected){deleteSelected.disabled=!selectedEntryIds.size;deleteSelected.textContent=selectedEntryIds.size?`Delete selected (${selectedEntryIds.size})`:"Delete selected"}els.entriesList.innerHTML="";if(!items.length){els.entriesList.innerHTML='<div class="entry-empty">No saved chart entries yet.</div>';return}items.forEach(entry=>{const row=document.createElement("div");row.className="entry-row";const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.className="entry-checkbox";checkbox.checked=selectedEntryIds.has(entry.id);checkbox.setAttribute("aria-label",`Select entry for tooth ${entry.tooth}`);checkbox.addEventListener("change",()=>{if(checkbox.checked)selectedEntryIds.add(entry.id);else selectedEntryIds.delete(entry.id);renderEntries()});const open=document.createElement("button");open.type="button";open.className="entry-open";open.innerHTML=`<div class="entry-preview">${renderEntryPreview(entry)}</div><div class="entry-text"><div class="entry-title">Tooth ${entry.tooth} · ${TREATMENTS[entry.treatment].label}</div><div class="entry-meta">${statusLabel(entry.status)} · ${entry.view==="occ"?"Crown":"Root"} · ${entrySurfaceLabel(entry)}</div><div class="entry-note">${entry.note?`Note: ${entry.note}`:"Note: —"}</div></div>`;open.setAttribute("aria-label",`Edit saved entry for tooth ${entry.tooth}`);open.addEventListener("click",()=>openEntry(entry.tooth,entry.id));const remove=document.createElement("button");remove.type="button";remove.className="entry-remove";remove.innerHTML='<span class="entry-remove-text">Remove</span><svg class="entry-remove-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z" fill="currentColor"/></svg>';remove.setAttribute("aria-label",`Remove saved entry for tooth ${entry.tooth}`);remove.addEventListener("click",()=>{if(window.confirm(`Remove the entry for tooth ${entry.tooth}?`))removeEntry(entry.tooth,entry.id)});row.append(checkbox,open,remove);els.entriesList.appendChild(row)})}
 function renderSelectedTeeth(){els.selectedTeeth.innerHTML=""; if(!selection.teeth.length){els.selectedTeeth.innerHTML='<span class="tooth-tag">No teeth selected</span>'; return} selection.teeth.forEach(n=>{const tag=document.createElement("span"); tag.className="tooth-tag"; tag.textContent=n; els.selectedTeeth.appendChild(tag)})}
 function renderDentitionSwitch(){els.dentitionSwitch.querySelectorAll("[data-mode]").forEach(btn=>btn.classList.toggle("active",btn.dataset.mode===chartMode)); els.dentitionHint.textContent=chartMode==="primary"?(isMobileToothModalViewport()?"Hint: Tap a faded permanent 6/7 molar to activate it. Use Deactivate permanent molar in the tooth panel to hide it again.":"Hint: Double-click baby teeth to swap with permanent successors. Double-click faded 6/7 slots to add, and double-click active 6/7 molars to hide them."):""}
-function renderSidebar(){const has=Boolean(draft.tooth); els.sidebarEmpty.style.display="none"; els.editor.classList.add("show"); els.multiToggleBtn.textContent=`Batch select: ${selection.multi?"On":"Off"}`; renderSelectedTeeth(); els.clearCurrentBtn.disabled=false; els.resetBtn.disabled=!has; els.saveBtn.disabled=!has; els.noteInput.disabled=!has; els.saveBtn.textContent=selection.multi&&selection.teeth.length>1?"Apply to selected":"Done"; if(!has){els.selectedCode.textContent="--"; els.selectedName.textContent=`Select a ${chartMode} tooth to start charting`; els.noteInput.value=""; els.noteInput.placeholder="Select a tooth to add a note"; els.miniPreview.classList.add("empty"); els.miniPreview.innerHTML="🦷"; renderCategoryGrid(true); renderViewGrid(true); renderSurfaceGrid(true); renderTreatmentGrid(true); renderStatusGrid(true); els.previewBox.innerHTML="<strong>Ready</strong><br>Select any tooth or surface on the left to begin."; return} normalizeDraft(); els.selectedCode.textContent=draft.tooth; els.selectedName.textContent=selection.multi&&selection.teeth.length>1?`${currentToothName(draft.tooth)} · ${selection.teeth.length} teeth selected · ${selectionSummary()}`:`${currentToothName(draft.tooth)} · ${selectionSummary()}`; els.noteInput.disabled=false; els.noteInput.placeholder="Optional note for this tooth"; els.noteInput.value=draft.note; renderMiniPreview(); renderCategoryGrid(false); renderViewGrid(false); renderSurfaceGrid(false); renderTreatmentGrid(false); renderStatusGrid(false); renderPreview()}
+function renderSidebar(){if(!canStartCharting()){els.sidebarEmpty.style.display="grid";els.sidebarEmpty.innerHTML=`<h3>Charting unavailable</h3><p>${chartPrerequisiteMessage()}</p>`;els.editor.style.display="none";return}const has=Boolean(draft.tooth); els.sidebarEmpty.style.display="none"; els.sidebarEmpty.innerHTML=""; els.editor.style.display=""; els.editor.classList.add("show"); els.multiToggleBtn.textContent=`Batch select: ${selection.multi?"On":"Off"}`; renderSelectedTeeth(); els.clearCurrentBtn.disabled=false; els.resetBtn.disabled=!has; els.saveBtn.disabled=!has; els.noteInput.disabled=!has; els.saveBtn.textContent=selection.multi&&selection.teeth.length>1?"Apply to selected":"Done"; if(!has){els.selectedCode.textContent="--"; els.selectedName.textContent=`Select a ${chartMode} tooth to start charting`; els.noteInput.value=""; els.noteInput.placeholder="Select a tooth to add a note"; els.miniPreview.classList.add("empty"); els.miniPreview.innerHTML="🦷"; renderCategoryGrid(true); renderViewGrid(true); renderSurfaceGrid(true); renderTreatmentGrid(true); renderStatusGrid(true); els.previewBox.innerHTML="<strong>Ready</strong><br>Select any tooth or surface on the left to begin."; return} normalizeDraft(); els.selectedCode.textContent=draft.tooth; els.selectedName.textContent=selection.multi&&selection.teeth.length>1?`${currentToothName(draft.tooth)} · ${selection.teeth.length} teeth selected · ${selectionSummary()}`:`${currentToothName(draft.tooth)} · ${selectionSummary()}`; els.noteInput.disabled=false; els.noteInput.placeholder="Optional note for this tooth"; els.noteInput.value=draft.note; renderMiniPreview(); renderCategoryGrid(false); renderViewGrid(false); renderSurfaceGrid(false); renderTreatmentGrid(false); renderStatusGrid(false); renderPreview()}
 function renderCategoryGrid(disabled=false){els.categoryGrid.innerHTML=""; CATEGORIES.forEach(c=>{const b=document.createElement("button"); b.className=`chip${draft.category===c.id?" active":""}`; b.type="button"; b.textContent=c.label; b.disabled=disabled; if(!disabled) b.addEventListener("click",()=>pickCategory(c.id)); els.categoryGrid.appendChild(b)})}
 function renderViewGrid(disabled=false){const t=treatmentFor(draft.treatment); els.viewGrid.innerHTML=""; [{id:"occ",label:"Crown view"},{id:"front",label:"Root view"}].forEach(v=>{const b=document.createElement("button"); b.className=`chip${draft.view===v.id?" active":""}`; b.type="button"; b.textContent=v.label; const blocked=disabled||!t.views.includes(v.id); b.disabled=blocked; if(!blocked) b.addEventListener("click",()=>pickView(v.id)); if(!t.views.includes(v.id)) b.style.opacity=".38"; els.viewGrid.appendChild(b)}); els.viewNote.textContent=disabled?"Select a tooth first.":(t.mode==="surface"?"Surface treatments color only the selected region.":(t.mode==="root"?"Root canal and root findings use the root view only.":"Whole-tooth treatments cover the whole tooth representation."))}
 function renderSurfaceGrid(disabled=false){const t=treatmentFor(draft.treatment),show=!disabled,interactive=!disabled&&t.mode==="surface"; els.surfaceField.style.display=show?"grid":"none"; els.surfaceGrid.innerHTML=""; if(!show){els.surfaceNote.textContent=disabled?"":"";
@@ -954,5 +985,5 @@ function miniPreviewTransform(n,view){
 }
 function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=treatmentFor(draft.treatment),whole=t.mode==="whole",missing=draft.treatment==="missing"; if(missing){els.miniPreview.innerHTML=missingSVG(draft.tooth,draft.view); return} const baseSVG=draft.view==="front"?toothSVG(draft.tooth,"#F5F2EC"):crownOnlySVG(draft.tooth,"#F5F2EC"); let html=baseSVG; if(whole&&isVeneer(draft.treatment)) html+=wholeOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status); if(whole&&!isVeneer(draft.treatment)) html+=wholeStatusOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status==="planned"?"planned":draft.status==="watch"?"watch":"existing"); if(t.mode==="root") html+=rctOverlayHTML(draft.tooth); if(t.mode==="surface"){const map={}; draft.surfaces.forEach(s=>map[s]=draft.treatment); html+=renderSurfaceOverlay(draft.tooth,draft.view,{complete:draft.status==="existing"?map:{},planned:draft.status==="planned"?map:{},review:draft.status==="watch"?map:{},selected:new Set(),previewColor:null,preview:false,clipKey:"draft-mini"})} const modeClass=draft.view==="front"?`front ${isUpper(draft.tooth)?"upper":"lower"}`:"occ"; const badge=draft.status==="watch"?reviewBadgeHTML(draft.tooth,draft.view):""; els.miniPreview.innerHTML=`<div class="mini-art ${modeClass}"><div class="art-core ${modeClass}" style="transform:${miniPreviewTransform(draft.tooth,draft.view)}">${html}</div>${badge}</div>`}
 function renderPreview(){const t=treatmentFor(draft.treatment),surfaceText=t.mode==="surface"?draft.surfaces.join(""):(t.mode==="root"?"Root":"Whole tooth"),status=STATUSES.find(i=>i.id===draft.status).label,targetText=selection.multi&&selection.teeth.length>1?`${selection.teeth.length} teeth`: `Tooth ${draft.tooth}`; els.previewBox.innerHTML=`<strong>${t.label}</strong><br>${targetText} · ${draft.view==="occ"?"Crown view":"Root view"} · ${surfaceText}<br>Status: ${status}`}
-function renderAll(){syncDateField("dob"); syncDateField("visit"); renderDentitionSwitch(); renderPatientHeader(); renderVisitHeader(); renderPrintSections(); renderChart(); renderEntries(); renderSidebar(); renderMobileToothModal(); renderMobileEntryWizard()}
+function renderAll(){syncDateField("dob"); syncDateField("visit"); updateChartPrerequisiteState(); renderDentitionSwitch(); renderPatientHeader(); renderVisitHeader(); renderPrintSections(); renderChart(); renderEntries(); renderSidebar(); renderMobileToothModal(); renderMobileEntryWizard()}
 renderAll();

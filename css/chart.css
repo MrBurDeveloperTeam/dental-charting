@@ -1,5 +1,7 @@
 .layout{display:grid;grid-template-columns:minmax(640px,1fr) clamp(640px,40vw,800px);gap:0;align-items:stretch;padding:0 0 28px;background:var(--bg)}
 .chart-workspace{min-width:0;display:grid;align-content:start;background:#eef3fb;border-right:1px solid var(--line)}
+.chart-workspace.chart-locked .chart-stage{pointer-events:none;opacity:.56;filter:saturate(.55)}
+.chart-workspace.chart-locked .chart-layer-switch{pointer-events:none;opacity:.5}
 .chart-card{margin:24px 16px 0;padding:0;min-width:0;overflow:hidden;border:0;border-radius:20px;background:var(--board-bottom);box-shadow:none}
 .sidebar{border-radius:0;background:var(--panel)}
 .print-patient-card,.print-note-card,.print-page-number{display:none}

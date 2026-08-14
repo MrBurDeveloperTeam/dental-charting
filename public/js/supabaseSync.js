@@ -410,14 +410,7 @@
   function finishVisit() {
     localStorage.removeItem("dental-charting-2-patient");
     localStorage.removeItem("dental-charting-2-visit");
-    Object.assign(patient, emptyPatient());
-    visit.date = new Date().toISOString().slice(0, 10);
-    clearChartForPatientSelection();
-    selectedEntryIds.clear();
-    if (typeof renderAll === "function") renderAll();
-    document.querySelector('[aria-controls="existing-patient-panel"]')?.click();
-    if (typeof openPatientModal === "function") openPatientModal();
-    setBadge("Ready for next patient", "#15803d");
+    window.location.reload();
   }
 
   function selectExistingPatient(row) {
@@ -431,6 +424,22 @@
     if (typeof persistPatient === "function") persistPatient();
     if (typeof renderAll === "function") renderAll();
     if (typeof closePatientModal === "function") closePatientModal();
+    pullDatabaseChart();
+  }
+
+  function openPatientRecord(event) {
+    const detail = event.detail || {};
+    const selected = normalizePatient(detail.patient || {});
+    if (!selected.patientId || !detail.visitDate) {
+      window.alert("This dental record is missing its patient or visit date.");
+      return;
+    }
+    Object.assign(patient, selected);
+    visit.date = detail.visitDate;
+    clearChartForPatientSelection();
+    if (typeof persistPatient === "function") persistPatient();
+    if (typeof persistVisit === "function") persistVisit();
+    if (typeof renderAll === "function") renderAll();
     pullDatabaseChart();
   }
 
@@ -547,6 +556,7 @@
     document.addEventListener("dental-chart:delete-entry", deleteDatabaseEntry);
     document.addEventListener("dental-chart:delete-entries", deleteDatabaseEntries);
     document.addEventListener("dental-chart:finish-visit", finishVisit);
+    document.addEventListener("dental-chart:open-record", openPatientRecord);
 
     // Create the patient in Supabase before allowing local/chart persistence.
     const patientForm = document.getElementById("patient-form");

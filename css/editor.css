@@ -1,5 +1,6 @@
 .sidebar{margin-top:0;padding:24px;background:var(--panel);border:0;border-left:1px solid var(--line);color:var(--ink);position:static;height:100%;max-height:none;overflow:visible;box-shadow:none}
 .sidebar-empty{display:none}
+.sidebar-empty{align-content:start;gap:10px;padding:22px;border:1px solid var(--line);border-radius:14px;background:var(--panel-soft)}
 .sidebar-empty h3{margin:0;font-size:20px}
 .sidebar-empty p{margin:0;line-height:1.5;color:var(--muted)}
 .helper-list{display:grid;gap:10px}
