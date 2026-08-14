@@ -312,7 +312,7 @@ function syncDateField(targetName){
   const error=document.getElementById(`${targetName}-date-error`); if(error) error.hidden=true;
 }
 function clearDateFieldError(targetName){const target=dateTargets[targetName]; target.textInput.classList.remove("invalid"); target.textInput.removeAttribute("aria-invalid"); target.textInput.setCustomValidity(""); const error=document.getElementById(`${targetName}-date-error`); if(error) error.hidden=true}
-function showDateFieldError(targetName){const target=dateTargets[targetName]; target.textInput.classList.add("invalid"); target.textInput.setAttribute("aria-invalid","true"); target.textInput.setCustomValidity(""); const error=document.getElementById(`${targetName}-date-error`); if(error) error.hidden=false}
+function showDateFieldError(targetName,message="*Enter a valid date as DD/MM/YYYY, example: 14/08/2026"){const target=dateTargets[targetName]; target.textInput.classList.add("invalid"); target.textInput.setAttribute("aria-invalid","true"); target.textInput.setCustomValidity(""); const error=document.getElementById(`${targetName}-date-error`); if(error){error.textContent=message;error.hidden=false}}
 function commitDateField(targetName,{emptyOk=true,fallbackToday=false}={}){
   const target=dateTargets[targetName];
   const parsed=parseTypedDate(target.textInput.value);
@@ -322,6 +322,7 @@ function commitDateField(targetName,{emptyOk=true,fallbackToday=false}={}){
     else if(emptyOk) target.valueInput.value="";
     else {showDateFieldError(targetName); return false}
   }else{
+    if(parsed>isoToday()){showDateFieldError(targetName,"*Date cannot be later than today."); return false}
     target.valueInput.value=parsed;
   }
   syncDateField(targetName);
@@ -334,13 +335,10 @@ function printFieldHTML(label,value,wide=false){return `<div class="print-info-i
 function renderPatientHeader(){const hasPatient=Boolean(patient.fullName); els.patientTrigger.classList.toggle("needs-patient",!hasPatient); els.patientNameDisplay.textContent=patient.fullName||"Add patient details"; const parts=[]; if(patient.dob) parts.push(formatDobLabel(patient.dob)); if(patient.patientId) parts.push(`ID ${patient.patientId}`); els.patientSubDisplay.textContent=parts.join(" · ")||"Click to add patient information"; els.patientTrigger.title=parts.join(" · ")||"Click to add patient details"}
 function renderVisitHeader(){els.visitDateDisplay.textContent=formatVisitDate(visit.date); els.visitDateSubDisplay.textContent="Click to change visit date"; els.dateTrigger.title="Click to change visit date"}
 function renderPrintSections(){
-  const age=calcAge(patient.dob);
   const fields=[
     ["Patient",patient.fullName||"Not set"],
-    ["Patient ID",patient.patientId||"—"],
     ["Visit date",formatVisitDate(visit.date)],
     ["Date of birth",patient.dob?formatInputDate(patient.dob):"—"],
-    ["Age",age!==null?`${age} years`:"—"],
     ["Dentition",activeDentition().label],
     ["Gender",patient.gender||"—"],
     ["Phone",patient.phone||"—"],
@@ -355,6 +353,8 @@ function renderDatePopover(){
   els.dateClearBtn.disabled=!target.allowClear;
   const selected=target.valueInput.value;
   const base=monthStartFromKey(datePicker.cursor);
+  const today=isoToday(),todayMonth=today.slice(0,7),todayYear=Number(today.slice(0,4));
+  els.dateNextBtn.disabled=datePicker.view==="day"?datePicker.cursor>=todayMonth:(datePicker.view==="month"?base.getFullYear()>=todayYear:(base.getFullYear()-(base.getFullYear()%12)+12)>todayYear);
   if(datePicker.view==="day"){
     els.dateTitleBtn.textContent=`${MONTHS_LONG[base.getMonth()]} ${base.getFullYear()}`;
     const first=new Date(base); const firstDay=(first.getDay()+6)%7;
@@ -367,19 +367,20 @@ function renderDatePopover(){
       if(cell.getMonth()!==base.getMonth()) classes.push("muted");
       if(sameDay(iso,selected)) classes.push("active");
       if(sameDay(iso,isoToday())) classes.push("today");
-      cells+=`<button class="${classes.join(" ")}" type="button" data-date-action="select-day" data-iso="${iso}">${cell.getDate()}</button>`;
+      const future=iso>today;if(future)classes.push("future");
+      cells+=`<button class="${classes.join(" ")}" type="button" data-date-action="select-day" data-iso="${iso}"${future?" disabled":""}>${cell.getDate()}</button>`;
     }
     els.dateView.innerHTML=`${cells}</div>`;
     return;
   }
   if(datePicker.view==="month"){
     els.dateTitleBtn.textContent=`${base.getFullYear()}`;
-    els.dateView.innerHTML=`<div class="date-months">${MONTHS.map((month,index)=>{const iso=buildIso(base.getFullYear(),index,1);const active=selected&&selected.slice(0,7)===iso.slice(0,7)?" active":"";return `<button class="date-grid-btn${active}" type="button" data-date-action="select-month" data-month="${index}">${month}</button>`}).join("")}</div>`;
+    els.dateView.innerHTML=`<div class="date-months">${MONTHS.map((month,index)=>{const iso=buildIso(base.getFullYear(),index,1);const active=selected&&selected.slice(0,7)===iso.slice(0,7)?" active":"",future=iso.slice(0,7)>todayMonth;return `<button class="date-grid-btn${active}${future?" future":""}" type="button" data-date-action="select-month" data-month="${index}"${future?" disabled":""}>${month}</button>`}).join("")}</div>`;
     return;
   }
   const startYear=base.getFullYear()-(base.getFullYear()%12);
   els.dateTitleBtn.textContent=`${startYear}–${startYear+11}`;
-  els.dateView.innerHTML=`<div class="date-years">${Array.from({length:12},(_,index)=>{const year=startYear+index;const active=selected&&selected.slice(0,4)===String(year)?" active":"";return `<button class="date-grid-btn${active}" type="button" data-date-action="select-year" data-year="${year}">${year}</button>`}).join("")}</div>`;
+  els.dateView.innerHTML=`<div class="date-years">${Array.from({length:12},(_,index)=>{const year=startYear+index,active=selected&&selected.slice(0,4)===String(year)?" active":"",future=year>todayYear;return `<button class="date-grid-btn${active}${future?" future":""}" type="button" data-date-action="select-year" data-year="${year}"${future?" disabled":""}>${year}</button>`}).join("")}</div>`;
 }
 function positionDatePopover(){
   if(!datePicker.open||!datePicker.anchor) return;
@@ -623,7 +624,17 @@ function saveDraft(){
   document.dispatchEvent(new CustomEvent("dental-chart:save-entries",{detail:{dentition:chartMode,entries:savedEntries}}));
   editingEntry=null; selection.multi=false; selection.teeth=[]; draft.tooth=null; draft.category="restoration"; draft.treatment="composite"; draft.view="occ"; draft.status="existing"; draft.layer="existing"; draft.surfaces=[]; draft.note=""; els.noteInput.value=""; renderAll();
 }
-function downloadPdf(){window.print()}
+function pdfFileName(){
+  const patientName=(patient.fullName||"Patient").trim().replace(/[<>:"/\\|?*\x00-\x1F]/g,"-").replace(/[. ]+$/g,"")||"Patient";
+  const visitDate=visit.date||isoToday();
+  return `${patientName}_${visitDate}`;
+}
+function downloadPdf(){
+  const previousTitle=document.title;
+  document.title=pdfFileName();
+  window.addEventListener("afterprint",()=>{document.title=previousTitle},{once:true});
+  window.print();
+}
 function pickCategory(c){draft.category=c; normalizeDraft(); renderAll()}
 function pickView(v){draft.view=v; normalizeDraft(); renderAll()}
 function pickTreatment(t){draft.treatment=t; draft.category=treatmentFor(t).category; normalizeDraft(); renderAll()}

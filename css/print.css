@@ -6,8 +6,11 @@
   .page{max-width:none;padding:0}
   .topbar,.contextbar{display:none!important}
   .sidebar,.topbar-actions{display:none!important}
+  #cloud-sync-badge,[id="cloud-sync-badge"]{display:none!important;visibility:hidden!important;opacity:0!important}
   .layout{display:block}
+  .chart-workspace{background:#fff!important;border-right:0!important}
   .chart-card {
+    margin:0!important;
     background: #fff;
     border: none !important;
     border-radius: 0;
@@ -20,18 +23,51 @@
     width:100%;
     zoom:.8;
   }
+  /* iOS Safari keeps narrow-screen media queries active while printing.
+     Reassert the desktop chart geometry so its mobile arch transforms cannot
+     leak into the PDF. */
+  .chart-stage-wrap{overflow:visible!important}
+  .chart-stage,.split-stage{min-width:720px!important;width:100%!important;overflow:visible!important;padding:16px!important;border-radius:20px!important}
+  .split-stage{display:grid!important;gap:16px!important}
   .split-group{
+    display:grid!important;
+    gap:0!important;
+    margin-top:0!important;
+    padding:16px 8px 12px!important;
+    border-radius:0!important;
     break-inside: avoid;
     page-break-inside: avoid;
   }
   .split-group.view-hidden{display:grid!important}
+  .split-group-head{display:grid!important;grid-template-columns:70px repeat(16,minmax(30px,1fr)) 70px!important;place-items:initial!important;padding:0 0 4px!important}
+  .split-group-head .split-status-label{grid-column:9 / span 2!important;justify-self:center!important;margin-bottom:0!important}
+  .split-stage .arch-grid,.split-stage .orientation-grid{grid-template-columns:70px minmax(0,1fr) 70px!important}
+  .split-stage .upper-grid{grid-template-rows:108px 58px 22px!important;padding-bottom:0!important}
+  .split-stage .lower-grid{grid-template-rows:22px 58px 108px!important;margin-top:0!important;padding-bottom:30px!important}
+  .split-stage .upper-grid .upper-label{grid-column:1!important;grid-row:1 / span 2!important;align-items:center!important}
+  .split-stage .lower-grid .lower-label{grid-column:1!important;grid-row:2 / span 2!important;align-items:center!important;justify-content:flex-start!important;transform:none!important}
+  .split-stage .arch-label-text{width:auto!important;margin:17px 0 10px!important;white-space:normal!important}
+  .split-stage .teeth-row,.split-stage .orientation-row{width:94%!important;margin-inline:auto!important;grid-template-columns:repeat(16,minmax(30px,1fr))!important}
+  .split-stage .upper-root-row,.split-stage .upper-crown-row,.split-stage .upper-number-row,
+  .split-stage .lower-root-row,.split-stage .lower-crown-row,.split-stage .lower-number-row{width:94%!important;margin-inline:auto!important}
+  .split-stage .tooth,.split-stage .number{transform:none!important}
+  .split-stage .upper-root-row .art-core{transform:scale(.59,-.59)!important}
+  .split-stage .lower-root-row .art-core{transform:scale(.59)!important}
+  .split-stage .upper-crown-row .art-core,.split-stage .lower-crown-row .art-core{transform:scale(.9)!important}
+  .split-stage .split-divider{transform:none!important}
   .chart-layer-switch{display:none!important}
   .print-page-one{break-after:page;page-break-after:always}
-  .entries-panel{padding:0;background:#fff;break-before:page;page-break-before:always}
+  .entries-panel{margin:0!important;padding:0;background:#fff;break-before:page;page-break-before:always}
   .entries-head h3.saved-entries-title{font-size:0}
   .entries-head h3.saved-entries-title::before{content:"Summary";font-size:16px}
   .entries-list{max-height:none;overflow:visible}
-  .entry-row{break-inside:avoid}
+  .entries-panel>.entries-head{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;min-height:96px!important;padding:18px 28px!important}
+  .entries-panel>.entries-list{padding:18px 28px 22px!important}
+  .entry-row{grid-template-columns:minmax(0,1fr)!important;gap:0!important;padding:0!important;break-inside:avoid;page-break-inside:avoid}
+  .entry-open{display:grid!important;grid-template-columns:52px minmax(0,1fr)!important;gap:12px!important;width:100%!important;padding:10px 12px!important}
+  .entry-preview{width:52px!important;height:40px!important}
+  .entry-text{display:grid!important;grid-template-columns:minmax(170px,1.15fr) minmax(180px,1fr)!important;grid-template-areas:"title meta" "note note"!important;column-gap:16px!important;row-gap:5px!important;width:100%!important;min-width:0!important;white-space:normal!important}
+  .entry-title,.entry-meta,.entry-note{font-size:12px!important;line-height:1.45!important;min-width:0!important;white-space:normal!important;word-break:normal!important;overflow-wrap:break-word!important}
   .entry-remove{display:none!important}
   .print-patient-card{padding:6px 0 8px!important;border:none!important;border-radius:0!important;box-shadow:none!important;margin-bottom:8px!important;background:#fff!important}
   .print-export-head{margin-bottom:6px}
@@ -51,4 +87,5 @@
   .chart-stage svg [stroke^="url(#gg"]{stroke:#c6beb2!important;opacity:.32!important}
   .chart-stage .surface-region{stroke-width:1.1!important}
   .print-patient-card,.print-note-card{display:block}
+  .print-note-card{background:#fff!important}
 }
