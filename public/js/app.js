@@ -469,11 +469,11 @@ function lowerCanineSVG(n,f){const id=`l${n}`;return`<svg viewBox="0 0 32 110" w
 function lowerPremolarSVG(n,f){const id=`l${n}`;return`<svg viewBox="0 0 36 96" width="36" height="96" filter="url(#ds${id})">${mkGrads(id,f)}<path d="M8,4 C6,9 4,18 4,26 C4,36 6,45 10,53 C12,58 15,60 18,61 C21,60 24,58 26,53 C30,45 32,36 32,26 C32,18 30,9 28,4 C25,1 22,0 18,0 C14,0 11,1 8,4 Z" fill="url(#cg${id})" ${WO}/><path d="M18,5 L18,60" fill="none" stroke="url(#gg${id})" stroke-width="1" opacity=".14"/><ellipse cx="18" cy="61" rx="10" ry="2.3" fill="#d7ae80" opacity=".56"/><path d="M13,59 C11,71 11,81 12,89 C13,94 15,96 18,96 C21,96 23,94 24,89 C25,81 25,71 23,59 Z" fill="url(#rg${id})" ${RO}/></svg>`}
 function lowerMolarSVG(n,f,wis){const id=`l${n}`,w=wis?48:52,c=w/2;return`<svg viewBox="0 0 ${w} 106" width="${w}" height="106" filter="url(#ds${id})">${mkGrads(id,f)}<path d="M6,4 C3,9 2,20 2,30 C2,40 4,50 8,58 C12,65 16,67 ${c},68 C${w-16},67 ${w-12},65 ${w-8},58 C${w-4},50 ${w-2},40 ${w-2},30 C${w-2},20 ${w-3},9 ${w-6},4 C${w-10},1 ${w-14},0 ${c},0 C14,0 10,1 6,4 Z" fill="url(#cg${id})" ${WO}/><path d="M${c},5 L${c},66" fill="none" stroke="url(#gg${id})" stroke-width="1" opacity=".15"/><path d="M9,28 L${w-9},28" fill="none" stroke="url(#gg${id})" stroke-width=".9" opacity=".1"/><ellipse cx="${c}" cy="68" rx="${c-6}" ry="2.6" fill="#d7ae80" opacity=".58"/><path d="M8,66 C6,79 6,89 7,97 C8,102 12,106 16,106 L20,106 C22,106 23,102 23,97 C22,89 21,79 20,66 Z" fill="url(#rg${id})" ${RO}/><path d="M${w-8},66 C${w-6},79 ${w-6},89 ${w-7},97 C${w-8},102 ${w-12},106 ${w-16},106 L${w-20},106 C${w-22},106 ${w-23},102 ${w-23},97 C${w-22},89 ${w-21},79 ${w-20},66 Z" fill="url(#rg${id})" ${RO}/></svg>`}
 function missingSVG(n,v){const d=v==="front"?{width:toothW(n),height:toothH(n)}:crownDims(n);return`<div class="missing-box" style="width:${d.width}px;height:${d.height}px">X</div>`}
-function hasPhotoTooth(n){return chartMode==="permanent"||(chartMode==="primary"&&PRIMARY_PHOTO_TEETH.has(n))}
+function hasPhotoTooth(n){return !isPrimaryTooth(n)||PRIMARY_PHOTO_TEETH.has(n)}
 function photoToothSVG(n,view){
   const dims=view==="occ"?crownDims(n):{width:toothW(n),height:toothH(n)};
   const file=view==="occ"?"crown":"root";
-  const folder=chartMode==="primary"?"primary":"permanent";
+  const folder=isPrimaryTooth(n)?"primary":"permanent";
   const assetName=folder==="permanent"&&n===12&&file==="root"?"12-root.PNG":`${n}-${file}.png`;
   const image=`<image href="./assets/images/teeth/${folder}/${assetName}" x="0" y="0" width="${dims.width}" height="${dims.height}" preserveAspectRatio="none"/>`;
   const content=view==="front"&&isUpper(n)?`<g transform="translate(0 ${dims.height}) scale(1 -1)">${image}</g>`:image;
