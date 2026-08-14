@@ -46,7 +46,7 @@ export default function App() {
       {view === "records" ? <PatientRecordsPage onOpenRecord={openRecord} /> : <DentalChartPage />}
       {view === "review" && selectedRecord && document.getElementById("record-review-summary-root") && createPortal(
         <section className="record-review-panel" aria-label="Patient referral details">
-          <div className="record-review-toolbar"><button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button><button className="record-review-download" type="button" onClick={() => document.getElementById("download-pdf-btn")?.click()}><span aria-hidden="true">⇩</span> Download PDF</button></div>
+          <div className="record-review-toolbar"><button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button><button className="record-review-download" type="button" onClick={() => document.getElementById("download-pdf-btn")?.click()}><svg className="record-review-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5" /></svg> Download PDF</button></div>
           <div className="record-review-summary">
             <div><small>Name</small><strong>{String(selectedRecord.patient.name || "—")}</strong></div>
             <div><small>Date of birth</small><strong>{selectedRecord.patient.dob ? new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${selectedRecord.patient.dob}T00:00:00`)) : "—"}</strong></div>
