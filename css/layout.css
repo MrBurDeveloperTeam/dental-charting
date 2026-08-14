@@ -292,12 +292,12 @@
   .entries-head{margin-bottom:8px}
   .entries-head h3{font-size:14px}
   .entries-head span{font-size:10px}
-  .entry-row{gap:4px;padding-right:4px}
+  .entry-row{gap:4px;padding-right:4px;padding-left:0}
   .entry-open{grid-template-columns:38px minmax(0,1fr);gap:7px;padding:7px 4px}
   .entry-preview{width:36px;height:32px}
   .entry-text{grid-template-columns:1fr;grid-template-areas:"title" "meta" "note";gap:2px;white-space:normal}
   .entry-title,.entry-meta,.entry-note{font-size:10px;line-height:1.25}
-  .entry-remove{display:grid;place-items:center;width:36px;height:36px;min-width:36px;padding:0;border-radius:6px}
+  .entry-remove{display:none!important}
   .entry-remove-text{display:none}
   .entry-remove-icon{display:block}
   .sidebar{padding:15px}
@@ -443,7 +443,7 @@ input[type="reset"],
   .meta-card{padding-inline:18px;gap:12px}
   .contextbar>.topbar-actions{padding-inline:16px}
   .contextbar>.topbar-actions .btn{padding-inline:15px}
-  .contextbar>.topbar-actions #clear-current-btn,.contextbar>.topbar-actions #download-pdf-btn{width:170px;min-width:170px}
+  .contextbar>.topbar-actions #finish-visit-btn,.contextbar>.topbar-actions #download-pdf-btn{width:170px;min-width:170px}
 }
 
 /* Continue the Date divider into the chart/sidebar divider on wide screens. */
@@ -492,7 +492,7 @@ input[type="reset"],
 
   .contextbar>.topbar-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;width:min(100%,300px);margin-top:6px;padding:6px 0 0;justify-self:start}
   .contextbar>.topbar-actions .btn,.contextbar>.topbar-actions .pdf-icon-btn{width:100%;min-width:0;height:38px;padding:0 9px;gap:6px;font-size:11px;line-height:1}
-  .contextbar>.topbar-actions #clear-current-btn,.contextbar>.topbar-actions #download-pdf-btn{width:100%;min-width:0}
+  .contextbar>.topbar-actions #finish-visit-btn,.contextbar>.topbar-actions #download-pdf-btn{width:100%;min-width:0}
   .context-action-icon{width:16px;height:16px}
 }
 
@@ -518,6 +518,7 @@ input[type="reset"],
 }
 
 @media (max-width:600px){
+  .finish-visit-modal,.delete-entry-modal{width:calc(100% - 20px)}
   .date-modal-card{width:calc(100% - 20px);border-radius:16px}
   .date-modal-card>.modal-head{align-items:flex-start;padding:20px 20px 12px}
   .date-modal-card>.modal-head h3{font-size:18px;line-height:1.2}
@@ -525,7 +526,7 @@ input[type="reset"],
   .date-modal-card>.modal-head .icon-btn{width:32px;height:32px}
   .date-modal-card>.modal-head .icon-btn::before{font-size:24px}
   .date-modal-card .patient-grid{padding:6px 20px 20px}
-  .date-modal-card .patient-field{gap:7px}
+  .date-modal-card .patient-field{gap:5px}
   .date-modal-card .patient-field label{font-size:10px}
   .date-modal-card .date-field-shell{grid-template-columns:minmax(0,1fr) 46px;gap:8px}
   .date-modal-card .date-text-input{min-height:46px;padding:10px 13px;border-radius:11px;font-size:13px}
@@ -536,6 +537,7 @@ input[type="reset"],
 }
 
 @media (max-width:360px){
+  .finish-visit-modal,.delete-entry-modal{width:calc(100% - 12px)}
   .date-modal-card{width:calc(100% - 12px)}
   .date-modal-card>.modal-head{padding-inline:16px}
   .date-modal-card .patient-grid{padding-inline:16px}
@@ -551,7 +553,14 @@ input[type="reset"],
   .split-stage{padding-right:0;padding-left:0}
 
   .entries-panel{margin:16px 8px 0;padding:0;border-radius:14px}
-  .entries-panel>.entries-head{min-height:56px;padding:0 18px}
+  .entries-panel>.entries-head{display:grid;grid-template-columns:minmax(0,1fr);gap:10px;min-height:0;padding:14px 18px}
+  .entries-panel>.entries-head .saved-entries-title{white-space:nowrap;font-size:16px}
+  .entries-panel>.entries-head .entries-bulk-actions{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;width:100%;padding-left:0;align-items:center}
+  .entries-panel>.entries-head .entries-select-all{white-space:nowrap}
+  .entries-panel>.entries-head .entries-select-all input,.entries-panel .entry-checkbox{width:14px;height:14px;min-width:14px;min-height:14px}
+  .entries-panel .entry-row{grid-template-columns:16px minmax(0,1fr)}
+  .entries-panel>.entries-head .entries-delete-selected{justify-self:start;white-space:nowrap}
+  .entries-panel>.entries-head #entries-count{justify-self:end;white-space:nowrap}
   .entries-panel>.entries-list{padding:12px 18px 16px}
   .entries-panel .entry-empty{padding:12px}
 }
@@ -559,6 +568,8 @@ input[type="reset"],
 @media (max-width:360px){
   .entries-panel{margin-inline:6px}
   .entries-panel>.entries-head{padding-inline:14px}
+  .entries-panel>.entries-head .entries-bulk-actions{grid-template-columns:auto minmax(0,1fr);gap:7px;padding-left:0}
+  .entries-panel>.entries-head #entries-count{grid-column:1 / -1;justify-self:end}
   .entries-panel>.entries-list{padding:10px 14px 14px}
 }
 
@@ -582,6 +593,8 @@ input[type="reset"],
   .patient-modal .patient-section-title{gap:9px;margin-top:6px;font-size:10px;letter-spacing:.11em}
   .patient-modal .patient-field{gap:4px}
   .patient-modal .patient-field label{font-size:9px;line-height:1.25}
+  .patient-modal .patient-field.patient-guardian-email-toggle label{display:grid;grid-template-columns:16px minmax(0,1fr);align-items:start;gap:8px;width:100%;font-size:10px;line-height:1.35}
+  .patient-modal .patient-field.patient-guardian-email-toggle input[type="checkbox"]{width:16px;height:16px;min-height:16px;margin:0;padding:0;align-self:start}
   .patient-modal .patient-field input,
   .patient-modal .patient-field textarea,
   .patient-modal .patient-field select,

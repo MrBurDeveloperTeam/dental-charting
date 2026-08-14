@@ -128,7 +128,7 @@ async function establishClinicSession() {
   };
 }
 
-async function getClinicSession() {
+export async function getClinicSession() {
   if (clinicSession && clinicSession.expiresAt > Date.now()) return clinicSession;
   if (!sessionPromise) {
     sessionPromise = establishClinicSession()

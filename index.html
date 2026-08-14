@@ -67,9 +67,10 @@
         </button>
       </div>
       <div class="topbar-actions">
-        <button class="btn secondary" type="button" id="clear-current-btn">
-          <svg class="context-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5"/></svg>
-          <span>Clear Page</span>
+        <button id="clear-current-btn" type="button" hidden aria-hidden="true"></button>
+        <button class="btn finish-visit-btn" type="button" id="finish-visit-btn">
+          <svg class="context-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+          <span>Finish Visit</span>
         </button>
         <button class="btn primary pdf-icon-btn" type="button" id="download-pdf-btn" aria-label="Download PDF" title="Download PDF">
           <svg class="context-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5"/></svg>
@@ -95,7 +96,7 @@
         <div>
           <h2>Clinical Chart</h2>
           <p>Mouth view showing the root profile and crown surface for every tooth.</p>
-          <p class="primary-chart-hint"><strong>Primary dentition:</strong> Double-click a primary tooth to swap it with its permanent successor. Double-click a faded 6/7 position to add the molar, or an active 6/7 molar to hide it.</p>
+          <p class="primary-chart-hint"><strong>Primary dentition:</strong> <span class="primary-hint-desktop">Double-click a primary tooth to swap it with its permanent successor. Double-click a faded 6/7 position to add the molar, or an active 6/7 molar to hide it.</span><span class="primary-hint-mobile">Tap a faded permanent 6/7 molar to activate it. In the tooth panel, tap Deactivate permanent molar to hide it again.</span></p>
         </div>
         <div class="chart-head-controls">
           <div class="chart-view-key" aria-label="Chart view guide">
@@ -203,7 +204,11 @@
       <div class="entries-panel">
         <div class="entries-head">
           <h3 class="saved-entries-title">Saved Entries</h3>
-          <span id="entries-count">0 items</span>
+          <div class="entries-bulk-actions">
+            <label class="entries-select-all"><input id="entries-select-all" type="checkbox"> Select all</label>
+            <button class="entries-delete-selected" id="entries-delete-selected" type="button" disabled>Delete selected</button>
+            <span id="entries-count">0 items</span>
+          </div>
         </div>
         <div class="entries-list" id="entries-list"></div>
       </div>
@@ -356,6 +361,32 @@
 
 <div id="react-root"></div>
 
+<div class="modal-backdrop" id="finish-visit-modal" aria-hidden="true">
+  <div class="modal finish-visit-modal confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="finish-visit-title">
+    <div class="modal-head">
+      <div><h3 id="finish-visit-title">Finish this visit?</h3><p>Saved chart entries will remain in the patient record. You can then select the next patient.</p></div>
+      <button class="icon-btn" type="button" id="finish-visit-close" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" type="button" id="finish-visit-cancel">Cancel</button>
+      <button class="btn finish-visit-btn" type="button" id="finish-visit-confirm">Finish Visit</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="delete-entry-modal" aria-hidden="true">
+  <div class="modal delete-entry-modal confirmation-modal" role="dialog" aria-modal="true" aria-labelledby="delete-entry-title">
+    <div class="modal-head">
+      <div><h3 id="delete-entry-title">Delete chart entry?</h3><p id="delete-entry-message">This entry will be permanently removed. This cannot be undone.</p></div>
+      <button class="icon-btn" type="button" id="delete-entry-close" aria-label="Close">&#10005;</button>
+    </div>
+    <div class="modal-actions">
+      <button class="btn secondary" type="button" id="delete-entry-cancel">Cancel</button>
+      <button class="btn delete-confirm-btn" type="button" id="delete-entry-confirm">Delete</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="date-modal" aria-hidden="true">
   <div class="modal date-modal-card" role="dialog" aria-modal="true" aria-labelledby="date-modal-title">
     <div class="modal-head">
@@ -370,10 +401,11 @@
         <div class="patient-field full">
           <label for="visit-date-text">Visit date</label>
           <div class="date-field-shell">
-            <input class="date-text-input" id="visit-date-text" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off">
+            <input class="date-text-input" id="visit-date-text" type="text" inputmode="numeric" placeholder="DD/MM/YYYY" autocomplete="off" aria-describedby="visit-date-error">
             <button class="date-picker-btn" id="visit-date-trigger" type="button" aria-label="Open visit date calendar">📅</button>
             <input id="visit-date-input" name="visitDate" type="hidden">
           </div>
+          <p class="date-field-error" id="visit-date-error" role="alert" hidden>*Enter a valid date as DD/MM/YYYY, example: 14/08/2026</p>
         </div>
       </div>
       <div class="modal-actions">
@@ -442,7 +474,7 @@
 
 <script type="module" src="/src/main.tsx"></script>
 <script defer src="./js/tooth-silhouettes.js"></script>
-<script defer src="./js/app.js?v=12"></script>
-<script defer src="./js/supabaseSync.js?v=3"></script>
+<script defer src="./js/app.js?v=20"></script>
+<script defer src="./js/supabaseSync.js?v=5"></script>
 </body>
 </html>

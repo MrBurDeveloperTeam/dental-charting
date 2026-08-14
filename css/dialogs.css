@@ -93,6 +93,11 @@
 .patient-search-bar .btn.primary::before{content:'';width:18px;height:18px;margin-right:8px;display:inline-block;vertical-align:-4px;background:center/18px 18px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-4-4'/%3E%3C/svg%3E")}
 .patient-modal .date-picker-btn{font-size:0!important;background:#f5f7fa center/20px 20px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231a2332' stroke-width='2'%3E%3Crect x='3' y='5' width='18' height='16' rx='2'/%3E%3Cpath d='M16 3v4M8 3v4M3 10h18'/%3E%3C/svg%3E")}
 .date-modal-card{width:min(560px,100%);max-height:calc(100vh - 36px);padding:0;overflow:hidden;border:1px solid rgba(26,120,232,.1);border-radius:20px;background:#fff;box-shadow:0 24px 64px rgba(15,23,42,.3);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.finish-visit-modal,.delete-entry-modal{width:min(560px,100%)}
+.confirmation-modal>.modal-head .icon-btn,.date-modal-card>.modal-head .icon-btn{transition:background-color .16s ease,color .16s ease,transform .16s ease,box-shadow .16s ease}
+.confirmation-modal>.modal-head .icon-btn:hover,.date-modal-card>.modal-head .icon-btn:hover{border-color:#d6e2f0;background:#eef4fb;color:#334155;box-shadow:0 4px 12px rgba(15,23,42,.1);transform:translateY(-1px)}
+.delete-confirm-btn{border-color:#dc2626;background:#dc2626;color:#fff;box-shadow:0 7px 16px rgba(220,38,38,.2)}
+.delete-confirm-btn:hover{border-color:#b91c1c;background:#b91c1c;box-shadow:0 8px 18px rgba(220,38,38,.28);transform:translateY(-1px)}
 .date-modal-card>.modal-head{align-items:flex-start;margin:0;padding:24px 28px 14px}
 .date-modal-card>.modal-head h3{font-size:21px;font-weight:700;line-height:1.25;letter-spacing:-.015em}
 .date-modal-card>.modal-head p{margin-top:6px;font-size:13px;font-weight:400;line-height:1.45;letter-spacing:-.005em;color:#8ba0bb}
@@ -112,6 +117,8 @@
 .date-text-input{width:100%;min-height:48px;padding:12px 14px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink);font:inherit;font-size:16px;font-weight:700}
 .date-text-input::placeholder{color:var(--muted);font-weight:600}
 .date-text-input.invalid{border-color:#ef4444;box-shadow:0 0 0 1px rgba(239,68,68,.18)}
+.date-modal-card p#visit-date-error.date-field-error{margin:-3px 0 0!important;color:#dc2626!important;font-size:12px;font-weight:700;line-height:1.35}
+.date-field-error[hidden]{display:none}
 .date-picker-btn{width:46px;height:46px;border:1px solid var(--line);border-radius:5px;background:#fff;color:var(--ink);font:inherit;font-size:18px;display:grid;place-items:center;cursor:pointer}
 .date-popover{position:fixed;z-index:140;width:min(420px,calc(100vw - 28px));border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 28px 70px rgba(15,23,42,.24);padding:18px}
 .date-popover[hidden]{display:none}
