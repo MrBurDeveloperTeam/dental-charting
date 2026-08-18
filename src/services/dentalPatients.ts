@@ -172,6 +172,22 @@ export async function searchDentalPatients(query = "") {
   return data || [];
 }
 
+export async function getDentalPatientById(patientId: string) {
+  if (!uuidPattern.test(patientId)) throw new Error("The patient link is invalid.");
+
+  const supabase = getSupabaseClient();
+  const { clinicId } = await getClinicSession();
+  const { data, error } = await supabase
+    .from("apt_patients")
+    .select("*")
+    .eq("clinic_id", clinicId)
+    .eq("id", patientId)
+    .maybeSingle();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function listDentalDentists(): Promise<DentalDentist[]> {
   const supabase = getSupabaseClient();
   const { clinicId } = await getClinicSession();
@@ -205,6 +221,7 @@ export async function createDentalPatient(input: PatientInput) {
 
 export const dentalPatients = {
   search: searchDentalPatients,
+  getById: getDentalPatientById,
   create: createDentalPatient,
   listDentists: listDentalDentists,
 };

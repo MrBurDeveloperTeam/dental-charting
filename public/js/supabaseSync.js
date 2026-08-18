@@ -427,6 +427,32 @@
     pullDatabaseChart();
   }
 
+  async function openLinkedPatient() {
+    const params = new URLSearchParams(window.location.search);
+    const patientId = params.get("patient_id");
+    if (!patientId || params.get("record") === "latest") return false;
+
+    setBadge("Cloud: opening patient…", "#1d4ed8");
+    try {
+      if (!window.dentalPatients) throw new Error("Dental patient access is not ready. Refresh and try again.");
+      const linkedPatient = await window.dentalPatients.getById(patientId);
+      if (!linkedPatient) throw new Error("This patient was not found in your clinic.");
+
+      const visitDate = params.get("visit_date");
+      if (/^\d{4}-\d{2}-\d{2}$/.test(visitDate || "")) {
+        visit.date = visitDate;
+        if (typeof persistVisit === "function") persistVisit();
+      }
+
+      selectExistingPatient(linkedPatient);
+      return true;
+    } catch (error) {
+      setBadge("Cloud: patient link failed", "#b91c1c");
+      window.alert(error?.message || "Unable to open the linked patient.");
+      return false;
+    }
+  }
+
   function openPatientRecord(event) {
     const detail = event.detail || {};
     const selected = normalizePatient(detail.patient || {});
@@ -436,9 +462,11 @@
     }
     Object.assign(patient, selected);
     visit.date = detail.visitDate;
+    chartMode = detail.dentition === "Primary" ? "primary" : "permanent";
     clearChartForPatientSelection();
     if (typeof persistPatient === "function") persistPatient();
     if (typeof persistVisit === "function") persistVisit();
+    if (typeof persistChartMode === "function") persistChartMode();
     if (typeof renderAll === "function") renderAll();
     pullDatabaseChart();
   }
@@ -579,8 +607,9 @@
   }
 
   /* ================= INIT ================= */
-  function init() {
+  async function init() {
     attachTriggers();
+    if (await openLinkedPatient()) return;
     if (currentPatientId()) {
       pullDatabaseChart();
     } else {
