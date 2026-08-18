@@ -33,6 +33,10 @@ const STORAGE_PATIENT_KEY="dental-charting-2-patient";
 const STORAGE_VISIT_KEY="dental-charting-2-visit";
 const STORAGE_MODE_KEY="dental-charting-2-mode";
 const STORAGE_TREATMENTS_KEY="dental-charting-2-treatment-methods";
+// A browser refresh starts a new charting session. Patient and visit context
+// must come from a fresh selection or an explicit Appointment deep link.
+localStorage.removeItem(STORAGE_PATIENT_KEY);
+localStorage.removeItem(STORAGE_VISIT_KEY);
 const PATIENT_TEXT_FIELDS=["fullName","dob","patientId","idNumber","gender","taxNumber","phone","email","guardianName","guardianRelationship","address","emergencyContactName","emergencyContactPhone","allergies","medicalConditions","medications","source","preferredDentist","insurance","notes"];
 const BUILTIN_TREATMENT_IDS=new Set(Object.keys(TREATMENTS));
 const TREATMENT_ICON_OPTIONS=[{id:"filling",label:"Filling square"},{id:"circle",label:"Circle"},{id:"seal",label:"Sealant curve"},{id:"cross",label:"Cross"},{id:"bolt",label:"Fracture bolt"},{id:"canal",label:"Root canal"},{id:"crown",label:"Crown"},{id:"veneer",label:"Veneer"},{id:"implant",label:"Implant"}];
