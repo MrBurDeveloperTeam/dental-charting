@@ -69,13 +69,13 @@
       </div>
       <div class="topbar-actions">
         <button id="clear-current-btn" type="button" hidden aria-hidden="true"></button>
-        <button class="btn finish-visit-btn" type="button" id="finish-visit-btn">
-          <svg class="context-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
-          <span>Finish Visit</span>
-        </button>
         <button class="btn primary pdf-icon-btn" type="button" id="download-pdf-btn" aria-label="Download PDF" title="Download PDF">
           <svg class="context-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5"/></svg>
           <span>Download PDF</span>
+        </button>
+        <button class="btn finish-visit-btn" type="button" id="finish-visit-btn">
+          <svg class="context-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6"/></svg>
+          <span>Finish Visit</span>
         </button>
       </div>
     </section>
@@ -95,7 +95,7 @@
 
   <div class="layout">
     <section class="chart-workspace">
-      <div class="chart-head">
+  <div class="chart-head">
         <div>
           <h2>Clinical Chart</h2>
           <p>Mouth view showing the root profile and crown surface for every tooth.</p>
@@ -448,11 +448,10 @@
     <nav class="mobile-tooth-navigation" aria-label="Move between teeth">
       <button class="mobile-tooth-nav-btn" type="button" id="mobile-tooth-prev-btn">
         <span aria-hidden="true">&#8592;</span>
-        <small id="mobile-tooth-prev-number">Previous</small>
+        <small id="mobile-tooth-prev-number">Previous tooth</small>
       </button>
-      <span class="mobile-tooth-nav-hint">Wrong tooth?<br>Move left or right</span>
       <button class="mobile-tooth-nav-btn" type="button" id="mobile-tooth-next-btn">
-        <small id="mobile-tooth-next-number">Next</small>
+        <small id="mobile-tooth-next-number">Next tooth</small>
         <span aria-hidden="true">&#8594;</span>
       </button>
     </nav>
