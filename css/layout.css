@@ -1,3 +1,20 @@
+/* Desktop: keep the editor in place and scroll only the chart column. */
+@media (min-width:1301px){
+  body:not(.patient-records-view):not(.patient-record-review) .layout{
+    height:calc(100dvh - 147px);
+    min-height:0;
+    overflow:hidden;
+  }
+
+  body:not(.patient-records-view):not(.patient-record-review) .chart-workspace{
+    height:100%;
+    min-height:0;
+    overflow-x:hidden;
+    overflow-y:auto;
+    overscroll-behavior-y:contain;
+  }
+}
+
 @media (max-width:1300px){
   .layout{grid-template-columns:1fr; padding: 0px;}
   .chart-workspace{border-right:0;padding-bottom:24px}
