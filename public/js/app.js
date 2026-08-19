@@ -813,8 +813,8 @@ function renderMobileToothModal(){
   const neighbors=mobileToothNeighbors(draft.tooth);
   mobileToothEls.prev.disabled=!neighbors.previous;
   mobileToothEls.next.disabled=!neighbors.next;
-  mobileToothEls.prevNumber.textContent=neighbors.previous?`Tooth ${neighbors.previous}`:"Start";
-  mobileToothEls.nextNumber.textContent=neighbors.next?`Tooth ${neighbors.next}`:"End";
+  mobileToothEls.prevNumber.textContent="Previous tooth";
+  mobileToothEls.nextNumber.textContent="Next tooth";
   mobileToothEls.prev.setAttribute("aria-label",neighbors.previous?`Select tooth ${neighbors.previous}, to the left`:`No tooth to the left`);
   mobileToothEls.next.setAttribute("aria-label",neighbors.next?`Select tooth ${neighbors.next}, to the right`:`No tooth to the right`);
   const viewLabel=draft.view==="occ"?"Crown":"Root";
