@@ -103,3 +103,7 @@ body{
 #clear-current-btn:hover{color:#dc2626;border-color:#fca5a5;background:#fff5f5;box-shadow:0 4px 12px rgba(220,38,38,.06);transform:translateY(-1px)}
 #download-pdf-btn:hover{background:#1565c0;box-shadow:0 8px 18px rgba(26,120,232,.3);transform:translateY(-1px)}
 .btn:focus-visible,.chip:focus-visible,.dentition-btn:focus-visible,.meta-card:focus-visible,.surface-chip:focus-visible{outline:3px solid rgba(26,120,232,.25);outline-offset:2px}
+/* Hide the cloud synchronization status badge on all devices */
+#cloud-sync-badge {
+  display: none !important;
+}

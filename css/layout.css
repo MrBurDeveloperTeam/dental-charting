@@ -613,3 +613,83 @@ input[type="reset"],
   .patient-search-bar{grid-template-columns:minmax(0,1fr) 88px}
   .patient-search-bar .btn.primary{width:88px;min-width:88px;padding-inline:7px;font-size:10px}
 }
+
+/*
+ * Desktop clinical-chart layout
+ * Header spans both columns.
+ * Dental chart remains on the left and editor sidebar on the right.
+ */
+@media (min-width: 1101px) {
+  .layout {
+    display: grid;
+    grid-template-columns:
+      minmax(0, 58fr)
+      minmax(460px, 42fr);
+    grid-template-areas:
+      "chart-header chart-header"
+      "chart-workspace chart-sidebar";
+    align-items: stretch;
+    gap: 0;
+    padding-bottom: 28px;
+  }
+
+  .layout > .chart-head {
+    grid-area: chart-header;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .layout > .chart-workspace {
+    grid-area: chart-workspace;
+    min-width: 0;
+    border-right: 0;
+  }
+
+  .layout > .sidebar {
+    grid-area: chart-sidebar;
+    min-width: 0;
+    height: auto;
+    margin: 24px 16px 0 0;
+    padding: 24px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--panel);
+  }
+
+  .chart-card {
+    border-radius: 20px;
+  }
+
+  /* The header was moved outside .chart-workspace, so preserve its locked state. */
+  .layout:has(.chart-workspace.chart-locked) .chart-layer-switch {
+    pointer-events: none;
+    opacity: 0.5;
+  }
+}
+
+@media (min-width: 601px) and (max-width: 1100px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "chart-header"
+      "chart-workspace"
+      "chart-sidebar";
+  }
+
+  .layout > .chart-head {
+    grid-area: chart-header;
+  }
+
+  .layout > .chart-workspace {
+    grid-area: chart-workspace;
+  }
+
+  .layout > .sidebar {
+    grid-area: chart-sidebar;
+    height: auto;
+    margin: 16px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+  }
+}

@@ -194,3 +194,27 @@
 .rct-lines{position:absolute;inset:0;pointer-events:none}
 .rct-lines span{position:absolute;width:5px;border-radius:999px;background:linear-gradient(180deg,#ff9d94 0%,#ff5a4f 45%,#d9322a 100%);box-shadow:0 0 14px rgba(255,90,79,.6)}
 .missing-box{display:flex;align-items:center;justify-content:center;border:2px dashed rgba(255,255,255,.28);border-radius:14px;color:rgba(255,255,255,.68);font-size:16px;font-weight:700;background:rgba(255,255,255,.04)}
+/*
+ * Touch devices only:
+ * Prevent tapped teeth from remaining enlarged and hide tooth tooltips.
+ * Desktop and laptop hover remains unchanged regardless of screen width.
+ */
+@media (hover: none) and (pointer: coarse) {
+  .tooth:hover .tooth-art,
+  .tooth.ghost:hover .tooth-art {
+    transform: none;
+    filter: none;
+  }
+
+  .tooth.has-tooltip::before,
+  .tooth.has-tooltip::after {
+    display: none;
+    content: none;
+  }
+
+  .surface-region:hover {
+    stroke-width: 1;
+    filter: none;
+    fill-opacity: 0;
+  }
+}
