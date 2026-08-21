@@ -178,6 +178,31 @@
   }
 }
 
+/* Keep each separator attached to the detail before it when lines wrap. */
+.record-review-identity-details {
+  gap: 6px 10px;
+}
+
+.record-review-identity-details > span {
+  display: inline-flex;
+  align-items: center;
+}
+
+.record-review-identity-details > span + span {
+  margin-left: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.record-review-identity-details > span:not(:last-child)::after {
+  content: "";
+  width: 1px;
+  height: 1.2em;
+  margin-left: 10px;
+  flex: 0 0 1px;
+  background: #cdd9e7;
+}
+
 /* Keep the new card wrapper independent from the legacy summary-cell rule. */
 .record-review-summary > .record-review-cards {
   display: grid;
