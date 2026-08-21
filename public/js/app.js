@@ -1005,6 +1005,26 @@ function wholeStatusOverlaySVG(n, v, treatment, status) {
     `;
   }
 
+  // Existing Crown is outline-only: keep the natural tooth visible underneath.
+  if (treatment === "crown") {
+    const stroke = darken(COLORS[treatment], 14);
+    const paths = surfaceClipPath(n, v).replace(
+      /<path /g,
+      `<path fill="none" stroke="${stroke}" stroke-width="1.8" `
+    );
+
+    return `
+      <svg
+        class="surface-svg"
+        width="${dims.width}"
+        height="${dims.height}"
+        viewBox="0 0 ${dims.width} ${dims.height}"
+      >
+        ${paths}
+      </svg>
+    `;
+  }
+
   // Existing treatments use the standard outlined/line appearance.
   const fill = lighten(COLORS[treatment], 18);
   const stroke = darken(COLORS[treatment], 14);

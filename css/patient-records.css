@@ -8,7 +8,7 @@
 .patient-record-date-range{display:grid;grid-template-columns:1fr 1fr;gap:10px}.patient-record-date-range label{display:grid;gap:5px;color:#73859b;font-size:10px;font-weight:750;text-transform:uppercase}.patient-record-date-range input{width:100%;min-width:0;height:40px;padding:0 9px;border:1px solid #d4e1f1;border-radius:9px;background:#fff;color:#34465d;font:inherit;font-size:12px}.patient-record-filter-error{margin:8px 0 0;color:#c0362c;font-size:11px;line-height:1.4}
 .patient-record-table-card{overflow:hidden;border:1px solid rgba(26,120,232,.14);border-radius:17px;background:#fff;box-shadow:0 6px 24px rgba(18,35,57,.06)}.patient-record-table-scroll{overflow-x:auto}.patient-record-table{width:100%;min-width:1180px;border-collapse:collapse}.patient-record-table th{padding:15px 18px;border-bottom:1px solid #dde8f4;background:#f6f9fc;text-align:left;color:#8193a8;font-size:11px;text-transform:uppercase;letter-spacing:.06em;white-space:nowrap}.patient-record-table th button{display:flex;align-items:center;gap:6px;padding:0;border:0;background:none;color:inherit;font:inherit;text-transform:inherit;letter-spacing:inherit;cursor:pointer}.patient-record-table th button.active{color:var(--primary)}.patient-record-table td{padding:17px 18px;border-bottom:1px solid #edf2f7;color:#51627a;font-size:13px}.patient-record-table tbody tr{cursor:pointer;transition:background .14s}.patient-record-table tbody tr:hover,.patient-record-table tbody tr:focus{outline:0;background:#f5f9ff}.patient-record-table td small{display:block;margin-top:4px;color:#8b9aae}.patient-record-table td em{color:#9aa9bb;font-style:normal}.patient-record-person{display:flex;align-items:center;gap:11px;white-space:nowrap}.patient-record-person>span{display:grid;place-items:center;width:39px;height:39px;border-radius:50%;background:linear-gradient(135deg,#42a5f5,#1565c0);color:#fff;font-size:12px;font-weight:800}.patient-record-person strong{color:#1a2332}.patient-record-statuses{display:flex;gap:5px;flex-wrap:wrap}.patient-record-statuses span{padding:4px 9px;border-radius:999px;font-size:10px;font-weight:800}.patient-record-statuses .status-existing{background:#e6f6ef;color:#18775a}.patient-record-statuses .status-planned{background:#e7f1ff;color:#1767b8}.patient-record-statuses .status-watch{background:#fff2dc;color:#a36112}.patient-record-chevron{color:var(--primary)!important;font-size:23px!important}.patient-record-empty{height:220px;text-align:center;color:#8193a8!important;cursor:default}.patient-record-empty.error{color:#b42318!important}
 .patient-record-review .layout{grid-template-columns:minmax(0,1fr)}.patient-record-review .layout>.sidebar,.patient-record-review .contextbar,.patient-record-review #finish-visit-btn,.patient-record-review .mobile-entry-trigger,.patient-record-review .mobile-entry-hint,.patient-record-review .entries-bulk-actions,.patient-record-review .entry-remove,.patient-record-review .entry-checkbox,.patient-record-review .chart-head{display:none!important}.patient-record-review .chart-workspace{display:grid;grid-template-columns:minmax(680px,1.55fr) minmax(440px,1fr);gap:18px;align-items:stretch;padding:18px;background:#f0f4fb;border-right:0}.patient-record-review .chart-card{grid-column:1;margin:0}.patient-record-review .entries-panel{grid-column:2;grid-row:1;display:flex;flex-direction:column;height:100%;margin:0;max-height:none}.patient-record-review .entries-panel>.entries-list{flex:1;align-content:start;max-height:none;overflow:auto}.patient-record-review .print-note-card{grid-column:2;margin:0}.patient-record-review .chart-stage .tooth,.patient-record-review .entry-open{pointer-events:none}
-.record-review-panel{padding:14px 18px 0}.record-review-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:10px}.record-review-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 15px;border:1px solid rgba(26,120,232,.22);border-radius:11px;background:#fff;color:#52657e;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.record-review-toolbar button:hover{border-color:var(--primary);color:var(--primary);background:#f7fbff}.record-review-toolbar .record-review-download{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 7px 16px rgba(26,120,232,.2)}.record-review-toolbar .record-review-download:hover{background:var(--primary-dark);color:#fff}.record-review-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;overflow:hidden;border:1px solid rgba(26,120,232,.16);border-radius:14px;background:#dce8f5}.record-review-summary>div{display:flex;flex-direction:column;gap:5px;min-width:0;padding:15px 18px;background:#fff}.record-review-summary small{color:#8193a8;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.record-review-summary strong{overflow-wrap:anywhere;color:#25364d;font-size:13px}
+.record-review-panel{padding:14px 18px 0}.record-review-toolbar{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:10px}.record-review-toolbar button{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 15px;border:1px solid rgba(26,120,232,.22);border-radius:11px;background:#fff;color:#52657e;font:inherit;font-size:13px;font-weight:700;cursor:pointer}.record-review-toolbar button:hover{border-color:var(--primary);color:var(--primary);background:#f7fbff}.record-review-toolbar .record-review-download{border-color:var(--primary);background:var(--primary);color:#fff;box-shadow:0 7px 16px rgba(26,120,232,.2)}.record-review-toolbar .record-review-download:hover{background:var(--primary-dark);color:#fff}.record-review-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1px;overflow:hidden;border:1px solid rgba(26,120,232,.16);border-radius:14px;background:#dce8f5}.record-review-summary>div{min-width:0;}.record-review-summary small{color:#8193a8;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em}.record-review-summary strong{overflow-wrap:anywhere;color:#25364d;font-size:13px}
 .record-review-layer-switch{display:none}
 .record-review-action-icon{display:block;width:18px;height:18px;flex:0 0 18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 @media(max-width:1200px){.patient-record-review .chart-workspace{grid-template-columns:minmax(0,1fr)}.patient-record-review .chart-card,.patient-record-review .entries-panel,.patient-record-review .print-note-card{grid-column:1;grid-row:auto}.patient-record-review .entry-row{grid-template-columns:minmax(0,1fr)!important;padding-inline:0!important}.patient-record-review .entry-open{width:100%!important;min-width:0}.patient-record-review .entry-text{width:100%;min-width:0}.patient-record-review .entry-note{word-break:normal;overflow-wrap:break-word}.record-review-summary{grid-template-columns:repeat(3,1fr)}}
@@ -175,5 +175,103 @@
     min-height: 72px;
     padding: 12px 14px;
     border-radius: 12px;
+  }
+}
+
+/* Keep the new card wrapper independent from the legacy summary-cell rule. */
+.record-review-summary > .record-review-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.record-review-summary .record-review-card {
+  min-height: 0;
+}
+
+@media (max-width: 1100px) {
+  .record-review-summary > .record-review-cards {
+    gap: 12px;
+  }
+}
+
+/* Tablet/mobile identity line and two-card first row. */
+@media (max-width: 760px) {
+  .record-review-identity-details {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 0;
+  }
+
+  .record-review-identity-details > span + span {
+    margin-left: 10px;
+    padding-left: 10px;
+    border-left: 1px solid #cdd9e7;
+  }
+
+  .record-review-email {
+    grid-column: auto;
+  }
+
+  .record-review-summary > .record-review-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .record-review-summary > .record-review-cards > .record-review-visit-field {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  .record-review-identity-details {
+    font-size: 11px;
+  }
+
+  .record-review-identity-details > span + span {
+    margin-left: 8px;
+    padding-left: 8px;
+  }
+
+  .record-review-summary .record-review-card {
+    padding: 12px;
+  }
+
+  .record-review-visit-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 100%;
+    max-width: 100%;
+    min-height: 34px;
+    padding: 4px 36px 4px 4px;
+    overflow: hidden;
+    color: var(--primary);
+    font-size: 16px;
+    line-height: 1.25;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%231a78e8' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 16px;
+  }
+
+  .record-review-visit-field select option {
+    font-size: 16px;
+  }
+
+  .patient-record-date-range {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .patient-record-date-range input {
+    min-width: 0;
+    max-width: 100%;
+    font-size: 16px;
   }
 }
