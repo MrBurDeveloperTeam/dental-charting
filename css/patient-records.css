@@ -51,3 +51,10 @@
   outline: 0;
   box-shadow: 0 0 0 2px rgba(26,120,232,.12);
 }
+
+/* MacBook and compact desktop: keep all eight patient details in two rows. */
+@media (min-width: 901px) and (max-width: 1600px) {
+  .record-review-summary {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}

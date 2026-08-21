@@ -51,7 +51,23 @@ const visit=loadVisit();
 let chartMode=loadChartMode();
 let splitChartView="existing";
 const els={upperFront:document.getElementById("upper-front"),upperNumbers:document.getElementById("upper-numbers"),upperOcc:document.getElementById("upper-occ"),lowerOcc:document.getElementById("lower-occ"),lowerNumbers:document.getElementById("lower-numbers"),lowerFront:document.getElementById("lower-front"),combinedStage:document.getElementById("combined-stage"),splitStage:document.getElementById("split-stage"),chartViewToggle:document.getElementById("chart-view-toggle"),splitPlannedUpperFront:document.getElementById("split-planned-upper-front"),splitPlannedUpperOcc:document.getElementById("split-planned-upper-occ"),splitPlannedUpperNumbers:document.getElementById("split-planned-upper-numbers"),splitExistingUpperFront:document.getElementById("split-existing-upper-front"),splitExistingUpperOcc:document.getElementById("split-existing-upper-occ"),splitExistingUpperNumbers:document.getElementById("split-existing-upper-numbers"),splitExistingLowerNumbers:document.getElementById("split-existing-lower-numbers"),splitExistingLowerOcc:document.getElementById("split-existing-lower-occ"),splitExistingLowerFront:document.getElementById("split-existing-lower-front"),splitPlannedLowerNumbers:document.getElementById("split-planned-lower-numbers"),splitPlannedLowerOcc:document.getElementById("split-planned-lower-occ"),splitPlannedLowerFront:document.getElementById("split-planned-lower-front"),entriesList:document.getElementById("entries-list"),entriesCount:document.getElementById("entries-count"),printPatientGrid:document.getElementById("print-patient-grid"),printNoteBody:document.getElementById("print-note-body"),patientTrigger:document.getElementById("patient-trigger"),patientNameDisplay:document.getElementById("patient-name-display"),patientSubDisplay:document.getElementById("patient-sub-display"),dentitionSwitch:document.getElementById("dentition-switch"),dentitionHint:document.getElementById("dentition-hint"),patientModal:document.getElementById("patient-modal"),patientForm:document.getElementById("patient-form"),patientCloseBtn:document.getElementById("patient-close-btn"),patientCancelBtn:document.getElementById("patient-cancel-btn"),patientClearBtn:document.getElementById("patient-clear-btn"),patientDobText:document.getElementById("patient-dob-text"),patientDobTrigger:document.getElementById("patient-dob-trigger"),dateTrigger:document.getElementById("date-trigger"),visitDateDisplay:document.getElementById("visit-date-display"),visitDateSubDisplay:document.getElementById("visit-date-sub-display"),dateModal:document.getElementById("date-modal"),dateForm:document.getElementById("date-form"),dateCloseBtn:document.getElementById("date-close-btn"),dateCancelBtn:document.getElementById("date-cancel-btn"),dateTodayBtn:document.getElementById("date-today-btn"),visitDateText:document.getElementById("visit-date-text"),visitDateTrigger:document.getElementById("visit-date-trigger"),datePopover:document.getElementById("date-popover"),datePrevBtn:document.getElementById("date-prev-btn"),dateNextBtn:document.getElementById("date-next-btn"),dateTitleBtn:document.getElementById("date-title-btn"),dateView:document.getElementById("date-view"),dateClearBtn:document.getElementById("date-clear-btn"),datePopoverTodayBtn:document.getElementById("date-popover-today-btn"),datePopoverCloseBtn:document.getElementById("date-popover-close-btn"),sidebarEmpty:document.getElementById("sidebar-empty"),editor:document.getElementById("editor"),selectedCode:document.getElementById("selected-code"),selectedName:document.getElementById("selected-name"),miniPreview:document.getElementById("mini-preview"),multiToggleBtn:document.getElementById("multi-toggle-btn"),selectedTeeth:document.getElementById("selected-teeth"),categoryGrid:document.getElementById("category-grid"),viewGrid:document.getElementById("view-grid"),viewNote:document.getElementById("view-note"),surfaceField:document.getElementById("surface-field"),surfaceGrid:document.getElementById("surface-grid"),surfaceNote:document.getElementById("surface-note"),treatmentGrid:document.getElementById("treatment-grid"),statusGrid:document.getElementById("status-grid"),noteInput:document.getElementById("note-input"),previewBox:document.getElementById("preview-box"),saveBtn:document.getElementById("save-btn"),resetBtn:document.getElementById("reset-btn"),clearCurrentBtn:document.getElementById("clear-current-btn"),downloadPdfBtn:document.getElementById("download-pdf-btn")};
-const mobileToothEls={modal:document.getElementById("mobile-tooth-modal"),title:document.getElementById("mobile-tooth-modal-title"),name:document.getElementById("mobile-tooth-modal-name"),root:document.getElementById("mobile-tooth-root"),crown:document.getElementById("mobile-tooth-crown"),selection:document.getElementById("mobile-tooth-selection"),optionalMolar:document.getElementById("mobile-optional-molar-btn"),prev:document.getElementById("mobile-tooth-prev-btn"),prevNumber:document.getElementById("mobile-tooth-prev-number"),next:document.getElementById("mobile-tooth-next-btn"),nextNumber:document.getElementById("mobile-tooth-next-number"),close:document.getElementById("mobile-tooth-close-btn"),bottomClose:document.getElementById("mobile-tooth-bottom-close-btn"),done:document.getElementById("mobile-tooth-done-btn")};
+const mobileToothEls = {
+  modal: document.getElementById("mobile-tooth-modal"),
+  title: document.getElementById("mobile-tooth-modal-title"),
+  name: document.getElementById("mobile-tooth-modal-name"),
+  root: document.getElementById("mobile-tooth-root"),
+  crown: document.getElementById("mobile-tooth-crown"),
+  selection: document.getElementById("mobile-tooth-selection"),
+  optionalMolar: document.getElementById("mobile-optional-molar-btn"),
+  primarySwap: document.getElementById("mobile-primary-swap-btn"),
+  prev: document.getElementById("mobile-tooth-prev-btn"),
+  prevNumber: document.getElementById("mobile-tooth-prev-number"),
+  next: document.getElementById("mobile-tooth-next-btn"),
+  nextNumber: document.getElementById("mobile-tooth-next-number"),
+  close: document.getElementById("mobile-tooth-close-btn"),
+  bottomClose: document.getElementById("mobile-tooth-bottom-close-btn"),
+  done: document.getElementById("mobile-tooth-done-btn")
+};
 const mobileEntryEls={modal:document.getElementById("mobile-entry-modal"),content:document.getElementById("mobile-entry-content"),title:document.getElementById("mobile-entry-title"),progress:document.getElementById("mobile-entry-progress"),trigger:document.getElementById("mobile-entry-trigger"),hint:document.getElementById("mobile-entry-hint"),close:document.getElementById("mobile-entry-close-btn"),back:document.getElementById("mobile-entry-back-btn"),next:document.getElementById("mobile-entry-next-btn"),done:document.getElementById("mobile-entry-done-btn")};
 const editorHome=els.editor.parentElement;
 const treatmentManagerEls={openBtn:document.getElementById("manage-treatments-btn"),modal:document.getElementById("treatment-manager-modal"),closeBtn:document.getElementById("treatment-manager-close-btn"),cancelBtn:document.getElementById("treatment-manager-cancel-btn"),saveBtn:document.getElementById("treatment-manager-save-btn"),list:document.getElementById("treatment-method-list"),addForm:document.getElementById("add-treatment-form"),newIcon:document.getElementById("new-treatment-icon")};
@@ -87,6 +103,10 @@ treatmentManagerEls.openBtn.addEventListener("click",openTreatmentManager); trea
 mobileToothEls.prev.addEventListener("click",()=>navigateMobileTooth(-1)); mobileToothEls.next.addEventListener("click",()=>navigateMobileTooth(1)); mobileToothEls.optionalMolar.addEventListener("click",toggleMobileOptionalMolar); mobileToothEls.close.addEventListener("click",closeMobileToothModal); mobileToothEls.bottomClose.addEventListener("click",closeMobileToothModal); mobileToothEls.done.addEventListener("click",finishMobileToothSelection); mobileToothEls.modal.addEventListener("click",e=>{if(e.target===mobileToothEls.modal) closeMobileToothModal()});
 mobileEntryEls.trigger.addEventListener("click",openMobileEntryWizard); mobileEntryEls.close.addEventListener("click",closeMobileEntryWizard); mobileEntryEls.back.addEventListener("click",()=>setMobileEntryStep(mobileEntryStep-1)); mobileEntryEls.next.addEventListener("click",()=>setMobileEntryStep(mobileEntryStep+1)); mobileEntryEls.done.addEventListener("click",completeMobileEntryWizard); mobileEntryEls.modal.addEventListener("click",e=>{if(e.target===mobileEntryEls.modal)closeMobileEntryWizard()});
 mobileEntryEls.progress.addEventListener("click",e=>{const stage=e.target.closest("[data-entry-stage]");if(stage)setMobileEntryStep(Number(stage.dataset.entryStage))});
+mobileToothEls.primarySwap.addEventListener(
+  "click",
+  toggleMobilePrimarySuccessor
+);
 els.dentitionSwitch.addEventListener("click",e=>{const btn=e.target.closest("[data-mode]"); if(!btn) return; setChartMode(btn.dataset.mode)});
 els.chartViewToggle.addEventListener("click",e=>{const btn=e.target.closest("[data-chart-view]");if(!btn)return;setSplitChartView(btn.dataset.chartView)});
 els.splitStage.addEventListener("click",e=>{if(isMobileToothModalViewport()&&e.target.closest("[data-surface]")) mobileToothModalOpen=true},true);
@@ -806,6 +826,21 @@ function toggleMobileOptionalMolar(){
   mobileToothModalOpen=true;
   renderAll();
 }
+function toggleMobilePrimarySuccessor() {
+  const tooth = draft.tooth;
+
+  if (
+    chartMode !== "primary" ||
+    !tooth ||
+    isPrimaryOptionalMolar(tooth) ||
+    !swapPrimaryToothNumber(tooth)
+  ) {
+    return;
+  }
+
+  mobileToothModalOpen = true;
+  togglePrimaryTooth(tooth, draft.view);
+}
 function navigateMobileTooth(direction){
   if(!draft.tooth)return;
   const neighbors=mobileToothNeighbors(draft.tooth),next=direction<0?neighbors.previous:neighbors.next;
@@ -827,6 +862,24 @@ function renderMobileToothModal(){
   mobileToothEls.optionalMolar.hidden=!optionalMolar;
   mobileToothEls.optionalMolar.classList.toggle("activate",optionalMolar&&!optionalMolarActive);
   mobileToothEls.optionalMolar.textContent=optionalMolar?(optionalMolarActive?"Deactivate permanent molar":"Activate permanent molar"):"";
+  const successor = swapPrimaryToothNumber(draft.tooth);
+  const canSwapSuccessor =
+    chartMode === "primary" &&
+    !optionalMolar &&
+    Boolean(successor);
+
+  mobileToothEls.primarySwap.hidden = !canSwapSuccessor;
+
+  if (canSwapSuccessor) {
+    mobileToothEls.primarySwap.textContent = isPrimaryTooth(draft.tooth)
+      ? `Switch to permanent tooth ${successor}`
+      : `Switch back to primary tooth ${successor}`;
+
+    mobileToothEls.primarySwap.classList.toggle(
+      "activate",
+      isPrimaryTooth(draft.tooth)
+    );
+  }
   const neighbors=mobileToothNeighbors(draft.tooth);
   mobileToothEls.prev.disabled=!neighbors.previous;
   mobileToothEls.next.disabled=!neighbors.next;
