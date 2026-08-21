@@ -90,6 +90,10 @@ mobileEntryEls.progress.addEventListener("click",e=>{const stage=e.target.closes
 els.dentitionSwitch.addEventListener("click",e=>{const btn=e.target.closest("[data-mode]"); if(!btn) return; setChartMode(btn.dataset.mode)});
 els.chartViewToggle.addEventListener("click",e=>{const btn=e.target.closest("[data-chart-view]");if(!btn)return;setSplitChartView(btn.dataset.chartView)});
 els.splitStage.addEventListener("click",e=>{if(isMobileToothModalViewport()&&e.target.closest("[data-surface]")) mobileToothModalOpen=true},true);
+els.patientDobText?.addEventListener("input", event => {
+  event.target.value = formatDobWhileTyping(event.target.value);
+  clearDateFieldError("dob");
+});
 els.patientDobText?.addEventListener("blur",()=>commitDateField("dob",{emptyOk:true}));
 els.visitDateText.addEventListener("blur",()=>commitDateField("visit",{emptyOk:false,fallbackToday:false}));
 els.visitDateText.addEventListener("input",()=>clearDateFieldError("visit"));
@@ -310,6 +314,16 @@ function shiftMonth(key,delta){const date=monthStartFromKey(key); date.setMonth(
 function shiftYear(key,delta){const date=monthStartFromKey(key); date.setFullYear(date.getFullYear()+delta); return `${date.getFullYear()}-${`${date.getMonth()+1}`.padStart(2,"0")}`}
 function buildIso(year,monthIndex,day){return `${year}-${`${monthIndex+1}`.padStart(2,"0")}-${`${day}`.padStart(2,"0")}`}
 function sameDay(a,b){return a&&b&&a===b}
+function formatDobWhileTyping(value) {
+  const digits = value.replace(/\D/g, "").slice(0, 8);
+
+  if (digits.length <= 2) return digits;
+  if (digits.length <= 4) {
+    return `${digits.slice(0, 2)}/${digits.slice(2)}`;
+  }
+
+  return `${digits.slice(0, 2)}/${digits.slice(2, 4)}/${digits.slice(4)}`;
+}
 function parseTypedDate(value){
   const raw=value.trim();
   if(!raw) return "";
