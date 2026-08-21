@@ -25,7 +25,7 @@ const TOOTH_NAMES={
   permanent:{11:"Upper right central incisor",12:"Upper right lateral incisor",13:"Upper right canine",14:"Upper right first premolar",15:"Upper right second premolar",16:"Upper right first molar",17:"Upper right second molar",18:"Upper right wisdom tooth",21:"Upper left central incisor",22:"Upper left lateral incisor",23:"Upper left canine",24:"Upper left first premolar",25:"Upper left second premolar",26:"Upper left first molar",27:"Upper left second molar",28:"Upper left wisdom tooth",31:"Lower left central incisor",32:"Lower left lateral incisor",33:"Lower left canine",34:"Lower left first premolar",35:"Lower left second premolar",36:"Lower left first molar",37:"Lower left second molar",38:"Lower left wisdom tooth",41:"Lower right central incisor",42:"Lower right lateral incisor",43:"Lower right canine",44:"Lower right first premolar",45:"Lower right second premolar",46:"Lower right first molar",47:"Lower right second molar",48:"Lower right wisdom tooth"},
   primary:{51:"Upper right central primary incisor",52:"Upper right lateral primary incisor",53:"Upper right primary canine",54:"Upper right first primary molar",55:"Upper right second primary molar",61:"Upper left central primary incisor",62:"Upper left lateral primary incisor",63:"Upper left primary canine",64:"Upper left first primary molar",65:"Upper left second primary molar",71:"Lower left central primary incisor",72:"Lower left lateral primary incisor",73:"Lower left primary canine",74:"Lower left first primary molar",75:"Lower left second primary molar",81:"Lower right central primary incisor",82:"Lower right lateral primary incisor",83:"Lower right primary canine",84:"Lower right first primary molar",85:"Lower right second primary molar"}
 };
-const COLORS={composite:"#15803d",amalgam:"#1d4ed8",gic:"#ef4444",sealant:"#55a8e8",caries:"#4b5563",rootCaries:"#ae7042",fracture:"#b76c59",missing:"#a8b4c1",extraction:"#d85852",implant:"#f97316",rootCanal:"#d85852",crown:"#8f9daf",veneer:"#7fc8c9"};
+const COLORS={composite:"#15803d",amalgam:"#1d4ed8",gic:"#ef4444",sealant:"#55a8e8",caries:"#4b5563",rootCaries:"#ae7042",fracture:"#b76c59",missing:"#a8b4c1",extraction:"#d85852",implant:"#f97316",rootCanal:"#d85852",crown:"#8f9daf",veneer:"#00fbff"};
 const TREATMENTS={composite:{label:"Composite",category:"restoration",mode:"surface",views:["occ","front"]},amalgam:{label:"Amalgam",category:"restoration",mode:"surface",views:["occ","front"]},gic:{label:"GIC",category:"restoration",mode:"surface",views:["occ","front"]},sealant:{label:"Sealant",category:"restoration",mode:"surface",views:["occ"]},caries:{label:"Caries",category:"condition",mode:"surface",views:["occ","front"]},rootCaries:{label:"Root caries",category:"condition",mode:"surface",views:["front"]},fracture:{label:"Fracture",category:"condition",mode:"surface",views:["occ","front"]},missing:{label:"Missing",category:"condition",mode:"whole",views:["occ","front"]},rootCanal:{label:"Root canal",category:"procedure",mode:"root",views:["front"]},extraction:{label:"Extraction",category:"procedure",mode:"whole",views:["occ","front"]},implant:{label:"Implant",category:"procedure",mode:"whole",views:["occ","front"]},crown:{label:"Crown",category:"prosthetic",mode:"whole",views:["occ","front"]},veneer:{label:"Veneer",category:"prosthetic",mode:"whole",views:["occ","front"]}};
 const CATEGORIES=[{id:"restoration",label:"Restoration"},{id:"condition",label:"Condition"},{id:"procedure",label:"Procedure"},{id:"prosthetic",label:"Prosthetic"}];
 const STATUSES=[{id:"existing",label:"Existing"},{id:"planned",label:"Planned"},{id:"watch",label:"Review"}];
@@ -91,12 +91,15 @@ els.dentitionSwitch.addEventListener("click",e=>{const btn=e.target.closest("[da
 els.chartViewToggle.addEventListener("click",e=>{const btn=e.target.closest("[data-chart-view]");if(!btn)return;setSplitChartView(btn.dataset.chartView)});
 els.splitStage.addEventListener("click",e=>{if(isMobileToothModalViewport()&&e.target.closest("[data-surface]")) mobileToothModalOpen=true},true);
 els.patientDobText?.addEventListener("input", event => {
-  event.target.value = formatDobWhileTyping(event.target.value);
+  event.target.value = formatDateWhileTyping(event.target.value);
   clearDateFieldError("dob");
 });
 els.patientDobText?.addEventListener("blur",()=>commitDateField("dob",{emptyOk:true}));
+els.visitDateText.addEventListener("input", event => {
+  event.target.value = formatDateWhileTyping(event.target.value);
+  clearDateFieldError("visit");
+});
 els.visitDateText.addEventListener("blur",()=>commitDateField("visit",{emptyOk:false,fallbackToday:false}));
-els.visitDateText.addEventListener("input",()=>clearDateFieldError("visit"));
 els.patientDobText?.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();commitDateField("dob",{emptyOk:true});}});
 els.visitDateText.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();commitDateField("visit",{emptyOk:false,fallbackToday:false});}});
 els.patientDobTrigger?.addEventListener("click",()=>openDatePopover("dob",els.patientDobTrigger));
@@ -314,7 +317,7 @@ function shiftMonth(key,delta){const date=monthStartFromKey(key); date.setMonth(
 function shiftYear(key,delta){const date=monthStartFromKey(key); date.setFullYear(date.getFullYear()+delta); return `${date.getFullYear()}-${`${date.getMonth()+1}`.padStart(2,"0")}`}
 function buildIso(year,monthIndex,day){return `${year}-${`${monthIndex+1}`.padStart(2,"0")}-${`${day}`.padStart(2,"0")}`}
 function sameDay(a,b){return a&&b&&a===b}
-function formatDobWhileTyping(value) {
+function formatDateWhileTyping(value) {
   const digits = value.replace(/\D/g, "").slice(0, 8);
 
   if (digits.length <= 2) return digits;
@@ -922,17 +925,72 @@ function wholeOverlaySVG(n,v,treatment,status){
   const paths=veneerClipPath(n,v).replace(/<path /g, `<path fill="${fill}" fill-opacity="${opacity}" `);
   return `<svg class="surface-svg" width="${dims.width}" height="${dims.height}" viewBox="0 0 ${dims.width} ${dims.height}">${paths}</svg>`;
 }
-function wholeStatusOverlaySVG(n,v,treatment,status){
-  const dims=v==="front"?{width:toothW(n),height:toothH(n)}:crownDims(n);
-  if(status==="planned"){
-    const pattern=plannedPatternDef(treatment);
-    const paths=surfaceClipPath(n,v).replace(/<path /g,`<path fill="url(#${pattern.id})" stroke="none" `);
-    return `<svg class="surface-svg" width="${dims.width}" height="${dims.height}" viewBox="0 0 ${dims.width} ${dims.height}"><defs>${pattern.markup}</defs>${paths}</svg>`;
+function wholeStatusOverlaySVG(n, v, treatment, status) {
+  const dims =
+    v === "front"
+      ? { width: toothW(n), height: toothH(n) }
+      : crownDims(n);
+
+  // Keep diagonal lines for planned treatments.
+  if (status === "planned") {
+    const pattern = plannedPatternDef(treatment);
+    const paths = surfaceClipPath(n, v).replace(
+      /<path /g,
+      `<path fill="url(#${pattern.id})" stroke="none" `
+    );
+
+    return `
+      <svg
+        class="surface-svg"
+        width="${dims.width}"
+        height="${dims.height}"
+        viewBox="0 0 ${dims.width} ${dims.height}"
+      >
+        <defs>${pattern.markup}</defs>
+        ${paths}
+      </svg>
+    `;
   }
-  const fill=lighten(COLORS[treatment],18);
-  const stroke=darken(COLORS[treatment],14);
-  const paths=surfaceClipPath(n,v).replace(/<path /g,`<path fill="${fill}" fill-opacity="0.24" stroke="${stroke}" stroke-width="1.45" `);
-  return `<svg class="surface-svg" width="${dims.width}" height="${dims.height}" viewBox="0 0 ${dims.width} ${dims.height}">${paths}</svg>`;
+
+  // Existing Crown: use a full solid colour without internal lines.
+  if (treatment === "crown" && status === "existing") {
+    const fill = COLORS[treatment];
+    const paths = surfaceClipPath(n, v).replace(
+      /<path /g,
+      `<path fill="${fill}" fill-opacity="1" stroke="none" `
+    );
+
+    return `
+      <svg
+        class="surface-svg"
+        width="${dims.width}"
+        height="${dims.height}"
+        viewBox="0 0 ${dims.width} ${dims.height}"
+      >
+        ${paths}
+      </svg>
+    `;
+  }
+
+  // Existing display for other whole-tooth treatments.
+  const fill = lighten(COLORS[treatment], 18);
+  const stroke = darken(COLORS[treatment], 14);
+  const paths = surfaceClipPath(n, v).replace(
+    /<path /g,
+    `<path fill="${fill}" fill-opacity="0.24"
+      stroke="${stroke}" stroke-width="1.45" `
+  );
+
+  return `
+    <svg
+      class="surface-svg"
+      width="${dims.width}"
+      height="${dims.height}"
+      viewBox="0 0 ${dims.width} ${dims.height}"
+    >
+      ${paths}
+    </svg>
+  `;
 }
 function renderSurfaceOverlay(n,v,{complete={},planned={},review={},selected=new Set(),previewColor=null,preview=false,clipKey="chart"}={}){
   const dims=v==="front"?{width:toothW(n),height:toothH(n)}:crownDims(n);
