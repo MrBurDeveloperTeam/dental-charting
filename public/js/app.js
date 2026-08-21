@@ -984,7 +984,7 @@ function wholeStatusOverlaySVG(n, v, treatment, status) {
       ? { width: toothW(n), height: toothH(n) }
       : crownDims(n);
 
-  // Keep diagonal lines for planned treatments.
+  // Planned treatments use diagonal hatching.
   if (status === "planned") {
     const pattern = plannedPatternDef(treatment);
     const paths = surfaceClipPath(n, v).replace(
@@ -1005,33 +1005,17 @@ function wholeStatusOverlaySVG(n, v, treatment, status) {
     `;
   }
 
-  // Existing Crown: use a full solid colour without internal lines.
-  if (treatment === "crown" && status === "existing") {
-    const fill = COLORS[treatment];
-    const paths = surfaceClipPath(n, v).replace(
-      /<path /g,
-      `<path fill="${fill}" fill-opacity="1" stroke="none" `
-    );
-
-    return `
-      <svg
-        class="surface-svg"
-        width="${dims.width}"
-        height="${dims.height}"
-        viewBox="0 0 ${dims.width} ${dims.height}"
-      >
-        ${paths}
-      </svg>
-    `;
-  }
-
-  // Existing display for other whole-tooth treatments.
+  // Existing treatments use the standard outlined/line appearance.
   const fill = lighten(COLORS[treatment], 18);
   const stroke = darken(COLORS[treatment], 14);
   const paths = surfaceClipPath(n, v).replace(
     /<path /g,
-    `<path fill="${fill}" fill-opacity="0.24"
-      stroke="${stroke}" stroke-width="1.45" `
+    `<path
+      fill="${fill}"
+      fill-opacity="0.24"
+      stroke="${stroke}"
+      stroke-width="1.45"
+    `
   );
 
   return `

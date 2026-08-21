@@ -52,9 +52,128 @@
   box-shadow: 0 0 0 2px rgba(26,120,232,.12);
 }
 
-/* MacBook and compact desktop: keep all eight patient details in two rows. */
-@media (min-width: 901px) and (max-width: 1600px) {
-  .record-review-summary {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+/* Patient review identity header and responsive information cards. */
+.record-review-summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+.record-review-summary > .record-review-identity {
+  display: block;
+  min-width: 0;
+  padding: 2px 2px 0;
+  background: transparent;
+}
+.record-review-identity h2 {
+  margin: 0 0 7px;
+  color: var(--ink);
+  font-size: 25px;
+  line-height: 1.15;
+  letter-spacing: -.025em;
+}
+.record-review-identity-details {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  min-width: 0;
+  color: #8a9bb3;
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+.record-review-identity-details > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.record-review-identity-details > span + span {
+  margin-left: 18px;
+  padding-left: 18px;
+  border-left: 1px solid #cdd9e7;
+}
+.record-review-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  min-width: 0;
+}
+.record-review-summary .record-review-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-width: 0;
+  min-height: 88px;
+  padding: 17px 20px;
+  border: 1px solid rgba(26,120,232,.18);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 3px 10px rgba(18,35,57,.04);
+}
+.record-review-card small {
+  color: #91a1b5;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+.record-review-card strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 15px;
+}
+.record-review-visit-field select {
+  height: auto;
+  padding: 0 30px 0 0;
+  border: 0;
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--primary);
+  font-size: 15px;
+  font-weight: 800;
+  box-shadow: none;
+}
+.record-review-visit-field select:hover,
+.record-review-visit-field select:focus {
+  border-color: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 1100px) {
+  .record-review-panel { padding-inline: 14px; }
+  .record-review-cards { gap: 12px; }
+  .record-review-summary .record-review-card {
+    min-height: 82px;
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .record-review-identity-details {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px 14px;
+  }
+  .record-review-identity-details > span + span {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
+  }
+  .record-review-email { grid-column: 1 / -1; }
+  .record-review-cards { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 600px) {
+  .record-review-summary { gap: 14px; }
+  .record-review-identity h2 { font-size: 21px; }
+  .record-review-identity-details { font-size: 11px; }
+  .record-review-summary .record-review-card {
+    min-height: 72px;
+    padding: 12px 14px;
+    border-radius: 12px;
   }
 }
