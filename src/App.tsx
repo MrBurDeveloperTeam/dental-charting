@@ -95,15 +95,30 @@ export default function App() {
         <section className="record-review-panel" aria-label="Patient referral details">
           <div className="record-review-toolbar"><button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button><button className="record-review-download" type="button" onClick={() => document.getElementById("download-pdf-btn")?.click()}><svg className="record-review-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5" /></svg> Download PDF</button></div>
           <div className="record-review-summary">
-            <div><small>Name</small><strong>{String(selectedRecord.patient.name || "—")}</strong></div>
-            <div><small>Date of birth</small><strong>{selectedRecord.patient.dob ? new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${selectedRecord.patient.dob}T00:00:00`)) : "—"}</strong></div>
-            <div><small>IC</small><strong>{String(selectedRecord.patient.id_number || "—")}</strong></div>
-            <div><small>Gender</small><strong>{selectedRecord.patient.gender ? String(selectedRecord.patient.gender).charAt(0).toUpperCase() + String(selectedRecord.patient.gender).slice(1) : "—"}</strong></div>
-            <div><small>Phone</small><strong>{String(selectedRecord.patient.phone || "—")}</strong></div>
-            <div><small>Email</small><strong>{String(selectedRecord.patient.email || "—")}</strong></div>
-            <div><small>Dentition</small><strong>{selectedRecord.dentition}</strong></div>
-            <div className="record-review-visit-field"><label htmlFor="record-review-visit"><small>Visit date</small></label><select id="record-review-visit" value={selectedRecord.id} onChange={(event) => { const record = patientVisitRecords.find((item) => item.id === event.target.value); if (record) openRecord(record); }}>{patientVisitRecords.map((record) => <option key={record.id} value={record.id}>{new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${record.visitDate}T00:00:00`))}</option>)}</select></div>
-            <div><small>Dentist</small><strong>{selectedRecord.dentist?.name || "Not assigned"}</strong></div>
+            <div className="record-review-identity">
+              <h2>{String(selectedRecord.patient.name || "Unknown patient")}</h2>
+              <div className="record-review-identity-details">
+                <span>{String(selectedRecord.patient.id_number || "IC not set")}</span>
+                <span>{selectedRecord.patient.gender ? String(selectedRecord.patient.gender).charAt(0).toUpperCase() + String(selectedRecord.patient.gender).slice(1) : "Gender not set"}</span>
+                <span>{selectedRecord.patient.dob ? new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${selectedRecord.patient.dob}T00:00:00`)) : "DOB not set"}</span>
+                <span>{String(selectedRecord.patient.phone || "Phone not set")}</span>
+                <span className="record-review-email">{String(selectedRecord.patient.email || "Email not set")}</span>
+              </div>
+            </div>
+            <div className="record-review-cards">
+              <div className="record-review-card">
+                <small>Preferred dentist</small>
+                <strong>{selectedRecord.dentist?.name || "Not assigned"}</strong>
+              </div>
+              <div className="record-review-card">
+                <small>Dentition</small>
+                <strong>{selectedRecord.dentition.charAt(0).toUpperCase() + selectedRecord.dentition.slice(1)}</strong>
+              </div>
+              <div className="record-review-card record-review-visit-field">
+                <label htmlFor="record-review-visit"><small>Visit date</small></label>
+                <select id="record-review-visit" value={selectedRecord.id} onChange={(event) => { const record = patientVisitRecords.find((item) => item.id === event.target.value); if (record) openRecord(record); }}>{patientVisitRecords.map((record) => <option key={record.id} value={record.id}>{new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${record.visitDate}T00:00:00`))}</option>)}</select>
+              </div>
+            </div>
           </div>
           <div className="record-review-layer-switch" aria-label="Chart layer">
             {(["existing", "planned"] as const).map((layer) => <button key={layer} type="button" className={reviewLayer === layer ? "active" : ""} aria-pressed={reviewLayer === layer} onClick={() => { setReviewLayer(layer); (document.querySelector(`[data-chart-view="${layer}"]`) as HTMLButtonElement | null)?.click(); }}>{layer === "existing" ? "Existing" : "Planning"}</button>)}
