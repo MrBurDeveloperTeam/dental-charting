@@ -693,3 +693,22 @@ input[type="reset"],
     border-radius: 20px;
   }
 }
+
+/*
+ * Prevent treatment buttons from becoming squeezed in the
+ * side-by-side laptop layout.
+ */
+@media (min-width: 1101px) and (max-width: 1600px) {
+  #treatment-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  #treatment-grid .chip.treatment {
+    min-width: 0;
+  }
+
+  #treatment-grid .treatment-name {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
