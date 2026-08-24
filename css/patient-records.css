@@ -300,3 +300,32 @@
     font-size: 16px;
   }
 }
+
+/* Mobile patient details stay in one ordered line:
+   IC | gender | date of birth | phone | email. */
+@media (max-width: 760px) {
+  .record-review-identity-details {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    white-space: nowrap;
+  }
+
+  .record-review-identity-details > span {
+    flex: 0 0 auto;
+    overflow-wrap: normal;
+  }
+
+  .record-review-identity-details > span + span {
+    margin-left: 0;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .record-review-identity-details > span:not(:last-child)::after {
+    margin-right: 8px;
+    margin-left: 8px;
+  }
+}

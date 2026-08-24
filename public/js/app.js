@@ -25,7 +25,7 @@ const TOOTH_NAMES={
   permanent:{11:"Upper right central incisor",12:"Upper right lateral incisor",13:"Upper right canine",14:"Upper right first premolar",15:"Upper right second premolar",16:"Upper right first molar",17:"Upper right second molar",18:"Upper right wisdom tooth",21:"Upper left central incisor",22:"Upper left lateral incisor",23:"Upper left canine",24:"Upper left first premolar",25:"Upper left second premolar",26:"Upper left first molar",27:"Upper left second molar",28:"Upper left wisdom tooth",31:"Lower left central incisor",32:"Lower left lateral incisor",33:"Lower left canine",34:"Lower left first premolar",35:"Lower left second premolar",36:"Lower left first molar",37:"Lower left second molar",38:"Lower left wisdom tooth",41:"Lower right central incisor",42:"Lower right lateral incisor",43:"Lower right canine",44:"Lower right first premolar",45:"Lower right second premolar",46:"Lower right first molar",47:"Lower right second molar",48:"Lower right wisdom tooth"},
   primary:{51:"Upper right central primary incisor",52:"Upper right lateral primary incisor",53:"Upper right primary canine",54:"Upper right first primary molar",55:"Upper right second primary molar",61:"Upper left central primary incisor",62:"Upper left lateral primary incisor",63:"Upper left primary canine",64:"Upper left first primary molar",65:"Upper left second primary molar",71:"Lower left central primary incisor",72:"Lower left lateral primary incisor",73:"Lower left primary canine",74:"Lower left first primary molar",75:"Lower left second primary molar",81:"Lower right central primary incisor",82:"Lower right lateral primary incisor",83:"Lower right primary canine",84:"Lower right first primary molar",85:"Lower right second primary molar"}
 };
-const COLORS={composite:"#15803d",amalgam:"#1d4ed8",gic:"#ef4444",sealant:"#55a8e8",caries:"#4b5563",rootCaries:"#ae7042",fracture:"#b76c59",missing:"#a8b4c1",extraction:"#d85852",implant:"#f97316",rootCanal:"#d85852",crown:"#8f9daf",veneer:"#00fbff"};
+const COLORS={composite:"#15803d",amalgam:"#1d4ed8",gic:"#ef4444",sealant:"#55a8e8",caries:"#4b5563",rootCaries:"#ae7042",fracture:"#bd4a2e",missing:"#a8b4c1",extraction:"#d85852",implant:"#f97316",rootCanal:"#d85852",crown:"#4f4f4f",veneer:"#00fbff"};
 const TREATMENTS={composite:{label:"Composite",category:"restoration",mode:"surface",views:["occ","front"]},amalgam:{label:"Amalgam",category:"restoration",mode:"surface",views:["occ","front"]},gic:{label:"GIC",category:"restoration",mode:"surface",views:["occ","front"]},sealant:{label:"Sealant",category:"restoration",mode:"surface",views:["occ"]},caries:{label:"Caries",category:"condition",mode:"surface",views:["occ","front"]},rootCaries:{label:"Root caries",category:"condition",mode:"surface",views:["front"]},fracture:{label:"Fracture",category:"condition",mode:"surface",views:["occ","front"]},missing:{label:"Missing",category:"condition",mode:"whole",views:["occ","front"]},rootCanal:{label:"Root canal",category:"procedure",mode:"root",views:["front"]},extraction:{label:"Extraction",category:"procedure",mode:"whole",views:["occ","front"]},implant:{label:"Implant",category:"procedure",mode:"whole",views:["occ","front"]},crown:{label:"Crown",category:"prosthetic",mode:"whole",views:["occ","front"]},veneer:{label:"Veneer",category:"prosthetic",mode:"whole",views:["occ","front"]}};
 const CATEGORIES=[{id:"restoration",label:"Restoration"},{id:"condition",label:"Condition"},{id:"procedure",label:"Procedure"},{id:"prosthetic",label:"Prosthetic"}];
 const STATUSES=[{id:"existing",label:"Existing"},{id:"planned",label:"Planned"},{id:"watch",label:"Review"}];
@@ -957,6 +957,10 @@ function veneerClipPath(n,v){
   return surfaceClipPath(n,"occ");
 }
 let plannedPatternSerial=0;
+let wholeStatusOverlaySerial=0;
+function usesWholeTreatmentBand(treatment){
+  return treatment==="extraction"||treatment==="implant"||treatment==="crown";
+}
 function plannedPatternDef(treatment){
   const id=`planned-hatch-${treatment}-${plannedPatternSerial++}`;
   const color=COLORS[treatment]||"#64748b";
@@ -1005,13 +1009,18 @@ function wholeStatusOverlaySVG(n, v, treatment, status) {
     `;
   }
 
-  // Existing Crown is outline-only: keep the natural tooth visible underneath.
-  if (treatment === "crown") {
-    const stroke = darken(COLORS[treatment], 14);
+  // Keep the natural tooth visible while identifying the whole treatment with
+  // its own outline and a clipped color band through the middle.
+  if (usesWholeTreatmentBand(treatment)) {
+    const clipId = `whole-treatment-${treatment}-${wholeStatusOverlaySerial++}`;
+    const color = COLORS[treatment] || "#64748b";
+    const stroke = darken(color, 14);
     const paths = surfaceClipPath(n, v).replace(
       /<path /g,
       `<path fill="none" stroke="${stroke}" stroke-width="1.8" `
     );
+    const bandY = dims.height * 0.42;
+    const bandHeight = Math.max(4, dims.height * 0.16);
 
     return `
       <svg
@@ -1020,6 +1029,18 @@ function wholeStatusOverlaySVG(n, v, treatment, status) {
         height="${dims.height}"
         viewBox="0 0 ${dims.width} ${dims.height}"
       >
+        <defs>
+          <clipPath id="${clipId}">${surfaceClipPath(n, v)}</clipPath>
+        </defs>
+        <rect
+          x="0"
+          y="${bandY}"
+          width="${dims.width}"
+          height="${bandHeight}"
+          fill="${color}"
+          fill-opacity="0.72"
+          clip-path="url(#${clipId})"
+        ></rect>
         ${paths}
       </svg>
     `;
