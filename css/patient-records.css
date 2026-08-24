@@ -178,6 +178,28 @@
   }
 }
 
+/* PDF/print output must expand the complete Summary instead of printing its
+   on-screen scroll container and scrollbar. This file loads after print.css. */
+@media print {
+  .patient-record-review .entries-panel {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+
+  .patient-record-review .entries-panel > .entries-list {
+    flex: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    scrollbar-width: none;
+  }
+
+  .patient-record-review .entries-panel > .entries-list::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 /* Keep each separator attached to the detail before it when lines wrap. */
 .record-review-identity-details {
   gap: 6px 10px;
