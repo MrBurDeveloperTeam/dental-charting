@@ -38,7 +38,7 @@ body{
 .topbar{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:28px;min-height:68px;padding:0 28px;border-bottom:1px solid var(--line);background:#fff}
 .brand{display:flex;align-items:center;gap:11px;min-width:0;padding-right:28px;border-right:1px solid var(--line)}
 .snabbb-home{display:flex;align-items:center;justify-content:center;width:82px;height:34px;flex:none;border-radius:8px;transition:background-color .16s ease,transform .16s ease}
-.snabbb-home:hover{background:#f2fbfa;transform:translateY(-1px)}
+.snabbb-home:hover{background:transparent;transform:translateY(-1px)}
 .snabbb-home:focus-visible{outline:3px solid rgba(89,190,181,.25);outline-offset:2px}
 .snabbb-home img{display:block;width:78px;height:auto;object-fit:contain}
 .brand-divider{width:auto;height:auto;flex:none;background:none;color:#d8e2ee;font-size:28px;font-weight:300;line-height:1}
