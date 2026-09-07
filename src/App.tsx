@@ -4,6 +4,8 @@ import { DentalChartPage } from "./pages/DentalChartPage";
 import { PatientRecordsPage } from "./pages/PatientRecordsPage";
 import { PatientModal } from "./components/patient/PatientModal";
 import { AuthGate } from "./components/auth/AuthGate";
+import { ProfileSettings } from "./components/profileSettings/ProfileSettings";
+import "./components/profileSettings/profileSettings.css";
 import { getLatestPatientRecord, listPatientRecords, type PatientRecord } from "./services/patientRecords";
 
 export default function App() {
@@ -89,6 +91,7 @@ export default function App() {
 
   const app = (
     <>
+      {document.getElementById("profile-settings-root") && createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)}
       <PatientModal />
       {view === "records" ? <PatientRecordsPage onOpenRecord={openRecord} /> : <DentalChartPage />}
       {view === "review" && selectedRecord && document.getElementById("record-review-summary-root") && createPortal(
