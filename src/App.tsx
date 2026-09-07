@@ -4,6 +4,8 @@ import { DentalChartPage } from "./pages/DentalChartPage";
 import { PatientRecordsPage } from "./pages/PatientRecordsPage";
 import { PatientModal } from "./components/patient/PatientModal";
 import { AuthGate } from "./components/auth/AuthGate";
+import { ProfileSettings } from "./components/profileSettings/ProfileSettings";
+import "./components/profileSettings/profileSettings.css";
 import { getLatestPatientRecord, listPatientRecords, type PatientRecord } from "./services/patientRecords";
 
 export default function App() {
@@ -131,6 +133,9 @@ export default function App() {
 
   // Local-only CSS/UI debugging switch. Production can never use this bypass.
   const bypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true";
+  const profileSettings = document.getElementById("profile-settings-root")
+    ? createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)
+    : null;
 
-  return bypassAuth ? app : <AuthGate>{app}</AuthGate>;
+  return bypassAuth ? <>{profileSettings}{app}</> : <AuthGate authenticatedChrome={profileSettings}>{app}</AuthGate>;
 }
