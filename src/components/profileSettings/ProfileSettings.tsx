@@ -5,6 +5,7 @@ const SNABBB_APP_URL = "https://app.snabbb.com";
 
 type ProfileUser = {
   id?: string;
+  partnerId?: string;
   email?: string;
   name?: string;
 };
@@ -15,10 +16,17 @@ function readUser(payload: unknown): ProfileUser {
   const data = payload as Record<string, any> | null;
   const user = data?.user ?? data?.data?.user ?? data?.profile ?? data?.data ?? {};
   const profileUser = user?.profiles?.user ?? user?.profile ?? {};
+  const metadata = profileUser?.user_metadata ?? user?.user_metadata ?? {};
+  const firstAndLastName = [
+    metadata.first_name ?? profileUser.first_name ?? user.first_name,
+    metadata.last_name ?? profileUser.last_name ?? user.last_name,
+  ].filter(Boolean).join(" ").trim();
   return {
     id: profileUser.user_id ?? profileUser.id ?? user.id ?? user.user_id ?? user.supabase_user_id,
+    partnerId: String(user.partner_id?.[0] ?? user.partner_id ?? profileUser.partner_id?.[0] ?? profileUser.partner_id ?? "") || undefined,
     email: user.email ?? profileUser.email,
-    name: user.name ?? user.full_name ?? profileUser.name ?? profileUser.full_name ?? user.user_metadata?.name ?? user.user_metadata?.full_name,
+    name: firstAndLastName || metadata.full_name || metadata.name
+      || profileUser.full_name || profileUser.name || user.full_name || user.name,
   };
 }
 
@@ -83,20 +91,34 @@ export function ProfileSettings() {
   useEffect(() => {
     if (!open || !user.email) return;
     const controller = new AbortController();
+    const company = readActiveCompany();
+    const params = new URLSearchParams({ email: user.email });
+    if (user.partnerId) params.set("partner_id", user.partnerId);
+    if (company.companyCode) {
+      params.set("website_scope", company.companyCode);
+      params.set("website_domain", company.companyCode);
+    }
     setCredits("Loading…");
-    fetch(`${SNABBB_APP_URL}/api/wallet?email=${encodeURIComponent(user.email)}`, {
+    fetch(`${SNABBB_APP_URL}/api/wallet?${params.toString()}`, {
       credentials: "include", headers: { Accept: "application/json" }, signal: controller.signal,
     })
       .then(async (response) => {
         const result = await response.json().catch(() => null);
         if (!response.ok) throw new Error();
-        const value = result?.data?.snabbb_balance ?? result?.data?.balance ?? result?.snabbb_balance ?? result?.balance;
+        const value = result?.data?.snabbb_balance ?? result?.data?.balance
+          ?? result?.result?.snabbb_balance ?? result?.result?.balance
+          ?? result?.snabbb_balance ?? result?.balance;
         if (!Number.isFinite(Number(value))) throw new Error();
         setCredits(`${Number(value)} credits`);
       })
-      .catch((error) => { if (error?.name !== "AbortError") setCredits("Balance unavailable"); });
+      .catch((error) => {
+        if (error?.name !== "AbortError") {
+          console.warn("[Wallet] Unable to load Snabbb Credit", error);
+          setCredits("Balance unavailable");
+        }
+      });
     return () => controller.abort();
-  }, [open, user.email]);
+  }, [open, user.email, user.partnerId]);
 
   const createAppLink = async (app: string) => {
     const company = readActiveCompany();
