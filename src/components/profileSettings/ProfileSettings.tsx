@@ -99,7 +99,7 @@ export function ProfileSettings() {
       params.set("website_domain", company.companyCode);
     }
     setCredits("Loading…");
-    fetch(`${SNABBB_APP_URL}/api/wallet?${params.toString()}`, {
+    fetch(`/api/wallet?${params.toString()}`, {
       credentials: "include", headers: { Accept: "application/json" }, signal: controller.signal,
     })
       .then(async (response) => {
