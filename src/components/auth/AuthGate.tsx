@@ -5,7 +5,7 @@ const VERIFY_URL = `${SNABBB_APP_URL}/api/verify-token`;
 
 type AuthState = "checking" | "authenticated" | "unauthenticated" | "error";
 
-export function AuthGate({ children }: { children: ReactNode }) {
+export function AuthGate({ children, authenticatedChrome }: { children: ReactNode; authenticatedChrome?: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>("checking");
 
   const verifySession = useCallback(async () => {
@@ -45,6 +45,7 @@ export function AuthGate({ children }: { children: ReactNode }) {
   return (
     <>
       {children}
+      {authState === "authenticated" && authenticatedChrome}
       {authState !== "authenticated" && (
         <main className="auth-gate" aria-busy={isChecking}>
           <section className="auth-gate-dialog" role={isChecking ? "status" : "alertdialog"} aria-modal={!isChecking}>

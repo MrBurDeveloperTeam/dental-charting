@@ -91,7 +91,6 @@ export default function App() {
 
   const app = (
     <>
-      {document.getElementById("profile-settings-root") && createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)}
       <PatientModal />
       {view === "records" ? <PatientRecordsPage onOpenRecord={openRecord} /> : <DentalChartPage />}
       {view === "review" && selectedRecord && document.getElementById("record-review-summary-root") && createPortal(
@@ -134,6 +133,9 @@ export default function App() {
 
   // Local-only CSS/UI debugging switch. Production can never use this bypass.
   const bypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true";
+  const profileSettings = document.getElementById("profile-settings-root")
+    ? createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)
+    : null;
 
-  return bypassAuth ? app : <AuthGate>{app}</AuthGate>;
+  return bypassAuth ? <>{profileSettings}{app}</> : <AuthGate authenticatedChrome={profileSettings}>{app}</AuthGate>;
 }

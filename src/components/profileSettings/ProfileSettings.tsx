@@ -14,11 +14,29 @@ type Destination = "reward" | "channel" | "support" | "settings";
 function readUser(payload: unknown): ProfileUser {
   const data = payload as Record<string, any> | null;
   const user = data?.user ?? data?.data?.user ?? data?.profile ?? data?.data ?? {};
+  const profileUser = user?.profiles?.user ?? user?.profile ?? {};
   return {
-    id: user.id ?? user.user_id ?? user.supabase_user_id,
-    email: user.email,
-    name: user.name ?? user.full_name ?? user.user_metadata?.name ?? user.user_metadata?.full_name,
+    id: profileUser.user_id ?? profileUser.id ?? user.id ?? user.user_id ?? user.supabase_user_id,
+    email: user.email ?? profileUser.email,
+    name: user.name ?? user.full_name ?? profileUser.name ?? profileUser.full_name ?? user.user_metadata?.name ?? user.user_metadata?.full_name,
   };
+}
+
+function readActiveCompany() {
+  try {
+    const session = JSON.parse(localStorage.getItem("odoo_session") || "null");
+    const companyCodes = session?.company_codes || {};
+    const current = session?.user_companies?.current_company?.[0]
+      ?? session?.user_companies?.current_company ?? session?.company_id ?? session?.current_company;
+    const companyId = current && companyCodes[current]
+      ? String(current)
+      : Object.keys(companyCodes).sort((a, b) => Number(a) - Number(b))[0];
+    if (!companyId) return { companyId: 2, companyCode: undefined };
+    const rawCode = String(companyCodes[companyId] || "").toUpperCase();
+    return { companyId: Number(companyId), companyCode: companyId === "4" ? "MID" : rawCode || undefined };
+  } catch {
+    return { companyId: 2, companyCode: undefined };
+  }
 }
 
 function Icon({ type }: { type: Destination | "logout" }) {
@@ -81,13 +99,17 @@ export function ProfileSettings() {
   }, [open, user.email]);
 
   const createAppLink = async (app: string) => {
+    const company = readActiveCompany();
     const response = await fetch(`${SNABBB_APP_URL}/api/v1/sso/userid`, {
       method: "POST",
       credentials: "include",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      headers: {
+        "Content-Type": "application/json", Accept: "application/json",
+        ...(company.companyCode ? { "X-Company-Code": company.companyCode, "X-Company-Id": String(company.companyId) } : {}),
+      },
       body: JSON.stringify({
         jsonrpc: "2.0", method: "call",
-        params: { app_code: app, email: user.email, name: user.name, company_id: 2, portal: true }, id: 1,
+        params: { app_code: app, email: user.email, name: user.name, company_id: company.companyId, portal: true }, id: 1,
       }),
     });
     if (!response.ok) throw new Error("Unable to open this page.");
@@ -107,11 +129,11 @@ export function ProfileSettings() {
       }
       const app = destination === "reward" ? "reward" : destination === "channel" ? "e-learning" : "snabbb";
       const result = await createAppLink(app);
-      const id = result?.result?.supabase_user_id ?? user.id;
+      const id = result?.result?.supabase_user_id ?? result?.data?.result?.supabase_user_id ?? result?.supabase_user_id ?? user.id;
       const url = destination === "reward"
         ? "https://reward.snabbb.com"
-        : destination === "channel" && id
-          ? `https://e-learning.snabbb.com/channel/${encodeURIComponent(id)}`
+        : destination === "channel"
+          ? id ? `https://e-learning.snabbb.com/channel/${encodeURIComponent(id)}` : "https://e-learning.snabbb.com"
           : `${SNABBB_APP_URL}/profile-settings`;
       window.location.assign(url);
     } catch {
