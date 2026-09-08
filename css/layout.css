@@ -657,7 +657,10 @@ input[type="reset"],
   .layout > .sidebar {
     grid-area: chart-sidebar;
     min-width: 0;
-    height: auto;
+    position: sticky;
+    top: 12px;
+    align-self: start;
+    height: calc(100dvh - 24px);
     margin: 24px 16px 0 0;
     padding: 24px;
     overflow: hidden;
@@ -668,6 +671,24 @@ input[type="reset"],
 
   .chart-card {
     border-radius: 20px;
+  }
+
+  /* Keep the selected tooth and actions visible while editing lower fields. */
+  .layout > .sidebar > .editor {
+    height: 100%;
+    min-height: 0;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 16px;
+  }
+
+  .layout > .sidebar .editor-fields {
+    display: grid;
+    align-content: start;
+    gap: 25px;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+    padding: 2px 4px 4px 2px;
   }
 
   /* The header was moved outside .chart-workspace, so preserve its locked state. */

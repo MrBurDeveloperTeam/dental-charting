@@ -261,7 +261,7 @@
   .mobile-entry-content .form-actions{display:none}
   .mobile-entry-content .field-pair{display:contents}
   .mobile-entry-content .field,.mobile-entry-content .treatment-field,.mobile-entry-content .status-field,.mobile-entry-content .note-field{grid-column:1!important;width:100%;min-width:0}
-  .mobile-entry-content .editor>.field,.mobile-entry-content .field-pair>.field{display:none!important}
+  .mobile-entry-content .editor-fields>.field,.mobile-entry-content .field-pair>.field{display:none!important}
   /* .mobile-entry-content[data-step="1"] .selection-field,.mobile-entry-content[data-step="1"] .chart-type-field, */
   .mobile-entry-content[data-step="2"] .selection-field,.mobile-entry-content[data-step="2"] .view-field,.mobile-entry-content[data-step="2"] #surface-field,
   .mobile-entry-content[data-step="3"] .selection-field,.mobile-entry-content[data-step="3"] .treatment-field,
