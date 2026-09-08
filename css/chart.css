@@ -218,3 +218,49 @@
     fill-opacity: 0;
   }
 }
+
+@media screen and (min-width: 601px) {
+  /* Leave room below L/R before the upper teeth in both chart sections. */
+  .split-stage .orientation-grid {
+    margin-bottom: 6px;
+  }
+
+  /* Space between EXISTING and PLANNING */
+  .split-stage {
+    --chart-root-row-height: 72px; /* previously 88px */
+    gap: 4px;
+    padding: 8px 12px;
+  }
+
+  /* Enable the existing grid layout */
+  .split-stage .arch-grid {
+    display: grid;
+    row-gap: 0;
+  }
+
+  /* Vertical spacing: root view, crown view, tooth numbers */
+  .split-stage .upper-grid {
+    grid-template-rows: var(--chart-root-row-height) 40px 18px;
+  }
+
+  .split-stage .lower-grid {
+    grid-template-rows: 18px 40px var(--chart-root-row-height);
+    padding-bottom: 0;
+  }
+
+  /* Bring neighbouring teeth closer horizontally */
+  .split-stage .teeth-row,
+  .split-stage .orientation-row {
+    width: 88%; /* previously 94% */
+    margin-inline: auto;
+  }
+
+  /* Reduce surrounding empty space */
+  .split-stage .split-group {
+    padding: 6px 8px 4px;
+  }
+
+  .split-stage .arch-label-text {
+    margin: 0;
+  }
+}
