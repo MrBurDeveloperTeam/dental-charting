@@ -632,8 +632,8 @@ input[type="reset"],
   .layout {
     display: grid;
     grid-template-columns:
-      minmax(0, 58fr)
-      minmax(460px, 42fr);
+      minmax(0, 54fr)
+      minmax(460px, 46fr);
     grid-template-areas:
       "chart-header chart-header"
       "chart-workspace chart-sidebar";
@@ -671,6 +671,21 @@ input[type="reset"],
 
   .chart-card {
     border-radius: 20px;
+  }
+
+  /* Recover the empty right gutter for the wider editor sidebar. */
+  .split-stage .arch-grid,
+  .split-stage .orientation-grid {
+    grid-template-columns: 70px minmax(0, 1fr) 16px;
+  }
+
+  .split-stage .orientation-grid {
+    display: grid;
+  }
+
+  .split-stage .teeth-row,
+  .split-stage .orientation-row {
+    width: 100%;
   }
 
   /* Keep the selected tooth and actions visible while editing lower fields. */

@@ -220,6 +220,11 @@
 }
 
 @media screen and (min-width: 601px) {
+  /* Leave room below L/R before the upper teeth in both chart sections. */
+  .split-stage .orientation-grid {
+    margin-bottom: 6px;
+  }
+
   /* Space between EXISTING and PLANNING */
   .split-stage {
     --chart-root-row-height: 72px; /* previously 88px */
