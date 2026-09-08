@@ -132,7 +132,9 @@ export default function App() {
   );
 
   // Local-only CSS/UI debugging switch. Production can never use this bypass.
-  const bypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true";
+  // TEMPORARY: bypass login to check the preview layout.
+// const bypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true";
+  const bypassAuth = true;
   const profileSettings = document.getElementById("profile-settings-root")
     ? createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)
     : null;
