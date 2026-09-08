@@ -1240,12 +1240,13 @@ function renderBridgeConnectors(){
       const review=reviewA?.treatment==="bridge"&&reviewA.bridgeId&&reviewB?.treatment==="bridge"&&reviewA.bridgeId===reviewB.bridgeId;
       const preview=draft.treatment==="bridge"&&draft.layer===layer&&!bridgeSelectionError(selection.teeth)&&selection.teeth.includes(n)&&selection.teeth.includes(next);
       if(!saved&&!review&&!preview)return;
-      const left=teeth[index].querySelector(".art-core")?.getBoundingClientRect();
-      const right=teeth[index+1].querySelector(".art-core")?.getBoundingClientRect();
+      const left=teeth[index].getBoundingClientRect();
+      const right=teeth[index+1].getBoundingClientRect();
       if(!left||!right)return;
+      const centerY=bounds.height/2;
       const line=document.createElementNS(svg.namespaceURI,"line");
-      line.setAttribute("x1",String(left.right-bounds.left-2));line.setAttribute("y1",String(left.top+left.height/2-bounds.top));
-      line.setAttribute("x2",String(right.left-bounds.left+2));line.setAttribute("y2",String(right.top+right.height/2-bounds.top));
+      line.setAttribute("x1",String(left.left+left.width/2-bounds.left));line.setAttribute("y1",String(centerY));
+      line.setAttribute("x2",String(right.left+right.width/2-bounds.left));line.setAttribute("y2",String(centerY));
       line.setAttribute("stroke",COLORS.bridge);line.setAttribute("stroke-width","3");line.setAttribute("stroke-linecap","round");
       if((preview&&!saved)||layer==="planned"||review)line.setAttribute("stroke-dasharray","4 3");
       svg.appendChild(line);
