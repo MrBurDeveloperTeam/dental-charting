@@ -685,7 +685,21 @@ input[type="reset"],
 
   .split-stage .teeth-row,
   .split-stage .orientation-row {
-    width: 100%;
+    width: 90%;
+    margin-inline: auto;
+  }
+
+  /* Tighter, larger desktop odontogram. Keep numbers and L/R aligned. */
+  .split-stage .art-core.front.upper {
+    transform: scale(.64, -.64);
+  }
+
+  .split-stage .art-core.front.lower {
+    transform: scale(.64);
+  }
+
+  .split-stage .art-core.occ {
+    transform: scale(.98);
   }
 
   /* Keep the selected tooth and actions visible while editing lower fields. */
