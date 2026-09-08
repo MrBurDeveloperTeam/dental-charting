@@ -998,6 +998,52 @@ function wholeStatusOverlaySVG(n, v, treatment, status) {
       ? { width: toothW(n), height: toothH(n) }
       : crownDims(n);
 
+  // A planned bridge stays readable as a tooth: use a light band and dashed
+  // perimeter instead of covering the complete root/crown with hatching.
+  if (status === "planned" && treatment === "bridge") {
+    const clipId = `planned-bridge-${wholeStatusOverlaySerial++}`;
+    const color = COLORS.bridge;
+    const paths = surfaceClipPath(n, v).replace(
+      /<path /g,
+      `<path fill="none" stroke="${color}" stroke-width="1.8" stroke-dasharray="4 3" `
+    );
+    const bandY = dims.height * 0.42;
+    const bandHeight = Math.max(4, dims.height * 0.14);
+
+    return `
+      <svg
+        class="surface-svg planned-bridge-overlay"
+        width="${dims.width}"
+        height="${dims.height}"
+        viewBox="0 0 ${dims.width} ${dims.height}"
+      >
+        <defs>
+          <clipPath id="${clipId}">${surfaceClipPath(n, v)}</clipPath>
+        </defs>
+        <rect
+          x="0"
+          y="${bandY}"
+          width="${dims.width}"
+          height="${bandHeight}"
+          fill="${color}"
+          fill-opacity="0.28"
+          clip-path="url(#${clipId})"
+        ></rect>
+        <line
+          x1="0"
+          y1="${bandY + bandHeight / 2}"
+          x2="${dims.width}"
+          y2="${bandY + bandHeight / 2}"
+          stroke="${color}"
+          stroke-width="1.8"
+          stroke-dasharray="4 3"
+          clip-path="url(#${clipId})"
+        ></line>
+        ${paths}
+      </svg>
+    `;
+  }
+
   // Planned treatments use diagonal hatching.
   if (status === "planned") {
     const pattern = plannedPatternDef(treatment);
