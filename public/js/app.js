@@ -25,7 +25,7 @@ const TOOTH_NAMES={
   permanent:{11:"Upper right central incisor",12:"Upper right lateral incisor",13:"Upper right canine",14:"Upper right first premolar",15:"Upper right second premolar",16:"Upper right first molar",17:"Upper right second molar",18:"Upper right wisdom tooth",21:"Upper left central incisor",22:"Upper left lateral incisor",23:"Upper left canine",24:"Upper left first premolar",25:"Upper left second premolar",26:"Upper left first molar",27:"Upper left second molar",28:"Upper left wisdom tooth",31:"Lower left central incisor",32:"Lower left lateral incisor",33:"Lower left canine",34:"Lower left first premolar",35:"Lower left second premolar",36:"Lower left first molar",37:"Lower left second molar",38:"Lower left wisdom tooth",41:"Lower right central incisor",42:"Lower right lateral incisor",43:"Lower right canine",44:"Lower right first premolar",45:"Lower right second premolar",46:"Lower right first molar",47:"Lower right second molar",48:"Lower right wisdom tooth"},
   primary:{51:"Upper right central primary incisor",52:"Upper right lateral primary incisor",53:"Upper right primary canine",54:"Upper right first primary molar",55:"Upper right second primary molar",61:"Upper left central primary incisor",62:"Upper left lateral primary incisor",63:"Upper left primary canine",64:"Upper left first primary molar",65:"Upper left second primary molar",71:"Lower left central primary incisor",72:"Lower left lateral primary incisor",73:"Lower left primary canine",74:"Lower left first primary molar",75:"Lower left second primary molar",81:"Lower right central primary incisor",82:"Lower right lateral primary incisor",83:"Lower right primary canine",84:"Lower right first primary molar",85:"Lower right second primary molar"}
 };
-const COLORS={composite:"#15803d",amalgam:"#1d4ed8",gic:"#ef4444",sealant:"#55a8e8",caries:"#4b5563",rootCaries:"#ae7042",fracture:"#bd4a2e",missing:"#a8b4c1",extraction:"#d85852",implant:"#f97316",rootCanal:"#d85852",bridge:"#f948f3",crown:"#4f4f4f",veneer:"#00fbff"};
+const COLORS={composite:"#15803d",amalgam:"#1d4ed8",gic:"#ef4444",sealant:"#55a8e8",caries:"#4b5563",rootCaries:"#ae7042",fracture:"#bd4a2e",missing:"#a8b4c1",extraction:"#d85852",implant:"#f97316",rootCanal:"#d85852",bridge:"#f948f3",crown:"#8c25f4",veneer:"#00fbff"};
 const TREATMENTS={composite:{label:"Composite",category:"restoration",mode:"surface",views:["occ","front"]},amalgam:{label:"Amalgam",category:"restoration",mode:"surface",views:["occ","front"]},gic:{label:"GIC",category:"restoration",mode:"surface",views:["occ","front"]},sealant:{label:"Sealant",category:"restoration",mode:"surface",views:["occ"]},caries:{label:"Caries",category:"condition",mode:"surface",views:["occ","front"]},rootCaries:{label:"Root caries",category:"condition",mode:"surface",views:["front"]},fracture:{label:"Fracture",category:"condition",mode:"surface",views:["occ","front"]},missing:{label:"Missing",category:"condition",mode:"whole",views:["occ","front"]},rootCanal:{label:"Root canal",category:"procedure",mode:"root",views:["front"]},extraction:{label:"Extraction",category:"procedure",mode:"whole",views:["occ","front"]},implant:{label:"Implant",category:"procedure",mode:"whole",views:["occ","front"]},bridge:{label:"Bridge",category:"prosthetic",mode:"whole",views:["occ","front"]},crown:{label:"Crown",category:"prosthetic",mode:"whole",views:["occ","front"]},veneer:{label:"Veneer",category:"prosthetic",mode:"whole",views:["occ","front"]}};
 const CATEGORIES=[{id:"restoration",label:"Restoration"},{id:"condition",label:"Condition"},{id:"procedure",label:"Procedure"},{id:"prosthetic",label:"Prosthetic"}];
 const STATUSES=[{id:"existing",label:"Existing"},{id:"planned",label:"Planned"},{id:"watch",label:"Review"}];
@@ -998,48 +998,52 @@ function wholeStatusOverlaySVG(n, v, treatment, status) {
       ? { width: toothW(n), height: toothH(n) }
       : crownDims(n);
 
-  // A planned bridge stays readable as a tooth: use a light band and dashed
-  // perimeter instead of covering the complete root/crown with hatching.
-  if (status === "planned" && treatment === "bridge") {
-    const clipId = `planned-bridge-${wholeStatusOverlaySerial++}`;
-    const color = COLORS.bridge;
-    const paths = surfaceClipPath(n, v).replace(
-      /<path /g,
-      `<path fill="none" stroke="${color}" stroke-width="1.8" stroke-dasharray="4 3" `
-    );
-    const bandY = dims.height * 0.42;
-    const bandHeight = Math.max(4, dims.height * 0.14);
+  // Whole-tooth treatments use the photo silhouette so their tint and border
+  // follow the anatomy instead of a generic geometric shape.
+  if (["bridge", "crown", "extraction", "implant", "veneer"].includes(treatment)) {
+    const serial = wholeStatusOverlaySerial++;
+    const clipId = `prosthetic-tooth-${treatment}-${serial}`;
+    const regionId = `prosthetic-crown-region-${treatment}-${serial}`;
+    const outlineId = `prosthetic-outline-${treatment}-${serial}`;
+    const outlineFilterId = `prosthetic-outline-filter-${treatment}-${serial}`;
+    const dashPatternId = `prosthetic-outline-dashes-${treatment}-${serial}`;
+    const color = COLORS[treatment] || "#64748b";
+    const stroke = darken(color, 14);
+    const planned = status === "planned";
+    const review = status === "watch";
+    const opacity = planned ? "0.32" : review ? "0.20" : status === "preview" ? "0.30" : "0.44";
+    const prostheticPath = surfaceClipPath(n, v);
+    const crownOnly = treatment === "bridge" || treatment === "crown" || treatment === "veneer";
+    const crownHeight = v === "front" && crownOnly ? crownCutY(n) : dims.height;
+    const cervicalY = crownHeight - 2;
+    const crownRegion = v === "front" && crownOnly ? `M0,0 H${dims.width} V${cervicalY} C${dims.width * 0.66},${crownHeight + 1} ${dims.width * 0.34},${crownHeight + 1} 0,${cervicalY} Z` : `M0,0 H${dims.width} V${dims.height} H0 Z`;
+    const paths = prostheticPath.replace(/<path /g, `<path fill="${color}" fill-opacity="${opacity}" stroke="none" `);
+    const outerShape = prostheticPath.replace(/<path /g, '<path fill="white" stroke="none" ');
+    const innerShape = prostheticPath.replace(/<path /g, '<path fill="black" stroke="none" ');
 
     return `
       <svg
-        class="surface-svg planned-bridge-overlay"
+        class="surface-svg prosthetic-tooth-overlay${planned ? " planned-prosthetic-overlay" : ""}"
         width="${dims.width}"
         height="${dims.height}"
         viewBox="0 0 ${dims.width} ${dims.height}"
       >
         <defs>
-          <clipPath id="${clipId}">${surfaceClipPath(n, v)}</clipPath>
+          <clipPath id="${clipId}">${prostheticPath}</clipPath>
+          <clipPath id="${regionId}"><path d="${crownRegion}"></path></clipPath>
+          <filter id="${outlineFilterId}" x="-12%" y="-12%" width="124%" height="124%">
+            <feMorphology operator="dilate" radius="0.9"></feMorphology>
+          </filter>
+          <mask id="${outlineId}" maskUnits="userSpaceOnUse" x="-3" y="-3" width="${dims.width + 6}" height="${dims.height + 6}">
+            <rect x="-3" y="-3" width="${dims.width + 6}" height="${dims.height + 6}" fill="black"></rect>
+            <g clip-path="url(#${regionId})"><g filter="url(#${outlineFilterId})">${outerShape}</g>${innerShape}</g>
+          </mask>
+          <pattern id="${dashPatternId}" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+            <rect width="3.8" height="7" fill="${stroke}"></rect>
+          </pattern>
         </defs>
-        <rect
-          x="0"
-          y="${bandY}"
-          width="${dims.width}"
-          height="${bandHeight}"
-          fill="${color}"
-          fill-opacity="0.28"
-          clip-path="url(#${clipId})"
-        ></rect>
-        <line
-          x1="0"
-          y1="${bandY + bandHeight / 2}"
-          x2="${dims.width}"
-          y2="${bandY + bandHeight / 2}"
-          stroke="${color}"
-          stroke-width="1.8"
-          stroke-dasharray="4 3"
-          clip-path="url(#${clipId})"
-        ></line>
-        ${paths}
+        <g clip-path="url(#${regionId})">${paths}</g>
+        <rect x="-2" y="-2" width="${dims.width + 4}" height="${dims.height + 4}" fill="${planned || review ? `url(#${dashPatternId})` : stroke}" mask="url(#${outlineId})"></rect>
       </svg>
     `;
   }
@@ -1167,7 +1171,7 @@ function surfaceOverlaySVG(n,v,preview=false){
   const previewColor=preview?COLORS[draft.treatment]:null;
   return renderSurfaceOverlay(n,v,{complete,planned,review,selected,previewColor,preview,clipKey:preview?"draft":"chart"});
 }
-function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=wholeExisting&&wholeExisting.treatment==="missing",selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; const tooltip=toothTooltipText(n); if(tooltip){holder.classList.add("has-tooltip"); holder.dataset.tooltip=tooltip; if(tooltipOnLeft(n)) holder.classList.add("tooltip-left")} const art=document.createElement("div"); art.className="tooth-art"; const core=document.createElement("div"); core.className=`art-core ${v==="front"?`front ${isUpper(n)?"upper":"lower"}`:"occ"}`; if(missing&&layer!=="planned"){core.innerHTML=missingSVG(n,v)} else {const split=layer!=="combined"; const baseWhole=!split&&wholeExisting&&!isVeneer(wholeExisting.treatment)?wholeExisting:null; const fill=split?"#F5F2EC":(baseWhole?COLORS[baseWhole.treatment]:"#F5F2EC"); const baseSVG=v==="front"?toothSVG(n,fill):crownOnlySVG(n,fill); core.innerHTML=baseSVG; if(!ghost){if(split&&wholeExisting&&!isVeneer(wholeExisting.treatment)) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeExisting.treatment,"existing")); if(wholeExisting&&isVeneer(wholeExisting.treatment)) core.insertAdjacentHTML("beforeend",wholeOverlaySVG(n,v,wholeExisting.treatment,"existing")); if(wholePlanned&&isVeneer(wholePlanned.treatment)) core.insertAdjacentHTML("beforeend",wholeOverlaySVG(n,v,wholePlanned.treatment,"planned")); if(!wholeExisting&&!wholePlanned&&wholeReview&&isVeneer(wholeReview.treatment)) core.insertAdjacentHTML("beforeend",wholeOverlaySVG(n,v,wholeReview.treatment,"watch")); if(selection.multi&&selection.teeth.includes(n)&&isVeneer(draft.treatment)&&layer==="combined") core.insertAdjacentHTML("beforeend",wholeOverlaySVG(n,v,draft.treatment,"preview")); if((split||!wholeExisting)&&wholePlanned&&!isVeneer(wholePlanned.treatment)) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholePlanned.treatment,"planned")); if((split||!wholeExisting&&!wholePlanned)&&wholeReview&&!isVeneer(wholeReview.treatment)) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeReview.treatment,"watch")); if(layer==="combined") core.insertAdjacentHTML("beforeend",surfaceOverlaySVG(n,v)); else if(layer==="existing") core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{complete:surfaceMap(n,v,"existing"),review:surfaceMap(n,v,"watch","existing"),selected:draft.tooth===n&&draft.view===v?new Set(draft.surfaces):new Set(),previewColor:null,preview:false,clipKey:`existing-${n}-${v}`})); else core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{planned:surfaceMap(n,v,"planned"),review:surfaceMap(n,v,"watch","planned"),selected:draft.tooth===n&&draft.view===v?new Set(draft.surfaces):new Set(),previewColor:null,preview:false,clipKey:`planned-${n}-${v}`})); if(v==="front"&&((layer==="planned"&&(rootPlanned||rootReview))||(layer==="existing"&&(rootExisting||rootReview))||(layer==="combined"&&(rootExisting||rootReview)))) core.insertAdjacentHTML("beforeend",rctOverlayHTML(n))}} art.appendChild(core); if(layer==="combined"){if(!ghost&&wholeExisting&&!missing&&!isVeneer(wholeExisting.treatment)&&!hideWholeRing(wholeExisting.treatment)) art.insertAdjacentHTML("beforeend",`<div class="status-ring" style="--ring-color:${COLORS[wholeExisting.treatment]}"></div>`); if(!ghost&&((wholePlanned||(rootPlanned&&!wholeExisting))&&!(wholePlanned&&isVeneer(wholePlanned.treatment)))){const t=wholePlanned?wholePlanned.treatment:rootPlanned.treatment; if(!hideWholeRing(t)) art.insertAdjacentHTML("beforeend",`<div class="plan-ring" style="--ring-color:${COLORS[t]}"></div>`)} if(!ghost&&v==="front"&&latestWatch(n,"existing")) art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} else if(!ghost&&v==="front"&&watch){art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} holder.appendChild(art); if(ghost){holder.addEventListener("click",e=>{if(!isMobileToothModalViewport())return;e.preventDefault();e.stopPropagation();activatePrimaryOptionalTooth(n)});holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); activatePrimaryOptionalTooth(n)}); return holder} holder.addEventListener("click",()=>handleToothClick(n,v,statusContext)); if(chartMode==="primary"&&isPrimaryOptionalMolar(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); deactivatePrimaryOptionalTooth(n)}); else if(chartMode==="primary"&&swapPrimaryToothNumber(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); togglePrimaryTooth(n,v)}); art.querySelectorAll("[data-surface]").forEach(el=>el.addEventListener("click",e=>{e.stopPropagation();openTooth(n,v,el.dataset.surface,selection.multi&&selection.teeth.length>0,statusContext)})); return holder}
+function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=wholeExisting&&wholeExisting.treatment==="missing",selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; const tooltip=toothTooltipText(n); if(tooltip){holder.classList.add("has-tooltip"); holder.dataset.tooltip=tooltip; if(tooltipOnLeft(n)) holder.classList.add("tooltip-left")} const art=document.createElement("div"); art.className="tooth-art"; const core=document.createElement("div"); core.className=`art-core ${v==="front"?`front ${isUpper(n)?"upper":"lower"}`:"occ"}`; if(missing&&layer!=="planned"){core.innerHTML=missingSVG(n,v)} else {const split=layer!=="combined"; const fill="#F5F2EC"; const baseSVG=v==="front"?toothSVG(n,fill):crownOnlySVG(n,fill); core.innerHTML=baseSVG; if(!ghost){if(wholeExisting) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeExisting.treatment,"existing")); if((split||!wholeExisting)&&wholePlanned) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholePlanned.treatment,"planned")); if((split||!wholeExisting&&!wholePlanned)&&wholeReview) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeReview.treatment,"watch")); if(selection.multi&&selection.teeth.includes(n)&&draft.treatment==="veneer"&&layer==="combined") core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,draft.treatment,"preview")); if(layer==="combined") core.insertAdjacentHTML("beforeend",surfaceOverlaySVG(n,v)); else if(layer==="existing") core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{complete:surfaceMap(n,v,"existing"),review:surfaceMap(n,v,"watch","existing"),selected:draft.tooth===n&&draft.view===v?new Set(draft.surfaces):new Set(),previewColor:null,preview:false,clipKey:`existing-${n}-${v}`})); else core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{planned:surfaceMap(n,v,"planned"),review:surfaceMap(n,v,"watch","planned"),selected:draft.tooth===n&&draft.view===v?new Set(draft.surfaces):new Set(),previewColor:null,preview:false,clipKey:`planned-${n}-${v}`})); if(v==="front"&&((layer==="planned"&&(rootPlanned||rootReview))||(layer==="existing"&&(rootExisting||rootReview))||(layer==="combined"&&(rootExisting||rootReview)))) core.insertAdjacentHTML("beforeend",rctOverlayHTML(n))}} art.appendChild(core); if(layer==="combined"){if(!ghost&&wholeExisting&&!missing&&!isVeneer(wholeExisting.treatment)&&!hideWholeRing(wholeExisting.treatment)) art.insertAdjacentHTML("beforeend",`<div class="status-ring" style="--ring-color:${COLORS[wholeExisting.treatment]}"></div>`); if(!ghost&&((wholePlanned||(rootPlanned&&!wholeExisting))&&!(wholePlanned&&isVeneer(wholePlanned.treatment)))){const t=wholePlanned?wholePlanned.treatment:rootPlanned.treatment; if(!hideWholeRing(t)) art.insertAdjacentHTML("beforeend",`<div class="plan-ring" style="--ring-color:${COLORS[t]}"></div>`)} if(!ghost&&v==="front"&&latestWatch(n,"existing")) art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} else if(!ghost&&v==="front"&&watch){art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} holder.appendChild(art); if(ghost){holder.addEventListener("click",e=>{if(!isMobileToothModalViewport())return;e.preventDefault();e.stopPropagation();activatePrimaryOptionalTooth(n)});holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); activatePrimaryOptionalTooth(n)}); return holder} holder.addEventListener("click",()=>handleToothClick(n,v,statusContext)); if(chartMode==="primary"&&isPrimaryOptionalMolar(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); deactivatePrimaryOptionalTooth(n)}); else if(chartMode==="primary"&&swapPrimaryToothNumber(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); togglePrimaryTooth(n,v)}); art.querySelectorAll("[data-surface]").forEach(el=>el.addEventListener("click",e=>{e.stopPropagation();openTooth(n,v,el.dataset.surface,selection.multi&&selection.teeth.length>0,statusContext)})); return holder}
 function renderNumbersRow(container,list){container.innerHTML=""; list.forEach(n=>{const item=document.createElement("div"); item.className=`number${n===null?" empty":""}${n!==null&&isGhostPrimarySlot(n)?" ghost":""}`; item.textContent=n===null?"":n; container.appendChild(item)})}
 function renderToothRow(container,list,view,layer="combined"){container.dataset.bridgeView=view;container.dataset.bridgeLayer=layer;container.dataset.bridgeTeeth=JSON.stringify(list);container.innerHTML=""; list.forEach(n=>{if(n===null){const spacer=document.createElement("div"); spacer.className="tooth-spacer"; container.appendChild(spacer); return} container.appendChild(buildToothElement(n,view,layer))})}
 function renderCombinedChart(){renderToothRow(els.upperFront,activeUpperDisplay(),"front","combined"); renderToothRow(els.upperOcc,activeUpperDisplay(),"occ","combined"); renderNumbersRow(els.upperNumbers,activeUpperDisplay()); renderNumbersRow(els.lowerNumbers,activeLowerDisplay()); renderToothRow(els.lowerOcc,activeLowerDisplay(),"occ","combined"); renderToothRow(els.lowerFront,activeLowerDisplay(),"front","combined")}
@@ -1193,7 +1197,7 @@ function miniPreviewTransform(n,view){
   const scale=Math.min(72/width,88/height)*0.98;
   return `translate(-50%,-50%) scale(${scale},${isUpper(n)?-scale:scale})`;
 }
-function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=treatmentFor(draft.treatment),whole=t.mode==="whole",missing=draft.treatment==="missing"; if(missing){els.miniPreview.innerHTML=missingSVG(draft.tooth,draft.view); return} const baseSVG=draft.view==="front"?toothSVG(draft.tooth,"#F5F2EC"):crownOnlySVG(draft.tooth,"#F5F2EC"); let html=baseSVG; if(whole&&isVeneer(draft.treatment)) html+=wholeOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status); if(whole&&!isVeneer(draft.treatment)) html+=wholeStatusOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status==="planned"?"planned":draft.status==="watch"?"watch":"existing"); if(t.mode==="root") html+=rctOverlayHTML(draft.tooth); if(t.mode==="surface"){const map={}; draft.surfaces.forEach(s=>map[s]=draft.treatment); html+=renderSurfaceOverlay(draft.tooth,draft.view,{complete:draft.status==="existing"?map:{},planned:draft.status==="planned"?map:{},review:draft.status==="watch"?map:{},selected:new Set(),previewColor:null,preview:false,clipKey:"draft-mini"})} const modeClass=draft.view==="front"?`front ${isUpper(draft.tooth)?"upper":"lower"}`:"occ"; const badge=draft.status==="watch"?reviewBadgeHTML(draft.tooth,draft.view):""; els.miniPreview.innerHTML=`<div class="mini-art ${modeClass}"><div class="art-core ${modeClass}" style="transform:${miniPreviewTransform(draft.tooth,draft.view)}">${html}</div>${badge}</div>`}
+function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=treatmentFor(draft.treatment),whole=t.mode==="whole",missing=draft.treatment==="missing"; if(missing){els.miniPreview.innerHTML=missingSVG(draft.tooth,draft.view); return} const baseSVG=draft.view==="front"?toothSVG(draft.tooth,"#F5F2EC"):crownOnlySVG(draft.tooth,"#F5F2EC"); let html=baseSVG; if(whole) html+=wholeStatusOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status==="planned"?"planned":draft.status==="watch"?"watch":"existing"); if(t.mode==="root") html+=rctOverlayHTML(draft.tooth); if(t.mode==="surface"){const map={}; draft.surfaces.forEach(s=>map[s]=draft.treatment); html+=renderSurfaceOverlay(draft.tooth,draft.view,{complete:draft.status==="existing"?map:{},planned:draft.status==="planned"?map:{},review:draft.status==="watch"?map:{},selected:new Set(),previewColor:null,preview:false,clipKey:"draft-mini"})} const modeClass=draft.view==="front"?`front ${isUpper(draft.tooth)?"upper":"lower"}`:"occ"; const badge=draft.status==="watch"?reviewBadgeHTML(draft.tooth,draft.view):""; els.miniPreview.innerHTML=`<div class="mini-art ${modeClass}"><div class="art-core ${modeClass}" style="transform:${miniPreviewTransform(draft.tooth,draft.view)}">${html}</div>${badge}</div>`}
 function renderPreview(){const t=treatmentFor(draft.treatment),surfaceText=t.mode==="surface"?draft.surfaces.join(""):(t.mode==="root"?"Root":"Whole tooth"),status=STATUSES.find(i=>i.id===draft.status).label,targetText=selection.multi&&selection.teeth.length>1?`${selection.teeth.length} teeth`: `Tooth ${draft.tooth}`; els.previewBox.innerHTML=`<strong>${t.label}</strong><br>${targetText} · ${draft.view==="occ"?"Crown view":"Root view"} · ${surfaceText}<br>Status: ${status}`}
 function createEntryRow(entry){
   const row=document.createElement("div");row.className="entry-row";
@@ -1262,6 +1266,7 @@ function renderBridgeConnectors(){
     const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");
     svg.classList.add("bridge-connectors");svg.setAttribute("aria-hidden","true");
     svg.setAttribute("viewBox",`0 0 ${bounds.width} ${bounds.height}`);
+    svg.setAttribute("preserveAspectRatio","none");
     const teeth=[...row.children];
     list.forEach((n,index)=>{
       const next=list[index+1];if(!n||!next)return;
@@ -1271,13 +1276,17 @@ function renderBridgeConnectors(){
       const review=reviewA?.treatment==="bridge"&&reviewA.bridgeId&&reviewB?.treatment==="bridge"&&reviewA.bridgeId===reviewB.bridgeId;
       const preview=draft.treatment==="bridge"&&draft.layer===layer&&!bridgeSelectionError(selection.teeth)&&selection.teeth.includes(n)&&selection.teeth.includes(next);
       if(!saved&&!review&&!preview)return;
-      const left=teeth[index].getBoundingClientRect();
-      const right=teeth[index+1].getBoundingClientRect();
+      const left=teeth[index].querySelector(".art-core")?.getBoundingClientRect();
+      const right=teeth[index+1].querySelector(".art-core")?.getBoundingClientRect();
       if(!left||!right)return;
-      const centerY=bounds.height/2;
+      const overlap=Math.min(4,Math.max(2,(right.left-left.right)*0.18));
+      const startX=left.right-bounds.left+overlap;
+      const endX=right.left-bounds.left-overlap;
+      const startY=left.top+left.height/2-bounds.top;
+      const endY=right.top+right.height/2-bounds.top;
       const line=document.createElementNS(svg.namespaceURI,"line");
-      line.setAttribute("x1",String(left.left+left.width/2-bounds.left));line.setAttribute("y1",String(centerY));
-      line.setAttribute("x2",String(right.left+right.width/2-bounds.left));line.setAttribute("y2",String(centerY));
+      line.setAttribute("x1",String(startX));line.setAttribute("y1",String(startY));
+      line.setAttribute("x2",String(endX));line.setAttribute("y2",String(endY));
       line.setAttribute("stroke",COLORS.bridge);line.setAttribute("stroke-width","3");line.setAttribute("stroke-linecap","round");
       if((preview&&!saved)||layer==="planned"||review)line.setAttribute("stroke-dasharray","4 3");
       svg.appendChild(line);
