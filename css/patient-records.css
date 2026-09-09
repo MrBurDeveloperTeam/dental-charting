@@ -31,6 +31,92 @@
   outline: 0;
 }
 
+.record-edit-chart-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--primary);
+  border-radius: 10px;
+  background: var(--primary);
+  color: #fff;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 750;
+  cursor: pointer;
+}
+.record-edit-chart-button:hover { background: var(--primary-dark); }
+.record-edit-chart-button:focus-visible { outline: 3px solid rgba(26,120,232,.25); outline-offset: 2px; }
+.record-edit-chart-button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.patient-record-review .entries-panel > .entries-head {
+  grid-template-columns: minmax(0,1fr) auto;
+  align-items: center;
+}
+.patient-record-review .entries-panel > .entries-head #record-edit-chart-root { grid-column: 2; grid-row: 1; }
+
+.chart-edit-mode-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 48px;
+  padding: 7px 20px;
+  border-bottom: 1px solid #c9def8;
+  background: #e5f1ff;
+  color: #315474;
+  font-size: 12px;
+}
+.chart-edit-mode-message { display: flex; align-items: center; gap: 7px; min-width: 0; }
+.chart-edit-mode-message > span { width: 7px; height: 7px; flex: 0 0 7px; border-radius: 50%; background: var(--primary); }
+.chart-edit-mode-message strong { overflow: hidden; color: var(--ink); text-overflow: ellipsis; white-space: nowrap; }
+.chart-edit-mode-actions { display: flex; align-items: center; gap: 16px; color: #6f849b; }
+.chart-edit-mode-actions > button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 13px;
+  border: 1px solid #c8dcf4;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--primary);
+  font: inherit;
+  font-weight: 750;
+  cursor: pointer;
+}
+.chart-edit-mode-actions > button:hover { border-color: var(--primary); background: #f8fbff; }
+.chart-edit-mode-actions > button:focus-visible { outline: 3px solid rgba(26,120,232,.25); outline-offset: 2px; }
+.chart-edit-mode-actions svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.patient-record-edit .contextbar button:disabled { cursor: default; opacity: .72; }
+.patient-record-edit .contextbar button:disabled:hover { transform: none; box-shadow: none; }
+.patient-record-edit .contextbar .topbar-actions { visibility: hidden; }
+
+.entries-status-section { display: grid; gap: 4px; }
+.entries-status-section + .entries-status-section { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--line); }
+.entries-status-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 5px;
+  color: #315474;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+.entries-status-heading small { display: grid; place-items: center; min-width: 23px; height: 20px; padding: 0 6px; border-radius: 999px; background: #eef4fb; color: #71869e; font-size: 10px; letter-spacing: 0; }
+
+@media (max-width: 600px) {
+  .chart-edit-mode-bar { align-items: flex-start; padding: 9px 12px; }
+  .chart-edit-mode-actions { gap: 8px; }
+  .chart-edit-mode-actions > span { display: none; }
+  .patient-record-review .entries-panel > .entries-head { grid-template-columns: minmax(0,1fr) auto; }
+}
+
 .record-review-visit-field select {
   width: 100%;
   min-width: 0;
@@ -181,6 +267,8 @@
 /* PDF/print output must expand the complete Summary instead of printing its
    on-screen scroll container and scrollbar. This file loads after print.css. */
 @media print {
+  #record-edit-chart-root,
+  #chart-edit-mode-root { display: none !important; }
   .patient-record-review .entries-panel {
     height: auto !important;
     max-height: none !important;

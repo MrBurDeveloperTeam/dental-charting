@@ -274,4 +274,5 @@
 }
 
 .teeth-row[data-bridge-teeth]{position:relative}
-.bridge-connectors{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.bridge-connectors{position:absolute;z-index:0;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.teeth-row[data-bridge-teeth]>.tooth{z-index:1}
