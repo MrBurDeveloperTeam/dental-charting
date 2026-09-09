@@ -9,7 +9,7 @@ import "./components/profileSettings/profileSettings.css";
 import { getLatestPatientRecord, listPatientRecords, type PatientRecord } from "./services/patientRecords";
 
 export default function App() {
-  const [view, setView] = useState<"chart" | "records" | "review">("chart");
+  const [view, setView] = useState<"chart" | "records" | "review" | "edit">("chart");
   const [selectedRecord, setSelectedRecord] = useState<PatientRecord | null>(null);
   const [patientVisitRecords, setPatientVisitRecords] = useState<PatientRecord[]>([]);
   const [reviewLayer, setReviewLayer] = useState<"existing" | "planned">("existing");
@@ -17,7 +17,15 @@ export default function App() {
   useEffect(() => {
     const chartNav = document.getElementById("chart-nav-item");
     const recordsNav = document.getElementById("patient-record-nav-item");
-    const showChart = () => { setSelectedRecord(null); setView("chart"); };
+    const showChart = () => {
+      const leavingAnotherView = document.body.classList.contains("patient-records-view")
+        || document.body.classList.contains("patient-record-review")
+        || document.body.classList.contains("patient-record-edit");
+      if (!leavingAnotherView) return;
+      setSelectedRecord(null);
+      setView("chart");
+      document.dispatchEvent(new CustomEvent("dental-chart:new-session"));
+    };
     const showRecords = () => setView("records");
     chartNav?.addEventListener("click", showChart);
     recordsNav?.addEventListener("click", showRecords);
@@ -27,13 +35,14 @@ export default function App() {
   useEffect(() => {
     document.body.classList.toggle("patient-records-view", view === "records");
     document.body.classList.toggle("patient-record-review", view === "review");
+    document.body.classList.toggle("patient-record-edit", view === "edit");
     const chartNav = document.getElementById("chart-nav-item");
     const recordsNav = document.getElementById("patient-record-nav-item");
-    chartNav?.classList.toggle("active", view === "chart");
-    recordsNav?.classList.toggle("active", view !== "chart");
-    chartNav?.setAttribute("aria-current", view === "chart" ? "page" : "false");
-    recordsNav?.setAttribute("aria-current", view !== "chart" ? "page" : "false");
-    return () => { document.body.classList.remove("patient-records-view", "patient-record-review"); };
+    chartNav?.classList.toggle("active", view === "chart" || view === "edit");
+    recordsNav?.classList.toggle("active", view === "records" || view === "review");
+    chartNav?.setAttribute("aria-current", view === "chart" || view === "edit" ? "page" : "false");
+    recordsNav?.setAttribute("aria-current", view === "records" || view === "review" ? "page" : "false");
+    return () => { document.body.classList.remove("patient-records-view", "patient-record-review", "patient-record-edit"); };
   }, [view]);
 
   useEffect(() => {
@@ -51,11 +60,28 @@ export default function App() {
     return () => { observer.disconnect(); setReadOnly(false); };
   }, [view]);
 
+  useEffect(() => {
+    const controls = [
+      ...document.querySelectorAll<HTMLButtonElement>("#dentition-switch button"),
+      document.getElementById("patient-trigger") as HTMLButtonElement | null,
+      document.getElementById("date-trigger") as HTMLButtonElement | null,
+    ].filter((control): control is HTMLButtonElement => Boolean(control));
+    controls.forEach((control) => { control.disabled = view === "edit"; });
+    return () => controls.forEach((control) => { control.disabled = false; });
+  }, [view]);
+
   const openRecord = (record: PatientRecord) => {
     setSelectedRecord(record);
     setPatientVisitRecords((current) => current.some((item) => item.patient.id === record.patient.id) ? current : [record]);
     setReviewLayer("existing");
     setView("review");
+    window.setTimeout(() => document.dispatchEvent(new CustomEvent("dental-chart:open-record", { detail: { patient: record.patient, visitDate: record.visitDate, dentition: record.dentition } })), 0);
+  };
+
+  const editRecord = (record: PatientRecord) => {
+    setSelectedRecord(record);
+    setReviewLayer("existing");
+    setView("edit");
     window.setTimeout(() => document.dispatchEvent(new CustomEvent("dental-chart:open-record", { detail: { patient: record.patient, visitDate: record.visitDate, dentition: record.dentition } })), 0);
   };
 
@@ -93,6 +119,26 @@ export default function App() {
     <>
       <PatientModal />
       {view === "records" ? <PatientRecordsPage onOpenRecord={openRecord} /> : <DentalChartPage />}
+      {view === "review" && selectedRecord && document.getElementById("record-edit-chart-root") && createPortal(
+        <button className="record-edit-chart-button" type="button" onClick={() => editRecord(selectedRecord)}>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 20 4.2-1 10.5-10.5a2.1 2.1 0 0 0-3-3L5.2 16 4 20ZM14.5 6.5l3 3" /></svg>
+          Edit chart
+        </button>,
+        document.getElementById("record-edit-chart-root")!,
+      )}
+      {view === "edit" && selectedRecord && document.getElementById("chart-edit-mode-root") && createPortal(
+        <section className="chart-edit-mode-bar" aria-label="Chart editing status">
+          <div className="chart-edit-mode-message"><span aria-hidden="true" /> Editing chart for <strong>{String(selectedRecord.patient.name || "Unknown patient")}</strong></div>
+          <div className="chart-edit-mode-actions">
+            <span>{String(selectedRecord.patient.id_number || selectedRecord.patient.id)}</span>
+            <button type="button" onClick={() => setView("review")}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12 4 4L19 6" /></svg>
+              Save chart
+            </button>
+          </div>
+        </section>,
+        document.getElementById("chart-edit-mode-root")!,
+      )}
       {view === "review" && selectedRecord && document.getElementById("record-review-summary-root") && createPortal(
         <section className="record-review-panel" aria-label="Patient referral details">
           <div className="record-review-toolbar"><button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button><button className="record-review-download" type="button" onClick={() => document.getElementById("download-pdf-btn")?.click()}><svg className="record-review-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5" /></svg> Download PDF</button></div>

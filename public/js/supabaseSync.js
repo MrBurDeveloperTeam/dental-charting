@@ -464,7 +464,7 @@
     }
     Object.assign(patient, selected);
     visit.date = detail.visitDate;
-    chartMode = detail.dentition === "Primary" ? "primary" : "permanent";
+    chartMode = String(detail.dentition).toLowerCase() === "primary" ? "primary" : "permanent";
     clearChartForPatientSelection();
     if (typeof persistPatient === "function") persistPatient();
     if (typeof persistVisit === "function") persistVisit();
