@@ -1088,8 +1088,8 @@ input[type="reset"],
 
 @media screen and (min-width: 1101px) {
   #split-stage {
-    --tooth-width: 1.4;   /* Increase to make teeth wider */
-    --tooth-height: 1.4;  /* Increase to make teeth taller */
+    --tooth-width: 1.3;   /* Increase to make teeth wider */
+    --tooth-height: 1.2;  /* Increase to make teeth taller */
     --tooth-hover: 1.3;   /* 25% larger on hover */
   }
 
@@ -1099,7 +1099,7 @@ input[type="reset"],
     justify-self: center;
     margin-inline: 0;
     left: auto;
-    column-gap: 12px;
+    column-gap: 8px;
     transform: scale(.78);
     transform-origin: center;
   }
@@ -1153,14 +1153,14 @@ input[type="reset"],
 @media screen and (min-width: 1101px) {
   /* Lower roots: slightly wider and shorter */
   #split-stage .lower-root-row {
-    --tooth-width: 1.5;
-    --tooth-height: 1.3;
+    --tooth-width: 1.43;
+    --tooth-height: 1.2;
   }
 
   /* Lower inner views */
   #split-stage .lower-crown-row {
     --tooth-width: 1.5;
-    --tooth-height: 2.2;
+    --tooth-height: 2;
   }
 }
 
@@ -1179,7 +1179,7 @@ input[type="reset"],
 
   /* Horizontal spacing, including numbers to keep alignment */
   #split-stage .lower-grid .teeth-row {
-    column-gap: 16px;
+    column-gap: 12px;
   }
 }
 
