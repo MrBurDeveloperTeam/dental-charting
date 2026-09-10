@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="./css/chart.css?v=15">
 <link rel="stylesheet" href="./css/editor.css?v=6">
 <link rel="stylesheet" href="./css/dialogs.css?v=23">
-<link rel="stylesheet" href="./css/layout.css?v=45">
+<link rel="stylesheet" href="./css/layout.css?v=64">
 <link rel="stylesheet" href="./css/print.css?v=6">
 <link rel="stylesheet" href="./css/patient-records.css?v=11">
 </head>
@@ -97,13 +97,13 @@
     <div class="chart-head">
         <div>
           <h2>Clinical Chart</h2>
-          <p>Mouth view showing the root profile and crown surface for every tooth.</p>
+          <p>Mouth view showing the root profile and crown + inner surface for every tooth.</p>
           <p class="primary-chart-hint"><strong>Primary dentition:</strong> <span class="primary-hint-desktop">Double-click a primary tooth to swap it with its permanent successor. Double-click a faded 6/7 position to add the molar, or an active 6/7 molar to hide it.</span><span class="primary-hint-mobile">Tap a faded permanent 6/7 molar to activate it. In the tooth panel, tap Deactivate permanent molar to hide it again.</span></p>
         </div>
         <div class="chart-head-controls">
           <div class="chart-view-key" aria-label="Chart view guide">
             <span><i class="view-key-icon root"></i>Root profile</span>
-            <span><i class="view-key-icon crown"></i>Crown surface</span>
+            <span><i class="view-key-icon crown"></i>Crown + inner surface</span>
           </div>
           <div class="chart-layer-switch" id="chart-view-toggle" aria-label="Chart layer">
             <button class="chart-layer-btn active" type="button" data-chart-view="existing" aria-pressed="true">Existing</button>
@@ -148,53 +148,37 @@
         </div>
 
         <div class="chart-stage split-stage" id="split-stage">
-          <section class="split-group" data-chart-layer="existing">
-            <div class="split-group-head">
-              <span class="split-status-label existing">Existing</span>
-            </div>
-            <div class="orientation-grid">
-              <div class="orientation-side"></div>
-              <div class="orientation-row">
-                <span class="side-label left">L</span>
-                <span class="side-label right">R</span>
-              </div>
-            </div>
+          <section class="split-group" data-chart-layer="planned" aria-label="Upper arch planning">
             <div class="arch-grid upper-grid">
-              <div class="arch-label-row upper-label"><div class="arch-label-text">Upper Arch</div></div>
+              <div class="arch-label-row upper-label"><div class="arch-label-text"><span class="split-status-label planned">Planning</span><span>Upper Arch</span></div></div>
+              <div class="teeth-row upper-root-row" id="split-planned-upper-front"></div>
+              <div class="teeth-row occ upper-crown-row" id="split-planned-upper-occ"></div>
+              <div class="teeth-row numbers upper-number-row" id="split-planned-upper-numbers"></div>
+            </div>
+          </section>
+
+          <section class="split-group" data-chart-layer="existing" aria-label="Upper arch existing">
+            <div class="arch-grid upper-grid">
+              <div class="arch-label-row upper-label"><div class="arch-label-text"><span class="split-status-label existing">Existing</span><span>Upper Arch</span></div></div>
               <div class="teeth-row upper-root-row" id="split-existing-upper-front"></div>
               <div class="teeth-row occ upper-crown-row" id="split-existing-upper-occ"></div>
               <div class="teeth-row numbers upper-number-row" id="split-existing-upper-numbers"></div>
             </div>
-            <div class="split-divider"></div>
+          </section>
+
+          <section class="split-group" data-chart-layer="existing" aria-label="Lower arch existing">
             <div class="arch-grid lower-grid">
               <div class="teeth-row numbers lower-number-row" id="split-existing-lower-numbers"></div>
-              <div class="arch-label-row lower lower-label"><div class="arch-label-text">Lower Arch</div></div>
+              <div class="arch-label-row lower lower-label"><div class="arch-label-text"><span class="split-status-label existing">Existing</span><span>Lower Arch</span></div></div>
               <div class="teeth-row occ lower-crown-row" id="split-existing-lower-occ"></div>
               <div class="teeth-row lower-root-row" id="split-existing-lower-front"></div>
             </div>
           </section>
 
-          <section class="split-group view-hidden" data-chart-layer="planned">
-            <div class="split-group-head">
-              <span class="split-status-label planned">Planning</span>
-            </div>
-            <div class="orientation-grid">
-              <div class="orientation-side"></div>
-              <div class="orientation-row">
-                <span class="side-label left">L</span>
-                <span class="side-label right">R</span>
-              </div>
-            </div>
-            <div class="arch-grid upper-grid">
-              <div class="arch-label-row upper-label"><div class="arch-label-text">Upper Arch</div></div>
-              <div class="teeth-row upper-root-row" id="split-planned-upper-front"></div>
-              <div class="teeth-row occ upper-crown-row" id="split-planned-upper-occ"></div>
-              <div class="teeth-row numbers upper-number-row" id="split-planned-upper-numbers"></div>
-            </div>
-            <div class="split-divider"></div>
+          <section class="split-group" data-chart-layer="planned" aria-label="Lower arch planning">
             <div class="arch-grid lower-grid">
               <div class="teeth-row numbers lower-number-row" id="split-planned-lower-numbers"></div>
-              <div class="arch-label-row lower lower-label"><div class="arch-label-text">Lower Arch</div></div>
+              <div class="arch-label-row lower lower-label"><div class="arch-label-text"><span class="split-status-label planned">Planning</span><span>Lower Arch</span></div></div>
               <div class="teeth-row occ lower-crown-row" id="split-planned-lower-occ"></div>
               <div class="teeth-row lower-root-row" id="split-planned-lower-front"></div>
             </div>
@@ -450,7 +434,7 @@
       </div>
       <button class="icon-btn mobile-tooth-close" type="button" id="mobile-tooth-close-btn" aria-label="Close tooth details">&#10005;</button>
     </div>
-    <p class="mobile-tooth-instruction">Tap the enlarged root or crown surface to select it.</p>
+    <p class="mobile-tooth-instruction">Tap the enlarged root or crown + inner surface to select it.</p>
     <nav class="mobile-tooth-navigation" aria-label="Move between teeth">
       <button class="mobile-tooth-nav-btn" type="button" id="mobile-tooth-prev-btn">
         <span aria-hidden="true">&#8592;</span>
@@ -490,7 +474,8 @@
 
 <script type="module" src="/src/main.tsx"></script>
 <script defer src="./js/tooth-silhouettes.js"></script>
-<script defer src="./js/app.js?v=26"></script>
+<script defer src="./js/inner-anatomy.js"></script>
+<script defer src="./js/app.js?v=31"></script>
 <script defer src="./js/supabaseSync.js?v=8"></script>
 </body>
 </html>

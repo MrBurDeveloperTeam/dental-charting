@@ -184,7 +184,7 @@
   .mobile-tooth-art .tooth-art{transform:none!important;filter:none!important}
   .mobile-tooth-art.root .art-core.front.upper{transform:scale(1.35,-1.35)}
   .mobile-tooth-art.root .art-core.front.lower{transform:scale(1.35)}
-  .mobile-tooth-art.crown .art-core.occ{transform:scale(2.65)}
+  .mobile-tooth-art.crown .art-core.occ{transform:scale(1.35)}
   .mobile-tooth-art .surface-region{cursor:pointer;touch-action:manipulation}
   .mobile-tooth-selection{min-height:34px;margin-top:10px;padding:9px 10px;border-radius:8px;background:#eef6ff;color:#315778;font-size:12px;font-weight:700;text-align:center}
   .mobile-optional-molar-btn{width:100%;min-height:46px;margin-top:10px;padding:9px 12px;border:1px solid #d7a7a3;border-radius:9px;background:#fff4f3;color:#a33b35;font:inherit;font-size:12px;font-weight:800;cursor:pointer;touch-action:manipulation}

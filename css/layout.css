@@ -771,3 +771,533 @@ input[type="reset"],
     overflow-wrap: anywhere;
   }
 }
+/* Four stacked arches, with adjoining teeth at their natural relative widths. */
+#split-stage{min-width:680px;gap:8px;padding:18px 14px;overflow:visible}
+#split-stage .split-group{display:grid;padding:8px 0;gap:0}
+#split-stage .split-group + .split-group{border-top:1px solid rgba(255,255,255,.12)}
+#split-stage .arch-grid{display:grid;grid-template-columns:100px minmax(0,1fr);padding:0}
+#split-stage .upper-grid{grid-template-rows:94px 112px 24px}
+#split-stage .lower-grid{grid-template-rows:24px 82px 94px}
+#split-stage .teeth-row{width:max-content;margin-inline:auto;padding:0;gap:0;min-height:0;transform:none;align-items:center}
+#split-stage .tooth,#split-stage .number{transform:none;min-width:0}
+#split-stage .art-core.front.upper{transform:scaleY(-1)}
+#split-stage .art-core.front.lower,#split-stage .art-core.occ{transform:none}
+#split-stage .arch-label-row{grid-column:1;grid-row:1 / -1;align-items:center;padding:0}
+#split-stage .arch-label-text{display:grid;gap:8px;margin:0;white-space:normal;font-size:12px}
+#split-stage .arch-label-text::after{display:none}
+#split-stage .split-status-label{font-size:12px;letter-spacing:.04em}
+#split-stage .number{font-size:11px}
+#split-stage .tooth:hover,#split-stage .tooth.active{z-index:5}
+.chart-layer-switch{display:none!important}
+.chart-stage-wrap{scrollbar-width:thin}
+.chart-stage-wrap::-webkit-scrollbar{display:block;height:8px}
+@media(max-width:600px){.chart-stage-wrap{overflow-x:auto}#split-stage .arch-label-text{font-size:12px}}
+/* Give enlarged arches the full workspace on laptops. */
+@media (min-width:601px) and (max-width:1400px){
+  .layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"chart-header" "chart-workspace" "chart-sidebar"}
+  .layout>.chart-head{grid-area:chart-header}
+  .layout>.chart-workspace{grid-area:chart-workspace}
+  .layout>.sidebar{grid-area:chart-sidebar;height:auto;margin:16px;border:1px solid var(--line);border-radius:20px}
+}
+
+/* Compact four-arch overview; image and surface SVG scale together. */
+@media screen and (min-width:601px){
+  #split-stage{--arch-column-scale:.68;min-width:600px;padding:8px 12px;gap:2px}
+  #split-stage .split-group{padding:3px 0}
+  #split-stage .upper-grid{grid-template-rows:62px 68px 18px}
+  #split-stage .lower-grid{grid-template-rows:18px 48px 62px}
+  #split-stage .tooth-art{zoom:.68}
+  #split-stage .tooth.active .tooth-art{transform:none}
+  #split-stage .tooth:hover{z-index:6}
+  #split-stage .tooth:hover .tooth-art{transform:scale(1.35);filter:brightness(1.06)}
+  #split-stage .number{font-size:11px}
+  #split-stage .arch-label-text{font-size:11px;gap:4px}
+  #split-stage .split-status-label{font-size:11px}
+}
+
+/* Desktop workspace: saved entries, anatomy chart, treatment editor. */
+@media screen and (min-width:1101px){
+  .layout{display:grid;grid-template-columns:220px minmax(510px,1fr) minmax(300px,24vw);grid-template-areas:"entries chart-header chart-sidebar" "entries chart chart-sidebar";gap:0;align-items:start}
+  .layout>.chart-workspace{display:contents}
+  .layout>.chart-head{grid-area:chart-header;min-width:0;padding:16px 18px;min-height:80px;gap:12px;flex-wrap:wrap}
+  .chart-workspace>.chart-card{grid-area:chart;min-width:0;margin:12px;border-radius:16px}
+  .chart-workspace>.entries-panel{grid-area:entries;align-self:stretch;min-width:0;margin:0;border-radius:0;border-width:0 1px 0 0;overflow:hidden}
+  .entries-panel>.entries-head{padding:18px 12px;gap:10px;min-height:0}
+  .entries-panel>.entries-list{padding:10px;max-height:calc(100dvh - 220px);align-content:start;overflow:auto}
+  .entries-panel .entries-bulk-actions{grid-template-columns:1fr auto;gap:8px}
+  .entries-panel .entries-delete-selected{grid-row:2;grid-column:1 / -1}
+  .entries-panel .entry-row{grid-template-columns:17px minmax(0,1fr);gap:5px;padding:6px 0;align-items:start}
+  .entries-panel .entry-open{grid-template-columns:28px minmax(0,1fr);gap:7px;padding:4px;align-items:start;min-width:0}
+  .entries-panel .entry-preview{width:28px;min-width:0}
+  .entries-panel .entry-text{grid-template-columns:minmax(0,1fr);grid-template-areas:"title" "meta" "note";gap:5px;line-height:1.45}
+  .entries-panel :is(.entry-title,.entry-meta,.entry-note){white-space:normal;overflow-wrap:anywhere}
+  .layout>.sidebar{grid-area:chart-sidebar;margin:0;padding:16px;min-width:0;height:auto;border-radius:0;border:0;border-left:1px solid var(--line)}
+  .sidebar .selected-head{grid-template-columns:minmax(0,1fr) 84px;gap:10px}
+  .sidebar .mini-preview{width:84px;min-width:0;height:100px}
+  .sidebar .form-actions{flex-wrap:wrap}
+  .sidebar #treatment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .sidebar #editor{min-width:0}
+  #split-stage{--arch-column-scale:.75;min-width:0;padding:8px 6px}
+  #split-stage .arch-grid{grid-template-columns:66px minmax(0,1fr)}
+  #split-stage .tooth-art{zoom:.75}
+  #split-stage .upper-grid{grid-template-rows:68px 74px 18px}
+  #split-stage .lower-grid{grid-template-rows:18px 53px 68px}
+  #split-stage .arch-label-text,#split-stage .split-status-label{font-size:10px}
+}
+@media screen and (min-width:1101px){
+  .layout{grid-template-rows:max-content 1fr}
+  .layout>.sidebar>.editor{display:flex;flex-direction:column;height:auto;gap:18px}
+  .layout>.sidebar .editor-fields{display:flex;flex-direction:column;overflow:visible;padding:0;gap:18px}
+  .layout>.sidebar .field{min-width:0;width:100%}
+  .sidebar .selected-side{grid-template-rows:100px auto;overflow:visible}
+  .sidebar .mini-preview{min-height:100px}
+  .sidebar .form-actions{grid-template-columns:1fr;gap:5px}
+  .sidebar #treatment-grid .chip{min-width:0;overflow-wrap:normal}
+  .sidebar #treatment-grid .treatment-name{word-break:normal;overflow-wrap:normal}
+}
+@media screen and (min-width:1101px){
+  .layout>.sidebar .field-pair{display:flex;flex-direction:column;gap:18px;min-width:0}
+  .layout>.sidebar .field-pair>.field{width:100%;min-width:0}
+}
+
+/* Keep the anatomy column close to its content; give spare width to editing. */
+@media screen and (min-width:1101px){
+  .layout{grid-template-columns:200px 510px minmax(0,1fr)}
+  .layout>.sidebar{min-width:0}
+  .layout>.chart-head{padding:14px 12px}
+  .chart-workspace>.chart-card{margin:10px 6px}
+  .sidebar #treatment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media screen and (min-width:1500px){
+  .layout{grid-template-columns:220px 530px minmax(0,1fr)}
+  .layout>.sidebar .field-pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:20px;align-items:start}
+  .sidebar #treatment-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+
+/* Restore the desktop preview and paired actions to their full-size layout. */
+@media screen and (min-width:1101px){
+  .sidebar .selected-head{grid-template-columns:minmax(0,1fr) minmax(180px,22%);gap:16px}
+  .sidebar .selected-side{width:100%;max-width:none;grid-template-rows:150px auto;align-content:start;height:auto}
+  .sidebar .mini-preview{width:100%;height:150px;min-height:150px}
+  .sidebar .form-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .sidebar .form-actions .btn{width:100%;min-width:0;height:42px;padding-inline:10px}
+}
+
+/* Desktop editor: stable summary, batch control, independently scrolling form. */
+@media screen and (min-width:1101px){
+  .layout{grid-template-columns:minmax(240px,1fr) 510px clamp(350px,38vw,640px)}
+  .layout>.sidebar{position:sticky;top:0;height:100dvh;max-height:100dvh;overflow:hidden;box-sizing:border-box}
+  .layout>.sidebar>.editor{display:grid;height:100%;min-height:0;grid-template-rows:auto auto minmax(0,1fr);gap:14px}
+  .layout>.sidebar .selected-head{grid-template-columns:minmax(0,1fr) 180px;gap:14px;padding-bottom:12px;flex-shrink:0}
+  .sidebar .selected-main{min-width:0}
+  .sidebar .selected-main .preview{max-width:360px;overflow-wrap:anywhere}
+  .sidebar .selected-side{width:180px}
+  .sidebar .desktop-batch-selection{display:grid;gap:8px;min-width:0}
+  .sidebar .desktop-batch-selection .selection-row{display:grid;gap:8px}
+  .sidebar .desktop-batch-selection #multi-toggle-btn{width:100%}
+  .layout>.sidebar .editor-fields{display:flex;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 8px 12px 0;gap:18px}
+  .layout>.sidebar .editor-fields>.field-pair{flex-shrink:0}
+  .sidebar #treatment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* Clinical chart desktop shell: chart -> treatment editor -> saved entries. */
+@media screen and (min-width:1101px){
+  .layout{
+    --clinical-panel-height:820px;
+    grid-template-columns:
+      minmax(480px, 1.0fr) /* Chart */
+      minmax(450px, 1fr) /* Treatment editor */
+      minmax(280px, .75fr); /* Saved entries */
+    grid-template-areas:
+      "chart-header chart-header chart-header"
+      "chart chart-sidebar entries";
+    grid-template-rows:auto minmax(0,1fr);
+    column-gap:0;
+    align-items:start;
+  }
+
+  .layout>.chart-head{
+    grid-area:chart-header;
+    min-height:80px;
+    padding:14px 20px;
+    margin-bottom: 10px;
+  }
+
+  .chart-workspace>.chart-card{
+    grid-area:chart;
+    display:flex;
+    align-items:center;
+    height:var(--clinical-panel-height);
+    max-height:var(--clinical-panel-height);
+    min-height:0;
+    margin:12px;
+    overflow:hidden;
+  }
+
+  .chart-workspace>.chart-card>.chart-stage-wrap{
+    width:100%;
+    padding-top:24px;
+    box-sizing:border-box;
+  }
+
+  .layout>.sidebar{
+    grid-area:chart-sidebar;
+    position:sticky;
+    top:92px;
+    height:var(--clinical-panel-height);
+    max-height:var(--clinical-panel-height);
+    margin:12px;
+    padding:14px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    box-shadow:0 8px 22px rgba(18,35,57,.07);
+  }
+
+  .layout>.sidebar>.editor{
+    grid-template-rows:auto minmax(0,1fr);
+    gap:12px;
+  }
+
+  .layout>.sidebar .selected-head{
+    grid-template-columns:minmax(0,1fr) 112px;
+    gap:12px;
+  }
+
+  .sidebar .selected-side{
+    width:112px;
+    grid-template-rows:104px auto;
+  }
+
+  .sidebar .mini-preview{
+    height:104px;
+    min-height:104px;
+  }
+
+  .sidebar .form-actions{gap:6px}
+  .sidebar .form-actions .btn{height:38px;padding-inline:6px}
+
+  .layout>.sidebar .editor-fields{
+    overflow-y:auto;
+    overflow-x:hidden;
+    overscroll-behavior:contain;
+    scrollbar-gutter:stable;
+    padding:2px 8px 16px 2px;
+  }
+
+  .layout>.sidebar .field-pair{
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  .sidebar #treatment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+
+  #split-stage{
+    min-width:0;
+    padding-inline:4px;
+  }
+
+  #split-stage .arch-grid{grid-template-columns:44px minmax(0,1fr)}
+  #split-stage .teeth-row{width:133.333%;grid-template-columns:repeat(16,minmax(0,1fr));position:relative;left:50%;transform:translateX(-50%) scale(.75);transform-origin:center center}
+  #split-stage .teeth-row>.tooth{width:100%;max-width:100%;min-width:0;contain:inline-size}
+  #split-stage .tooth-art{zoom:.75}
+
+  .chart-workspace>.entries-panel{
+    grid-area:entries;
+    position:sticky;
+    top:92px;
+    align-self:start;
+    height:var(--clinical-panel-height);
+    max-height:var(--clinical-panel-height);
+    margin:12px;
+    border:1px solid var(--line);
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:0 8px 22px rgba(18,35,57,.07);
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+    background:var(--panel);
+  }
+
+  .entries-panel>.entries-head{
+    padding:16px 14px;
+  }
+
+  .entries-panel .entries-bulk-actions{
+    grid-template-columns:auto auto minmax(0,1fr);
+    gap:8px;
+  }
+
+  .entries-panel .entries-delete-selected{
+    grid-row:auto;
+    grid-column:auto;
+    justify-self:start;
+    white-space:nowrap;
+  }
+
+  .entries-panel .entries-bulk-actions #entries-count{
+    justify-self:end;
+  }
+
+  .entries-panel>.entries-list{
+    max-height:none;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    scrollbar-width:none;
+    -ms-overflow-style:none;
+  }
+
+  .entries-panel>.entries-list::-webkit-scrollbar{display:none}
+}
+
+@media screen and (min-width: 1101px) {
+  #split-stage .tooth-art {
+    /* Width, then height */
+    transform: scaleX(1.2)scaleY(1.3);
+    transform-origin: center;
+  }
+}
+@media screen and (min-width: 1101px) {
+  /* Give labels enough room before the teeth begin */
+  #split-stage .arch-grid {
+    grid-template-columns: 76px minmax(0, 1fr);
+    column-gap: 10px
+  }
+
+  /* Move the complete tooth row slightly to the right */
+  #split-stage .teeth-row {
+    width: 120%;
+    position: relative;
+    left: calc(50% + 18px);
+
+    display: grid;
+    grid-template-columns: repeat(16, minmax(0, 1fr));
+    column-gap: 3px;
+
+    transform: translateX(-50%) scale(.78);
+    transform-origin: center;
+  }
+
+  /* Tooth artwork size */
+  #split-stage .tooth-art {
+    zoom: .82;
+    transform-origin: center;
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  #split-stage {
+    --tooth-width: 1.4;   /* Increase to make teeth wider */
+    --tooth-height: 1.4;  /* Increase to make teeth taller */
+    --tooth-hover: 1.3;   /* 25% larger on hover */
+  }
+
+  /* Center each arch using its actual total tooth width. */
+  #split-stage .teeth-row {
+    width: max-content;
+    justify-self: center;
+    margin-inline: 0;
+    left: auto;
+    column-gap: 12px;
+    transform: scale(.78);
+    transform-origin: center;
+  }
+
+  /* Apply the same proportions to normal and selected teeth. */
+  #split-stage .tooth-art,
+  #split-stage .tooth.active .tooth-art {
+    transform: scale(
+      var(--tooth-width),
+      var(--tooth-height)
+    );
+    transform-origin: center;
+    transition: transform .18s ease, filter .18s ease;
+  }
+}
+
+@media screen and (min-width: 1101px) and (hover: hover) {
+  #split-stage .tooth:not(.ghost):hover {
+    z-index: 10;
+  }
+
+  #split-stage .tooth:not(.ghost):hover .tooth-art {
+    transform:
+      scale(var(--tooth-width), var(--tooth-height))
+      scale(var(--tooth-hover));
+    filter: brightness(1.06);
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  #split-stage {
+    --inner-view-offset: -10px;
+  }
+
+  /* Upper inner view: move upward toward the roots. */
+  #split-stage .upper-crown-row {
+    top: calc(-1 * var(--inner-view-offset));
+  }
+
+  /* Lower inner view: move downward toward the roots. */
+  #split-stage .lower-crown-row {
+    top: var(--inner-view-offset);
+  }
+}
+
+#split-stage .number {
+  font-size: 17px; /* Currently 11px */
+  font-weight: 700;
+}
+
+@media screen and (min-width: 1101px) {
+  /* Lower roots: slightly wider and shorter */
+  #split-stage .lower-root-row {
+    --tooth-width: 1.5;
+    --tooth-height: 1.3;
+  }
+
+  /* Lower inner views */
+  #split-stage .lower-crown-row {
+    --tooth-width: 1.5;
+    --tooth-height: 2.2;
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  /* Vertical spacing: numbers, crown view, root view */
+  #split-stage .lower-grid {
+    grid-template-rows: 40px 65px 75px;
+    row-gap: 0;
+  }
+
+  /* Fine adjustment between crown and root */
+  #split-stage .lower-crown-row {
+    position: relative;
+    top:-5px;
+  }
+
+  /* Horizontal spacing, including numbers to keep alignment */
+  #split-stage .lower-grid .teeth-row {
+    column-gap: 14px;
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  #split-stage .upper-number-row {
+    position: relative;
+    top: 8px; /* Move numbers farther below the crown view */
+  }
+
+  #split-stage .upper-grid {
+    padding-bottom: 8px; /* Leave room before the divider */
+  }
+}
+
+button.number {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  border-radius: 3px;
+  padding: 0;
+  min-width: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button.number:hover {
+  color: #fff;
+}
+
+button.number:focus-visible {
+  outline: 2px solid #60a5fa;
+  outline-offset: 2px;
+}
+
+@media screen and (min-width: 1101px) {
+  #split-stage .upper-grid {
+    padding-top: 10px;    /* Top border → upper teeth */
+    padding-bottom: 14px; /* Numbers → bottom border */
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  /* Give larger labels enough room */
+  #split-stage .arch-grid {
+    grid-template-columns: 120px minmax(0, 1fr);
+  }
+
+  /* Space from the left border */
+  #split-stage .arch-label-row {
+    padding-left: 13px;
+  }
+
+  /* PLANNING / EXISTING */
+  #split-stage .split-status-label {
+    font-size: 16px;
+  }
+
+  /* Upper Arch / Lower Arch */
+  #split-stage .arch-label-text {
+    font-size: 13px;
+    gap: 6px;
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  /* Align chart to the top of its container */
+  .chart-workspace > .chart-card {
+    align-items: flex-start;
+  }
+
+  /* Remove the inner outline */
+  #split-stage {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  .layout > .sidebar .selected-head {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .sidebar .selected-side {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    justify-self: stretch;
+    grid-template-rows: 104px auto;
+  }
+
+  .sidebar .mini-preview {
+    width: 100%;
+    max-width: none;
+  }
+
+  .sidebar .form-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+    gap: 8px;
+  }
+
+  .sidebar .form-actions .btn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  .sidebar .selected-side {
+    grid-template-rows: 150px auto; /* Preview height, then buttons */
+  }
+
+  .sidebar .mini-preview {
+    width: 100%;       /* Fill the preview column */
+    height: 150px;
+    min-height: 150px;
+  }
+}
