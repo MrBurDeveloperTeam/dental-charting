@@ -53,7 +53,7 @@
 .surface-chip[data-area="right"]{grid-area:right}
 .surface-chip[data-area="bottom"]{grid-area:bottom}
 .field-note{font-size:10px;color:var(--muted);line-height:1.35}
-.note-input{width:100%;height:clamp(160px,22vh,240px);min-height:160px;resize:vertical;padding:12px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:12px;line-height:1.5}
+.note-input{width:100%;height:clamp(160px,22vh,240px);min-height:160px;resize:none;padding:12px;border-radius:6px;border:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;font-size:12px;line-height:1.5}
 .note-input::placeholder{color:#9aa6b2}
 .note-input:disabled{opacity:.42}
 .preview{padding:11px 12px;border-radius:6px;background:var(--panel-soft);border:1px solid var(--line);font-size:11px;line-height:1.45;width:100%}

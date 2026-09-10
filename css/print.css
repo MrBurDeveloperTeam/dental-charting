@@ -42,8 +42,8 @@
   .split-group-head{display:grid!important;grid-template-columns:70px repeat(16,minmax(30px,1fr)) 70px!important;place-items:initial!important;padding:0 0 4px!important}
   .split-group-head .split-status-label{grid-column:9 / span 2!important;justify-self:center!important;margin-bottom:0!important}
   .split-stage .arch-grid,.split-stage .orientation-grid{grid-template-columns:70px minmax(0,1fr) 70px!important}
-  .split-stage .upper-grid{grid-template-rows:100px 52px 20px!important;padding-bottom:0!important}
-  .split-stage .lower-grid{grid-template-rows:20px 52px 100px!important;margin-top:0!important;padding-bottom:22px!important}
+  .split-stage .upper-grid{grid-template-rows:100px 112px 20px!important;padding-bottom:0!important}
+  .split-stage .lower-grid{grid-template-rows:20px 82px 100px!important;margin-top:0!important;padding-bottom:22px!important}
   .split-stage .upper-grid .upper-label{grid-column:1!important;grid-row:1 / span 2!important;align-items:center!important}
   .split-stage .lower-grid .lower-label{grid-column:1!important;grid-row:2 / span 2!important;align-items:center!important;justify-content:flex-start!important;transform:none!important}
   .split-stage .arch-label-text{width:auto!important;margin:17px 0 10px!important;white-space:normal!important}
