@@ -1179,7 +1179,7 @@ input[type="reset"],
 
   /* Horizontal spacing, including numbers to keep alignment */
   #split-stage .lower-grid .teeth-row {
-    column-gap: 14px;
+    column-gap: 16px;
   }
 }
 
@@ -1299,5 +1299,18 @@ button.number:focus-visible {
     width: 100%;       /* Fill the preview column */
     height: 150px;
     min-height: 150px;
+  }
+}
+
+@media screen and (min-width: 1101px) {
+  .entries-panel .entry-open {
+    grid-template-columns: 40px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .entries-panel .entry-preview {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
   }
 }
