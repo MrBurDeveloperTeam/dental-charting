@@ -1381,7 +1381,7 @@ window.addEventListener("resize",scheduleBridgeConnectors);
 window.addEventListener("beforeprint",renderBridgeConnectors);
 window.addEventListener("afterprint",scheduleBridgeConnectors);
 
-// Keep desktop selection controls above the form scroller; restore original
+// Keep desktop selection controls first inside the form scroller; restore original
 // DOM positions when returning to mobile so its established flow is unchanged.
 (function desktopEditorSelection(){
   const editor=document.getElementById('editor');
@@ -1394,15 +1394,19 @@ window.addEventListener("afterprint",scheduleBridgeConnectors);
   const batchAnchor=document.createComment('batch original position');
   batch.before(batchAnchor);
   const oldBatch=editor.querySelector('.selected-batch-control');
+  const selectionTitle=selectionField.querySelector('.field-title');
+  const originalSelectionTitle=selectionTitle?.textContent;
   const media=window.matchMedia('(min-width:1101px)');
   function arrange(){
     if(media.matches){
-      fields.before(selectionField);
+      fields.prepend(selectionField);
+      if(selectionTitle)selectionTitle.textContent='Selection';
       selectionField.classList.add('desktop-batch-selection');
       selectionField.querySelector('.selection-row').prepend(batch);
       if(oldBatch)oldBatch.hidden=true;
     }else{
       selectionAnchor.after(selectionField);
+      if(selectionTitle)selectionTitle.textContent=originalSelectionTitle;
       batchAnchor.after(batch);
       selectionField.classList.remove('desktop-batch-selection');
       if(oldBatch)oldBatch.hidden=false;
