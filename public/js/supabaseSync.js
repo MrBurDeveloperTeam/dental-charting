@@ -319,6 +319,8 @@
         id: row.id,
         tooth,
         treatment: row.treatment,
+        material: row.material || null,
+        bridgeRole: row.bridge_role || null,
         bridgeId: row.bridge_id || null,
         category: row.chart_type,
         status: row.status,
@@ -345,6 +347,14 @@
     try {
       if (!window.dentalCharts) throw new Error("Dental chart access is not ready. Refresh and try again.");
       const result = await window.dentalCharts.load(chartContext());
+      try { await loadMaterialCatalog(); }
+      catch (materialError) {
+        materialCatalogLoaded=false;
+        applyDatabaseEntries(result.entries);
+        setBadge('Cloud: materials unavailable', '#b91c1c');
+        showChartValidation('Clinic materials could not be loaded. Apply the material database migration, then retry sync.');
+        return;
+      }
       applyDatabaseEntries(result.entries);
       setBadge(result.entries.length ? "Cloud: loaded ✓" : "Cloud: no saved entries", "#15803d");
     } catch (error) {
@@ -367,6 +377,8 @@
           view: entry.view,
           surfaces: entry.surfaces,
           treatment: entry.treatment,
+          material: entry.material || null,
+          bridgeRole: entry.bridgeRole || null,
           bridgeId: entry.bridgeId || null,
           status: entry.status,
           layer: entry.layer,

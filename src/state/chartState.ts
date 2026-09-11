@@ -12,6 +12,6 @@ export const INITIAL_CHART_STATE: DentalChartState = {
   chartMode: "permanent", permanent: {}, primary: {},
 };
 export const INITIAL_ENTRY_DRAFT: ChartEntryDraft = {
-  tooth: null, category: "restoration", treatment: "composite", view: "occ",
+  tooth: null, category: "condition", treatment: "caries", material: null, view: "occ",
   status: "existing", layer: "existing", surfaces: [], note: "",
 };

@@ -77,3 +77,13 @@ All controls require clear hover, focus-visible, active, selected, and disabled 
 - **Do:** Preserve the dark board as the visual landmark and reuse runtime tokens.
 - **Don't:** Let long treatment content push the selected-tooth summary off screen.
 - **Don't:** Hide scrollbars or add decorative color to clinical controls.
+
+## Material and condition workflow
+
+The treatment editor follows surface → material → condition/treatment → status → clinical note. Chart-type and view controls remain commented in the markup; the existing category and view models still drive chart geometry and persistence. Material swatches use a three-column grid, while condition/treatment buttons use neutral text and category headings. The name/color-only editor reuses the existing modal and saves the clinic catalogue through `src/services/dentalMaterials.ts`.
+
+Clinical colors come from `dental_material`, referenced by nullable entry material IDs. The built-in palette uses distinct, clinically inspired families: cool silver for amalgam, saturated resin amber for composite so it remains visible against the warm tooth anatomy, translucent aqua-gray for GIC, high-value cool white for zirconia, peach enamel for eMax, blue-white porcelain plus its dark cervical line for PFM, warm yellow metal for gold, dark alloy for generic metal, pale yellow resin for temporary work, and warm ivory for ceramic. Defaults are defined by the migration and mirrored in the service and offline fixture; live catalog rows are authoritative. Later palette migrations may replace only untouched legacy default values and must preserve clinic edits. Presentation geometry and below-tooth annotation badges live in `public/js/materials.js`; `css/materials.css` owns the new editor styles without replacing the application's palette or typography.
+
+Bridge and implant use procedure fallbacks only when no material is selected: structural indigo (`#6366f1`) for bridge and surgical teal (`#0f9fa8`) for implant. A selected material remains authoritative and replaces the fallback on the rendered restoration.
+
+Crown-view surfaces use the previous anatomical circular-sector map, scaled into the photographed crown bounds so overlays do not reach the roots. Teeth 13, 12, 11, 21, 22, 23, 42, 41, and 32 intentionally retain the established straight-edged anterior geometry; surface codes, selection targets, and persistence are unchanged.

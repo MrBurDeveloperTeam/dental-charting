@@ -9,6 +9,8 @@ export type DentalChartEntryInput = {
   view: string;
   surfaces: string[];
   treatment: string;
+  material?: string | null;
+  bridgeRole?: 'abutment' | 'pontic' | null;
   status: string;
   layer: string;
   clinicalNote?: string;
@@ -24,6 +26,8 @@ export type DentalChartEntryRow = {
   view: string;
   surfaces: string[];
   treatment: string;
+  material: string | null;
+  bridge_role?: 'abutment' | 'pontic' | null;
   status: string;
   layer: string;
   clinical_note: string | null;
@@ -102,6 +106,8 @@ function entryPayload(entry: DentalChartEntryInput) {
     view: entry.view,
     surfaces: Array.isArray(entry.surfaces) ? entry.surfaces : [],
     treatment: entry.treatment,
+    material: entry.material || null,
+    bridge_role: entry.bridgeRole || null,
     ...(entry.bridgeId ? { bridge_id: entry.bridgeId } : {}),
     status: entry.status,
     layer: entry.layer,

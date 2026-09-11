@@ -11,6 +11,7 @@
 <link rel="stylesheet" href="./css/dialogs.css?v=23">
 <link rel="stylesheet" href="./css/layout.css?v=64">
 <link rel="stylesheet" href="./css/print.css?v=6">
+<link rel="stylesheet" href="./css/materials.css?v=11">
 <link rel="stylesheet" href="./css/patient-records.css?v=11">
 </head>
 <body>
@@ -235,12 +236,13 @@
 
         <div class="editor-fields">
         <div class="field selection-field">
-          <div class="field-title">Selected teeth</div>
+          <div class="field-title selection-title-row"><span class="selection-title-text">Selected teeth</span></div>
           <div class="selection-row">
             <div class="selected-teeth" id="selected-teeth"></div>
           </div>
         </div>
 
+        <!-- Chart type and view controls retained, intentionally not exposed.
         <div class="field-pair">
           <div class="field chart-type-field">
             <div class="field-title">1. Chart type</div>
@@ -252,27 +254,33 @@
             <div class="field-note" id="view-note"></div>
           </div>
         </div>
+        -->
         <div class="field-pair treatment-row">
           <div class="field" id="surface-field">
-            <div class="field-title">3. Surface / area</div>
+            <div class="field-title">Surface / area</div>
             <div class="surface-grid" id="surface-grid"></div>
             <div class="field-note" id="surface-note"></div>
           </div>
+          <div class="field material-field">
+            <div class="field-heading-row"><div class="field-title">Material</div><button class="field-manage-btn" type="button" id="manage-treatments-btn">Edit / Add</button></div>
+            <div class="chip-grid" id="material-grid" aria-label="Material"></div>
+            <div class="field-note" id="material-note" role="status"></div>
+          </div>
           <div class="field treatment-field">
             <div class="field-heading-row">
-              <div class="field-title">4. Treatment</div>
-              <button class="field-manage-btn" type="button" id="manage-treatments-btn">Edit / Add</button>
+              <div class="field-title">Condition / treatment</div>
+
             </div>
             <div class="chip-grid" id="treatment-grid"></div>
           </div>
         </div>
         <div class="field-pair">
           <div class="field status-field">
-            <div class="field-title">5. Status</div>
+            <div class="field-title">Status</div>
             <div class="chip-grid" id="status-grid"></div>
           </div>
           <div class="field note-field">
-            <div class="field-title">Clinical note</div>
+            <label class="field-title" for="note-input">Clinical note</label>
             <textarea class="note-input" id="note-input" placeholder="Optional note for this tooth"></textarea>
           </div>
         </div>
@@ -288,7 +296,7 @@
       <div class="mobile-entry-heading">
         <div class="mobile-entry-progress" id="mobile-entry-progress" aria-label="Chart entry progress">
           <!-- <button class="mobile-entry-stage current" type="button" data-entry-stage="1" aria-label="Go to chart type"><span>1</span><small>Type</small></button> -->
-          <button class="mobile-entry-stage" type="button" data-entry-stage="2" aria-label="Go to view and surface"><span>1</span><small>View</small></button>
+          <button class="mobile-entry-stage" type="button" data-entry-stage="2" aria-label="Go to surface and material"><span>1</span><small>Surface</small></button>
           <button class="mobile-entry-stage" type="button" data-entry-stage="3" aria-label="Go to treatment"><span>2</span><small>Treatment</small></button>
           <button class="mobile-entry-stage" type="button" data-entry-stage="4" aria-label="Go to status and note"><span>3</span><small>Status</small></button>
         </div>
@@ -309,42 +317,40 @@
   <div class="modal treatment-manager-modal" role="dialog" aria-modal="true" aria-labelledby="treatment-manager-title">
     <div class="modal-head">
       <div>
-        <h3 id="treatment-manager-title">Manage Treatment Methods</h3>
-        <p>Choose which methods appear, and manage their name, icon, and color.</p>
+        <h3 id="treatment-manager-title">Manage materials</h3>
+        <p>Edit material names and colors for your clinic.</p>
       </div>
       <button class="icon-btn" type="button" id="treatment-manager-close-btn" aria-label="Close">×</button>
     </div>
 
     <div class="treatment-manager-section">
       <div class="manager-section-head">
-        <strong>Existing methods</strong>
-        <span>Changes are saved on this device.</span>
+        <strong>Materials</strong>
+        <span>Changes are saved for your clinic.</span>
       </div>
       <div class="treatment-method-list" id="treatment-method-list"></div>
     </div>
 
-    <form class="add-treatment-form" id="add-treatment-form">
+    <form class="add-treatment-form" id="add-treatment-form" novalidate>
       <div class="manager-section-head">
-        <strong>Add treatment method</strong>
-        <span>New methods use standard surface charting.</span>
+        <strong>Add material</strong>
+        <span>Choose a name and color.</span>
       </div>
       <div class="add-treatment-grid">
         <label>
           <span>Name</span>
-          <input name="label" type="text" maxlength="40" placeholder="e.g. Temporary filling" required>
+          <input name="label" type="text" maxlength="40" placeholder="e.g. Lithium disilicate" required>
         </label>
-        <label>
-          <span>Icon</span>
-          <select name="icon" id="new-treatment-icon"></select>
-        </label>
+
         <label>
           <span>Color</span>
           <input name="color" type="color" value="#3b82f6">
         </label>
       </div>
-      <button class="btn secondary add-method-btn" type="submit">+ Click to Add New Method</button>
+      <button class="btn secondary add-method-btn" type="submit">Add material</button>
     </form>
 
+    <p id="material-manager-message" class="field-note" role="status" aria-live="polite"></p>
     <div class="modal-actions manager-actions">
       <button class="btn secondary" type="button" id="treatment-manager-cancel-btn">Cancel</button>
       <button class="btn primary" type="button" id="treatment-manager-save-btn">Save changes</button>
@@ -475,7 +481,8 @@
 <script type="module" src="/src/main.tsx"></script>
 <script defer src="./js/tooth-silhouettes.js"></script>
 <script defer src="./js/inner-anatomy.js"></script>
-<script defer src="./js/app.js?v=31"></script>
-<script defer src="./js/supabaseSync.js?v=8"></script>
+<script defer src="./js/materials.js?v=5"></script>
+<script defer src="./js/app.js?v=59"></script>
+<script defer src="./js/supabaseSync.js?v=9"></script>
 </body>
 </html>
