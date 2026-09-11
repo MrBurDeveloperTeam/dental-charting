@@ -10,6 +10,7 @@ export type DentalChartEntryInput = {
   surfaces: string[];
   treatment: string;
   material?: string | null;
+  materialCode?: string | null;
   bridgeRole?: 'abutment' | 'pontic' | null;
   status: string;
   layer: string;
@@ -27,6 +28,7 @@ export type DentalChartEntryRow = {
   surfaces: string[];
   treatment: string;
   material: string | null;
+  material_code?: string | null;
   bridge_role?: 'abutment' | 'pontic' | null;
   status: string;
   layer: string;
@@ -44,6 +46,7 @@ type VisitContext = {
 };
 
 const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const builtinMaterialCodes = new Set(['amalgam','composite','gic','zirconia','emax','pfm','gold','metal','temporary','ceramic']);
 
 async function findVisit(context: VisitContext) {
   const supabase = getSupabaseClient();
@@ -106,7 +109,8 @@ function entryPayload(entry: DentalChartEntryInput) {
     view: entry.view,
     surfaces: Array.isArray(entry.surfaces) ? entry.surfaces : [],
     treatment: entry.treatment,
-    material: entry.material || null,
+    material: entry.material && uuidPattern.test(entry.material) ? entry.material : null,
+    material_code: entry.materialCode || (entry.material && builtinMaterialCodes.has(entry.material) ? entry.material : null),
     bridge_role: entry.bridgeRole || null,
     ...(entry.bridgeId ? { bridge_id: entry.bridgeId } : {}),
     status: entry.status,
