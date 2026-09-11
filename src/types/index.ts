@@ -35,6 +35,7 @@ export interface ChartEntryDraft {
   tooth: number | null;
   category: ChartCategory;
   treatment: string;
+  material: string | null;
   view: ToothView;
   status: ChartStatus;
   layer: ChartLayer;

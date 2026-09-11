@@ -8,16 +8,19 @@ import "@fontsource/inter/latin-800.css";
 import App from "./App";
 import { dentalPatients } from "./services/dentalPatients";
 import { dentalCharts } from "./services/dentalCharts";
+import { dentalMaterials } from "./services/dentalMaterials";
 
 declare global {
   interface Window {
     dentalPatients: typeof dentalPatients;
     dentalCharts: typeof dentalCharts;
+    dentalMaterials: typeof dentalMaterials;
   }
 }
 
 window.dentalPatients = dentalPatients;
 window.dentalCharts = dentalCharts;
+window.dentalMaterials = dentalMaterials;
 
 const rootElement = document.getElementById("react-root");
 if (!rootElement) throw new Error("Missing #react-root migration mount point");
