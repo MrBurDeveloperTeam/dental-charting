@@ -319,7 +319,7 @@
         id: row.id,
         tooth,
         treatment: row.treatment,
-        material: row.material || null,
+        material: row.material_code || row.material || null,
         bridgeRole: row.bridge_role || null,
         bridgeId: row.bridge_id || null,
         category: row.chart_type,
@@ -385,6 +385,7 @@
           clinicalNote: entry.note,
         });
         entry.id = saved.id;
+        entry.material = saved.material_code || saved.material || entry.material || null;
       }
       if (typeof renderAll === "function") renderAll();
       setBadge("Cloud: saved ✓", "#15803d");
