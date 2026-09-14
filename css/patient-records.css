@@ -411,6 +411,43 @@
   }
 }
 
+/* The clinical desktop layout uses three named grid areas and fixed-height
+   panels. The record review needs its own grid so those areas cannot create
+   implicit columns or squeeze the saved-entry text. */
+@media screen {
+  body.patient-record-review .layout {
+    display: block;
+    grid-template-areas: none;
+  }
+
+  body.patient-record-review .layout > .chart-workspace {
+    display: grid;
+    min-width: 0;
+    grid-template-columns: minmax(0, 1.55fr) minmax(440px, 1fr);
+  }
+
+  body.patient-record-review .chart-workspace > .chart-card,
+  body.patient-record-review .chart-workspace > .entries-panel {
+    grid-area: auto;
+    position: static;
+    height: auto;
+    max-height: none;
+    min-width: 0;
+    margin: 0;
+  }
+
+  body.patient-record-review .chart-workspace > .chart-card { grid-column: 1; grid-row: 1; }
+  body.patient-record-review .chart-workspace > .entries-panel { grid-column: 2; grid-row: 1; }
+  body.patient-record-review .entries-panel .entry-row { grid-template-columns: minmax(0, 1fr); }
+  body.patient-record-review .entries-panel .entry-open { width: 100%; }
+}
+
+@media screen and (max-width: 1200px) {
+  body.patient-record-review .layout > .chart-workspace { grid-template-columns: minmax(0, 1fr); }
+  body.patient-record-review .chart-workspace > .chart-card,
+  body.patient-record-review .chart-workspace > .entries-panel { grid-column: 1; grid-row: auto; }
+}
+
 /* Mobile patient details stay in one ordered line:
    IC | gender | date of birth | phone | email. */
 @media (max-width: 760px) {
