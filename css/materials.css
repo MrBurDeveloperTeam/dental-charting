@@ -55,7 +55,7 @@
 .retained-root-placeholder { width:28px; height:24px; }
 .implant-crown { position:relative; }
 @media(max-width:700px){
-  .mobile-entry-content[data-step="2"] #editor .material-field { display:grid!important; }
+  .mobile-entry-content[data-step="3"] #editor .material-field:not([hidden]) { display:grid!important; }
   .mobile-entry-content #editor .field-pair { gap:12px; }
   .mobile-entry-content #material-grid { grid-template-columns:repeat(3,minmax(0,1fr)); }
   .mobile-entry-content #treatment-grid { grid-template-columns:repeat(4,minmax(0,1fr)); }

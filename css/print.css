@@ -1,4 +1,5 @@
 @media print{
+  .saved-entries-toggle{display:none!important}
   /* PDF tooth controls: gap is space between the 16 tooth slots. */
   #split-stage{
     --pdf-tooth-gap:0px;
