@@ -9,9 +9,9 @@
 <link rel="stylesheet" href="./css/chart.css?v=15">
 <link rel="stylesheet" href="./css/editor.css?v=6">
 <link rel="stylesheet" href="./css/dialogs.css?v=23">
-<link rel="stylesheet" href="./css/layout.css?v=64">
+<link rel="stylesheet" href="./css/layout.css?v=68">
 <link rel="stylesheet" href="./css/print.css?v=6">
-<link rel="stylesheet" href="./css/materials.css?v=11">
+<link rel="stylesheet" href="./css/materials.css?v=12">
 <link rel="stylesheet" href="./css/patient-records.css?v=11">
 </head>
 <body>
@@ -261,17 +261,17 @@
             <div class="surface-grid" id="surface-grid"></div>
             <div class="field-note" id="surface-note"></div>
           </div>
-          <div class="field material-field">
-            <div class="field-heading-row"><div class="field-title">Material</div><button class="field-manage-btn" type="button" id="manage-treatments-btn">Edit / Add</button></div>
-            <div class="chip-grid" id="material-grid" aria-label="Material"></div>
-            <div class="field-note" id="material-note" role="status"></div>
-          </div>
           <div class="field treatment-field">
             <div class="field-heading-row">
               <div class="field-title">Condition / treatment</div>
 
             </div>
             <div class="chip-grid" id="treatment-grid"></div>
+          </div>
+          <div class="field material-field">
+            <div class="field-heading-row"><div class="field-title">Material</div><button class="field-manage-btn" type="button" id="manage-treatments-btn">Edit / Add</button></div>
+            <div class="chip-grid" id="material-grid" aria-label="Material"></div>
+            <div class="field-note" id="material-note" role="status"></div>
           </div>
         </div>
         <div class="field-pair">
@@ -482,7 +482,7 @@
 <script defer src="./js/tooth-silhouettes.js"></script>
 <script defer src="./js/inner-anatomy.js"></script>
 <script defer src="./js/materials.js?v=5"></script>
-<script defer src="./js/app.js?v=59"></script>
+<script defer src="./js/app.js?v=60"></script>
 <script defer src="./js/supabaseSync.js?v=10"></script>
 </body>
 </html>
