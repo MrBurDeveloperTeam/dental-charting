@@ -1,4 +1,11 @@
 @media print{
+  /* PDF tooth controls: gap is space between the 16 tooth slots. */
+  #split-stage{
+    --pdf-tooth-gap:0px;
+    --arch-column-scale:1.1;
+    --pdf-lower-crown-width:1.2;
+    --pdf-lower-crown-height:1.4;
+  }
   .entries-select-all,.entries-delete-selected,.entry-checkbox{display:none!important}
   @page{size:A4 portrait;margin:8mm}
   body{background:#fff}
@@ -47,13 +54,15 @@
   .split-stage .upper-grid .upper-label{grid-column:1!important;grid-row:1 / span 2!important;align-items:center!important}
   .split-stage .lower-grid .lower-label{grid-column:1!important;grid-row:2 / span 2!important;align-items:center!important;justify-content:flex-start!important;transform:none!important}
   .split-stage .arch-label-text{width:auto!important;margin:17px 0 10px!important;white-space:normal!important}
-  .split-stage .teeth-row,.split-stage .orientation-row{width:94%!important;margin-inline:auto!important;grid-template-columns:repeat(16,minmax(30px,1fr))!important}
-  .split-stage .upper-root-row,.split-stage .upper-crown-row,.split-stage .upper-number-row,
-  .split-stage .lower-root-row,.split-stage .lower-crown-row,.split-stage .lower-number-row{width:94%!important;margin-inline:auto!important}
+  .split-stage .orientation-row{width:94%!important;margin-inline:auto!important}
+  /* Keep the per-tooth columns set by app.js; equal-width slots leave gaps. */
+  #split-stage .teeth-row{width:max-content!important;margin-inline:auto!important;column-gap:var(--pdf-tooth-gap)!important}
   .split-stage .tooth,.split-stage .number{transform:none!important}
-  .split-stage .upper-root-row .art-core{transform:scale(.54,-.54)!important}
-  .split-stage .lower-root-row .art-core{transform:scale(.54)!important}
-  .split-stage .upper-crown-row .art-core,.split-stage .lower-crown-row .art-core{transform:scale(.82)!important}
+  .split-stage .tooth-art{zoom:.9!important}
+  .split-stage .upper-root-row .art-core{transform:scale(1.2,-.9)!important}
+  .split-stage .lower-root-row .art-core{transform:scale(1.2,.9)!important}
+  .split-stage .upper-crown-row .art-core{transform:scale(1.2)!important}
+  .split-stage .lower-crown-row .art-core{transform:scale(var(--pdf-lower-crown-width),var(--pdf-lower-crown-height))!important}
   .split-stage .split-divider{transform:none!important}
   .chart-layer-switch{display:none!important}
   .print-page-one{break-after:page;page-break-after:always}

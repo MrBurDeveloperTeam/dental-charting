@@ -1005,22 +1005,20 @@ function removeEntry(tooth,id){
 }
 function rctGeometry(n){
   const type=toothType(n),width=toothW(n),height=toothH(n),cervical=crownCutY(n);
-  const chamberTop=Math.max(5,cervical*.3),chamberBottom=Math.min(height*.58,cervical+5);
   const roots=type==="molar"||type==="wisdom"?[-.27,0,.27]:type==="premolar"?[-.16,.16]:[0];
-  return{type,width,height,cervical,chamberTop,chamberBottom,roots};
+  return{type,width,height,cervical,roots};
 }
 function rctOverlayHTML(n){
   const g=rctGeometry(n),cx=g.width/2,spread=g.type==="molar"||g.type==="wisdom"?g.width*.24:g.width*.17;
-  const chamber=`M${cx-spread} ${g.chamberTop} Q${cx} ${g.chamberTop-4} ${cx+spread} ${g.chamberTop} L${cx+spread*.58} ${g.chamberBottom} Q${cx} ${g.chamberBottom+5} ${cx-spread*.58} ${g.chamberBottom} Z`;
+  const wisdomTip=n===18||n===28,clipId=`rct-root-clip-${n}`;
+  const startY=Math.max(g.cervical+8,g.height*.57);
   const canals=g.roots.map((offset,index)=>{
-    const startX=cx+offset*spread*.9,endX=cx+offset*g.width*.8;
-    const bend=(index%2?1:-1)*g.width*.035;
-    return `<path class="rct-canal-glow" d="M${startX} ${g.chamberBottom-1} C${startX+bend} ${g.height*.64} ${endX-bend} ${g.height*.78} ${endX} ${g.height*.94}"/><path class="rct-canal" d="M${startX} ${g.chamberBottom-1} C${startX+bend} ${g.height*.64} ${endX-bend} ${g.height*.78} ${endX} ${g.height*.94}"/>`;
+    const startX=cx+offset*spread*.9,endX=cx+offset*g.width*(wisdomTip ? .48 : .8);
+    const bend=(index%2?1:-1)*g.width*(wisdomTip ? .015 : .035);
+    const path=`M${startX} ${startY} C${startX+bend} ${g.height*.69} ${endX-bend} ${g.height*.8} ${endX} ${g.height*(wisdomTip ? .9 : .94)}`;
+    return `<path class="rct-canal" d="${path}"/>`;
   }).join('');
-  const horns=g.roots.length===1
-    ? `<path class="rct-horn" d="M${cx-spread*.5} ${g.chamberTop+2} Q${cx} ${g.chamberTop-5} ${cx+spread*.5} ${g.chamberTop+2}"/>`
-    : g.roots.map(offset=>`<path class="rct-horn" d="M${cx+offset*spread*.8} ${g.chamberTop+5} L${cx+offset*spread*1.2} ${Math.max(3,g.chamberTop-5)}"/>`).join('');
-  return `<svg class="surface-svg rct-anatomy" width="${g.width}" height="${g.height}" viewBox="0 0 ${g.width} ${g.height}" aria-hidden="true"><path class="rct-chamber-glow" d="${chamber}"/><path class="rct-chamber" d="${chamber}"/>${horns}${canals}</svg>`;
+  return `<svg class="surface-svg rct-anatomy" width="${g.width}" height="${g.height}" viewBox="0 0 ${g.width} ${g.height}" aria-hidden="true"><defs><clipPath id="${clipId}">${surfaceClipPath(n,"front")}</clipPath></defs><g clip-path="url(#${clipId})">${canals}</g></svg>`;
 }
 function surfaceClipPath(n,v){
   if(v==="occ"&&innerAnatomy(n))return `<path d="${innerAnatomy(n).path}"></path>`;
