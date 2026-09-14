@@ -201,13 +201,14 @@
   /* .mobile-entry-progress{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;padding:3px 4px 0} */
   .mobile-entry-progress {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
 
   width: min(260px, 100%);
   margin-inline: auto;
   padding: 3px 4px 0;
 }
+  .mobile-entry-progress[data-has-material="false"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 
 /* Mobile patient-form selects: consistent size, arrow and non-overflowing text. */
 @media (max-width:600px) {
@@ -241,6 +242,7 @@
   }
 }
   .mobile-entry-stage{appearance:none;position:relative;display:grid;justify-items:center;gap:4px;min-width:0;padding:0;border:0;background:transparent;color:#9aa6b2;font:inherit;font-size:9px;font-weight:800;text-align:center;cursor:pointer;touch-action:manipulation}
+  .mobile-entry-stage[hidden]{display:none}
   .mobile-entry-stage:focus-visible{outline:2px solid #3484e8;outline-offset:3px;border-radius:5px}
   .mobile-entry-stage:not(:last-child)::after{content:"";position:absolute;top:14px;left:calc(50% + 16px);right:calc(-50% + 16px);height:2px;background:#dce3eb}
   .mobile-entry-stage span{position:relative;z-index:1;width:28px;height:28px;border:2px solid #dce3eb;border-radius:50%;display:grid;place-items:center;background:#fff;color:#8b98a7;font-size:11px}
@@ -262,9 +264,9 @@
   .mobile-entry-content .field-pair{display:contents}
   .mobile-entry-content .field,.mobile-entry-content .treatment-field,.mobile-entry-content .status-field,.mobile-entry-content .note-field{grid-column:1!important;width:100%;min-width:0}
   .mobile-entry-content .editor-fields>.field,.mobile-entry-content .field-pair>.field{display:none!important}
-  /* .mobile-entry-content[data-step="1"] .selection-field,.mobile-entry-content[data-step="1"] .chart-type-field, */
-  .mobile-entry-content[data-step="2"] .selection-field,.mobile-entry-content[data-step="2"] .view-field,.mobile-entry-content[data-step="2"] #surface-field,
-  .mobile-entry-content[data-step="3"] .selection-field,.mobile-entry-content[data-step="3"] .treatment-field,
+  .mobile-entry-content[data-step="1"] .selection-field,.mobile-entry-content[data-step="1"] .view-field,.mobile-entry-content[data-step="1"] #surface-field,
+  .mobile-entry-content[data-step="2"] .selection-field,.mobile-entry-content[data-step="2"] .treatment-field,
+  .mobile-entry-content[data-step="3"] .selection-field,
   .mobile-entry-content[data-step="4"] .selection-field,.mobile-entry-content[data-step="4"] .status-field,.mobile-entry-content[data-step="4"] .note-field{display:grid!important}
   .mobile-entry-content .preview{padding:9px;font-size:10px}
   .mobile-entry-content .selection-field{gap:6px}

@@ -112,11 +112,19 @@ document.getElementById("finish-visit-close")?.addEventListener("click",closeFin
 document.getElementById("finish-visit-cancel")?.addEventListener("click",closeFinishVisitModal);
 document.getElementById("finish-visit-confirm")?.addEventListener("click",()=>{closeFinishVisitModal();document.dispatchEvent(new CustomEvent("dental-chart:finish-visit"))});
 document.getElementById("entries-select-all")?.addEventListener("change",e=>{selectedEntryIds.clear();if(e.target.checked)flatEntries().forEach(entry=>selectedEntryIds.add(entry.id));renderEntries()});
+const savedEntriesPanel=document.querySelector(".entries-panel"),savedEntriesToggle=document.getElementById("saved-entries-toggle");
+savedEntriesToggle?.addEventListener("click",()=>{
+  const collapsed=savedEntriesPanel.classList.toggle("is-collapsed");
+  document.body.classList.toggle("saved-entries-collapsed",collapsed);
+  savedEntriesToggle.setAttribute("aria-expanded",String(!collapsed));
+  savedEntriesToggle.setAttribute("aria-label",collapsed?"Open Saved Entries":"Minimize Saved Entries");
+  savedEntriesToggle.title=collapsed?"Open Saved Entries":"Minimize Saved Entries";
+});
 els.entriesList.addEventListener("mouseover",e=>{const entry=e.target.closest?.(".entry-open");if(entry&&!entry.title)entry.title="Click to edit this saved entry"});
 document.getElementById("entries-delete-selected")?.addEventListener("click",()=>{const ids=[...selectedEntryIds];if(!ids.length)return;openDeleteEntryModal(`Delete ${ids.length} selected entr${ids.length===1?"y":"ies"}? Any selected bridge is deleted as a whole span. This cannot be undone.`,()=>removeSelectedEntries(ids))});
 treatmentManagerEls.openBtn.addEventListener("click",openMaterialManager); treatmentManagerEls.closeBtn.addEventListener("click",closeMaterialManager); treatmentManagerEls.cancelBtn.addEventListener("click",closeMaterialManager); treatmentManagerEls.saveBtn.addEventListener("click",saveMaterialManager); treatmentManagerEls.addForm.addEventListener("submit",addMaterial);    treatmentManagerEls.modal.addEventListener("click",e=>{if(e.target===treatmentManagerEls.modal) closeMaterialManager()});
 mobileToothEls.prev.addEventListener("click",()=>navigateMobileTooth(-1)); mobileToothEls.next.addEventListener("click",()=>navigateMobileTooth(1)); mobileToothEls.optionalMolar.addEventListener("click",toggleMobileOptionalMolar); mobileToothEls.close.addEventListener("click",closeMobileToothModal); mobileToothEls.bottomClose.addEventListener("click",closeMobileToothModal); mobileToothEls.done.addEventListener("click",finishMobileToothSelection); mobileToothEls.modal.addEventListener("click",e=>{if(e.target===mobileToothEls.modal) closeMobileToothModal()});
-mobileEntryEls.trigger.addEventListener("click",openMobileEntryWizard); mobileEntryEls.close.addEventListener("click",closeMobileEntryWizard); mobileEntryEls.back.addEventListener("click",()=>setMobileEntryStep(mobileEntryStep-1)); mobileEntryEls.next.addEventListener("click",()=>setMobileEntryStep(mobileEntryStep+1)); mobileEntryEls.done.addEventListener("click",completeMobileEntryWizard); mobileEntryEls.modal.addEventListener("click",e=>{if(e.target===mobileEntryEls.modal)closeMobileEntryWizard()});
+mobileEntryEls.trigger.addEventListener("click",openMobileEntryWizard); mobileEntryEls.close.addEventListener("click",closeMobileEntryWizard); mobileEntryEls.back.addEventListener("click",()=>moveMobileEntryStep(-1)); mobileEntryEls.next.addEventListener("click",()=>moveMobileEntryStep(1)); mobileEntryEls.done.addEventListener("click",completeMobileEntryWizard); mobileEntryEls.modal.addEventListener("click",e=>{if(e.target===mobileEntryEls.modal)closeMobileEntryWizard()});
 mobileEntryEls.progress.addEventListener("click",e=>{const stage=e.target.closest("[data-entry-stage]");if(stage)setMobileEntryStep(Number(stage.dataset.entryStage))});
 mobileToothEls.primarySwap.addEventListener(
   "click",
@@ -343,7 +351,8 @@ function chartPrerequisiteMessage(){
 function updateChartPrerequisiteState(){
   const locked=!canStartCharting(),workspace=document.querySelector(".chart-workspace"),mobileTrigger=document.getElementById("mobile-entry-trigger");
   workspace?.classList.toggle("chart-locked",locked);
-  workspace?.setAttribute("aria-disabled",String(locked));
+  workspace?.removeAttribute("aria-disabled");
+  workspace?.querySelectorAll(".chart-stage").forEach(stage=>stage.setAttribute("aria-disabled",String(locked)));
   if(mobileTrigger)mobileTrigger.disabled=locked;
 }
 function formatInputDate(value){const date=parseIsoDate(value); if(!date) return ""; const day=`${date.getDate()}`.padStart(2,"0"); const month=`${date.getMonth()+1}`.padStart(2,"0"); return `${day}/${month}/${date.getFullYear()}`}
@@ -825,8 +834,7 @@ function openMobileEntryWizard(){
   if(!canStartCharting()||!isMobileToothModalViewport()||!draft.tooth||isGhostPrimarySlot(draft.tooth))return;
   closeMobileToothModal();
   mobileEntryOpen=true;
-  // mobileEntryStep=1;
-  mobileEntryStep=2;
+  mobileEntryStep=1;
   mobileEntryEls.content.appendChild(els.editor);
   renderMobileEntryWizard();
 }
@@ -836,15 +844,19 @@ function closeMobileEntryWizard(){
   mobileEntryEls.modal.setAttribute("aria-hidden","true");
   if(els.editor.parentElement!==editorHome)editorHome.appendChild(els.editor);
 }
+function mobileEntrySteps(){return shouldShowMaterialField(draft.treatment)?[1,2,3,4]:[1,2,4]}
+function moveMobileEntryStep(direction){const steps=mobileEntrySteps(),index=steps.indexOf(mobileEntryStep);setMobileEntryStep(steps[Math.max(0,Math.min(steps.length-1,index+direction))])}
 function setMobileEntryStep(step){
-  if(step===4&&materialSelectionError()){mobileEntryStep=2;renderMobileEntryWizard();showChartValidation(materialSelectionError());return;}
-  // mobileEntryStep=Math.max(1,Math.min(4,step));
-  mobileEntryStep=Math.max(2,Math.min(4,step));
+  const steps=mobileEntrySteps();
+  if(!steps.includes(step))return;
+  if(step===4&&materialSelectionError()){mobileEntryStep=3;renderMobileEntryWizard();showChartValidation(materialSelectionError());return;}
+  mobileEntryStep=step;
   renderMobileEntryWizard();
   mobileEntryEls.content.scrollTop=0;
 }
 function completeMobileEntryWizard(){
   if(!draft.tooth||draft.treatment==="bridge"&&bridgeSelectionError(selection.teeth))return;
+  if(materialSelectionError()){setMobileEntryStep(3);showChartValidation(materialSelectionError());return;}
   closeMobileEntryWizard();
   saveDraft();
 }
@@ -857,15 +869,18 @@ function renderMobileEntryWizard(){
   mobileEntryEls.modal.setAttribute("aria-hidden",shouldShow?"false":"true");
   if(!shouldShow){if(mobileEntryOpen&&!hasTooth)closeMobileEntryWizard();return}
   if(els.editor.parentElement!==mobileEntryEls.content)mobileEntryEls.content.appendChild(els.editor);
-  const titles=["Chart type","Surface & material","Condition / treatment","Status & note"];
+  const steps=mobileEntrySteps(),needsMaterial=steps.includes(3);
+  if(!steps.includes(mobileEntryStep))mobileEntryStep=2;
+  const titles={1:"Surface",2:"Treatment",3:"Material",4:"Status & note"};
   mobileEntryEls.content.dataset.step=String(mobileEntryStep);
-  mobileEntryEls.title.textContent=titles[mobileEntryStep-1];
-  // mobileEntryEls.progress.querySelectorAll("[data-entry-stage]").forEach(stage=>{const number=Number(stage.dataset.entryStage);stage.classList.toggle("current",number===mobileEntryStep);stage.classList.toggle("complete",number<mobileEntryStep);stage.querySelector("span").textContent=number<mobileEntryStep?"✓":number});
+  mobileEntryEls.title.textContent=titles[mobileEntryStep];
+  mobileEntryEls.progress.dataset.hasMaterial=String(needsMaterial);
   mobileEntryEls.progress
   .querySelectorAll("[data-entry-stage]")
   .forEach(stage => {
     const number = Number(stage.dataset.entryStage);
-    const displayNumber = number - 1;
+    const displayNumber = steps.indexOf(number)+1;
+    stage.hidden=number===3&&!needsMaterial;
 
     stage.classList.toggle(
       "current",
@@ -874,14 +889,13 @@ function renderMobileEntryWizard(){
 
     stage.classList.toggle(
       "complete",
-      number < mobileEntryStep
+      displayNumber < steps.indexOf(mobileEntryStep)+1
     );
 
     stage.querySelector("span").textContent =
-      number < mobileEntryStep ? "✓" : displayNumber;
+      displayNumber < steps.indexOf(mobileEntryStep)+1 ? "✓" : displayNumber;
   });
-  // mobileEntryEls.back.disabled=mobileEntryStep===1;
-  mobileEntryEls.back.disabled=mobileEntryStep===2;
+  mobileEntryEls.back.disabled=mobileEntryStep===1;
   mobileEntryEls.next.hidden=mobileEntryStep===4;
   mobileEntryEls.done.hidden=mobileEntryStep!==4;
   mobileEntryEls.done.disabled=Boolean(materialSelectionError())||draft.treatment==="bridge"&&Boolean(bridgeSelectionError(selection.teeth));
@@ -1250,7 +1264,7 @@ function surfaceOverlaySVG(n,v,preview=false){
   const previewColor=preview?entryColor(draft):null;
   return renderSurfaceOverlay(n,v,{complete,planned,review,selected,previewColor,preview,clipKey:preview?"draft":"chart"});
 }
-function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=wholeExisting&&wholeExisting.treatment==="missing",selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; const tooltip=toothTooltipText(n); if(tooltip){holder.classList.add("has-tooltip"); holder.dataset.tooltip=tooltip; if(tooltipOnLeft(n)) holder.classList.add("tooltip-left")} const art=document.createElement("div"); art.className="tooth-art"; const core=document.createElement("div"); core.className=`art-core ${v==="front"?`front ${isUpper(n)?"upper":"lower"}`:"occ"}`; if(missing&&layer!=="planned"){core.innerHTML=missingSVG(n,v)} else {const split=layer!=="combined"; const fill="#F5F2EC"; const anatomyEntry=wholePlanned||wholeExisting||wholeReview; const baseSVG=anatomySVG(n,v,anatomyEntry); core.innerHTML=baseSVG; if(!ghost){if(wholeExisting) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeExisting.treatment,"existing",wholeExisting)); if((split||!wholeExisting)&&wholePlanned) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholePlanned.treatment,"planned",wholePlanned)); if((split||!wholeExisting&&!wholePlanned)&&wholeReview) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeReview.treatment,"watch",wholeReview)); if(selection.multi&&selection.teeth.includes(n)&&draft.treatment==="veneer"&&layer==="combined") core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,draft.treatment,"preview")); if(layer==="combined") core.insertAdjacentHTML("beforeend",surfaceOverlaySVG(n,v)); else if(layer==="existing") core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{complete:surfaceMap(n,v,"existing"),review:surfaceMap(n,v,"watch","existing"),selected:draft.tooth===n&&draft.view===v?new Set(draft.surfaces):new Set(),previewColor:null,preview:false,clipKey:`existing-${n}-${v}`})); else core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{planned:surfaceMap(n,v,"planned"),review:surfaceMap(n,v,"watch","planned"),selected:draft.tooth===n&&draft.view===v?new Set(draft.surfaces):new Set(),previewColor:null,preview:false,clipKey:`planned-${n}-${v}`})); if(v==="front"&&((layer==="planned"&&(rootPlanned||rootReview))||(layer==="existing"&&(rootExisting||rootReview))||(layer==="combined"&&(rootExisting||rootReview)))) core.insertAdjacentHTML("beforeend",rctOverlayHTML(n))}} if(layer!=="combined"){const dims=v==="front"?{width:toothW(n),height:toothH(n)}:crownDims(n);core.style.zoom=String(.82*toothW(n)/dims.width);}
+function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=wholeExisting&&wholeExisting.treatment==="missing",selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; if(!isPrimaryTooth(n)&&n%10>=1&&n%10<=5)holder.classList.add("mobile-inner-tooth"); const tooltip=toothTooltipText(n); if(tooltip){holder.classList.add("has-tooltip"); holder.dataset.tooltip=tooltip; if(tooltipOnLeft(n)) holder.classList.add("tooltip-left")} const art=document.createElement("div"); art.className="tooth-art"; const core=document.createElement("div"); core.className=`art-core ${v==="front"?`front ${isUpper(n)?"upper":"lower"}`:"occ"}`; if(missing&&layer!=="planned"){core.innerHTML=missingSVG(n,v)} else {const split=layer!=="combined"; const fill="#F5F2EC"; const anatomyEntry=wholePlanned||wholeExisting||wholeReview; const baseSVG=anatomySVG(n,v,anatomyEntry); core.innerHTML=baseSVG; if(!ghost){if(wholeExisting) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeExisting.treatment,"existing",wholeExisting)); if((split||!wholeExisting)&&wholePlanned) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholePlanned.treatment,"planned",wholePlanned)); if((split||!wholeExisting&&!wholePlanned)&&wholeReview) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeReview.treatment,"watch",wholeReview)); if(selection.multi&&selection.teeth.includes(n)&&draft.treatment==="veneer"&&layer==="combined") core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,draft.treatment,"preview")); if(layer==="combined") core.insertAdjacentHTML("beforeend",surfaceOverlaySVG(n,v)); else if(layer==="existing") core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{complete:surfaceMap(n,v,"existing"),review:surfaceMap(n,v,"watch","existing"),selected:draft.tooth===n&&draft.view===v?new Set(draft.surfaces):new Set(),previewColor:null,preview:false,clipKey:`existing-${n}-${v}`})); else core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{planned:surfaceMap(n,v,"planned"),review:surfaceMap(n,v,"watch","planned"),selected:draft.tooth===n&&draft.view===v?new Set(draft.surfaces):new Set(),previewColor:null,preview:false,clipKey:`planned-${n}-${v}`})); if(v==="front"&&((layer==="planned"&&(rootPlanned||rootReview))||(layer==="existing"&&(rootExisting||rootReview))||(layer==="combined"&&(rootExisting||rootReview)))) core.insertAdjacentHTML("beforeend",rctOverlayHTML(n))}} if(layer!=="combined"){const dims=v==="front"?{width:toothW(n),height:toothH(n)}:crownDims(n);core.style.zoom=String(.82*toothW(n)/dims.width);}
 applyAnatomyClip(core,n,v,wholePlanned||wholeExisting||wholeReview); art.appendChild(core); if(layer==="combined"){if(!ghost&&wholeExisting&&!missing&&!isVeneer(wholeExisting.treatment)&&!hideWholeRing(wholeExisting.treatment)) art.insertAdjacentHTML("beforeend",`<div class="status-ring" style="--ring-color:${COLORS[wholeExisting.treatment]}"></div>`); if(!ghost&&((wholePlanned||(rootPlanned&&!wholeExisting))&&!(wholePlanned&&isVeneer(wholePlanned.treatment)))){const t=wholePlanned?wholePlanned.treatment:rootPlanned.treatment; if(!hideWholeRing(t)) art.insertAdjacentHTML("beforeend",`<div class="plan-ring" style="--ring-color:${COLORS[t]}"></div>`)} if(!ghost&&v==="front"&&latestWatch(n,"existing")) art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} else if(!ghost&&v==="front"&&watch){art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} holder.appendChild(art); if(!ghost)appendConditionBadges(holder,n,layer,v); if(ghost){holder.addEventListener("click",e=>{if(!isMobileToothModalViewport())return;e.preventDefault();e.stopPropagation();activatePrimaryOptionalTooth(n)});holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); activatePrimaryOptionalTooth(n)}); return holder} holder.addEventListener("click",()=>handleToothClick(n,v,statusContext)); if(chartMode==="primary"&&isPrimaryOptionalMolar(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); deactivatePrimaryOptionalTooth(n)}); else if(chartMode==="primary"&&swapPrimaryToothNumber(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); togglePrimaryTooth(n,v)}); art.querySelectorAll("[data-surface]").forEach(el=>el.addEventListener("click",e=>{e.stopPropagation();openTooth(n,v,el.dataset.surface,selection.multi&&selection.teeth.length>0,statusContext)})); return holder}
 function setArchColumns(container,list){if(!container.id.startsWith("split-"))return;container.style.gridTemplateColumns=list.map(n=>`calc(${.82*(n===null?28:toothW(n)-4)}px * var(--arch-column-scale, 1))`).join(" ")}
 function renderNumbersRow(container, list) {

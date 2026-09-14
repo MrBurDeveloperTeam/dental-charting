@@ -8,13 +8,13 @@
 <link rel="stylesheet" href="./css/base.css?v=16">
 <link rel="stylesheet" href="./css/chart.css?v=16">
 <link rel="stylesheet" href="./css/editor.css?v=6">
-<link rel="stylesheet" href="./css/dialogs.css?v=23">
-<link rel="stylesheet" href="./css/layout.css?v=68">
-<link rel="stylesheet" href="./css/print.css?v=9">
-<link rel="stylesheet" href="./css/materials.css?v=12">
+<link rel="stylesheet" href="./css/dialogs.css?v=24">
+<link rel="stylesheet" href="./css/layout.css?v=75">
+<link rel="stylesheet" href="./css/print.css?v=10">
+<link rel="stylesheet" href="./css/materials.css?v=13">
 <link rel="stylesheet" href="./css/patient-records.css?v=11">
 </head>
-<body>
+<body class="saved-entries-collapsed">
 <div class="page">
   <header class="app-header">
     <section class="topbar">
@@ -102,10 +102,10 @@
           <p class="primary-chart-hint"><strong>Primary dentition:</strong> <span class="primary-hint-desktop">Double-click a primary tooth to swap it with its permanent successor. Double-click a faded 6/7 position to add the molar, or an active 6/7 molar to hide it.</span><span class="primary-hint-mobile">Tap a faded permanent 6/7 molar to activate it. In the tooth panel, tap Deactivate permanent molar to hide it again.</span></p>
         </div>
         <div class="chart-head-controls">
-          <div class="chart-view-key" aria-label="Chart view guide">
+          <!-- <div class="chart-view-key" aria-label="Chart view guide">
             <span><i class="view-key-icon root"></i>Root profile</span>
             <span><i class="view-key-icon crown"></i>Crown + inner surface</span>
-          </div>
+          </div> -->
           <div class="chart-layer-switch" id="chart-view-toggle" aria-label="Chart layer">
             <button class="chart-layer-btn active" type="button" data-chart-view="existing" aria-pressed="true">Existing</button>
             <button class="chart-layer-btn" type="button" data-chart-view="planned" aria-pressed="false">Planning</button>
@@ -189,9 +189,12 @@
       <div class="print-page-number print-page-one" aria-hidden="true">1</div>
       </div>
 
-      <div class="entries-panel">
+      <div class="entries-panel is-collapsed">
         <div class="entries-head">
           <h3 class="saved-entries-title">Saved Entries</h3>
+          <button class="saved-entries-toggle" id="saved-entries-toggle" type="button" aria-label="Open Saved Entries" aria-controls="entries-list" aria-expanded="false" title="Open Saved Entries">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path class="collapse-mark" d="M5 12h14"/><path class="expand-mark" d="M5 12h14M12 5v14"/></svg>
+          </button>
           <div id="record-edit-chart-root"></div>
           <div class="entries-bulk-actions">
             <label class="entries-select-all"><input id="entries-select-all" type="checkbox"> Select all</label>
@@ -295,12 +298,12 @@
     <div class="modal-head mobile-entry-head">
       <div class="mobile-entry-heading">
         <div class="mobile-entry-progress" id="mobile-entry-progress" aria-label="Chart entry progress">
-          <!-- <button class="mobile-entry-stage current" type="button" data-entry-stage="1" aria-label="Go to chart type"><span>1</span><small>Type</small></button> -->
-          <button class="mobile-entry-stage" type="button" data-entry-stage="2" aria-label="Go to surface and material"><span>1</span><small>Surface</small></button>
-          <button class="mobile-entry-stage" type="button" data-entry-stage="3" aria-label="Go to treatment"><span>2</span><small>Treatment</small></button>
-          <button class="mobile-entry-stage" type="button" data-entry-stage="4" aria-label="Go to status and note"><span>3</span><small>Status</small></button>
+          <button class="mobile-entry-stage" type="button" data-entry-stage="1" aria-label="Go to surface"><span>1</span><small>Surface</small></button>
+          <button class="mobile-entry-stage" type="button" data-entry-stage="2" aria-label="Go to treatment"><span>2</span><small>Treatment</small></button>
+          <button class="mobile-entry-stage" type="button" data-entry-stage="3" aria-label="Go to material"><span>3</span><small>Material</small></button>
+          <button class="mobile-entry-stage" type="button" data-entry-stage="4" aria-label="Go to status and note"><span>4</span><small>Status</small></button>
         </div>
-        <h3 id="mobile-entry-title">Chart type</h3>
+        <h3 id="mobile-entry-title">Surface</h3>
       </div>
       <button class="icon-btn mobile-tooth-close" type="button" id="mobile-entry-close-btn" aria-label="Close chart entry">&#10005;</button>
     </div>
@@ -482,7 +485,7 @@
 <script defer src="./js/tooth-silhouettes.js"></script>
 <script defer src="./js/inner-anatomy.js"></script>
 <script defer src="./js/materials.js?v=5"></script>
-<script defer src="./js/app.js?v=61"></script>
+<script defer src="./js/app.js?v=64"></script>
 <script defer src="./js/supabaseSync.js?v=10"></script>
 </body>
 </html>

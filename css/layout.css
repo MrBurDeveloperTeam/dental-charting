@@ -72,7 +72,7 @@
   .chart-head-controls .chart-layer-switch{grid-column:1}
   .mobile-entry-trigger {
     display: inline-flex;
-    grid-column: 2;
+    grid-column: 1;
     align-items: center;
     justify-content: center;
 
@@ -1313,4 +1313,143 @@ button.number:focus-visible {
     height: 40px;
     min-width: 40px;
   }
+}
+
+/* Compact Saved Entries tab while charting; preserve the complete panel in
+   patient-record review and in print. */
+@media screen {
+  body:not(.patient-record-review):not(.patient-record-edit) .entries-panel > .entries-head {
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:center;
+  }
+  body:not(.patient-record-review):not(.patient-record-edit) .entries-panel > .entries-head .saved-entries-toggle {
+    grid-column:2;
+    grid-row:1;
+  }
+  body:not(.patient-record-review):not(.patient-record-edit) .entries-panel > .entries-head .entries-bulk-actions {grid-column:1 / -1}
+  body:not(.patient-record-review):not(.patient-record-edit) #record-edit-chart-root:empty {display:none}
+  .saved-entries-toggle {
+    display:grid;
+    place-items:center;
+    width:34px;
+    height:34px;
+    padding:0;
+    border:1px solid #d5e4f6;
+    border-radius:9px;
+    background:#f4f8fe;
+    color:#315b85;
+    cursor:pointer;
+  }
+  .saved-entries-toggle:hover {background:#eaf3ff;border-color:#9fc7f4}
+  .saved-entries-toggle:focus-visible {outline:3px solid #79aef7;outline-offset:2px}
+  .saved-entries-toggle svg {width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
+  .saved-entries-toggle .expand-mark {display:none}
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed {
+    justify-self:end;
+    width:min(100%,180px);
+    height:auto;
+    max-height:none;
+    overflow:visible;
+  }
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed > .entries-head {
+    min-height:64px;
+    padding:12px;
+    border-bottom:0;
+  }
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed > .entries-head .saved-entries-title {font-size:14px;white-space:nowrap}
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed :is(.entries-bulk-actions,.entries-list) {display:none}
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed .collapse-mark {display:none}
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed .expand-mark {display:block}
+  body:is(.patient-record-review,.patient-record-edit) .saved-entries-toggle {display:none}
+}
+
+@media screen and (min-width:1101px) {
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .layout {
+    grid-template-columns:minmax(480px,1fr) minmax(450px,1fr) 180px;
+  }
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .chart-workspace > .entries-panel.is-collapsed {
+    position:static;
+    width:auto;
+    height:64px;
+    max-height:64px;
+    margin:12px;
+  }
+}
+
+/* Keep every tooth and its number visible in the four-arch phone chart. */
+@media screen and (max-width:600px) {
+  .layout {grid-template-columns:minmax(0,1fr)}
+  .chart-workspace {min-width:0;grid-template-columns:minmax(0,1fr)}
+  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed {justify-self:start}
+  .chart-stage-wrap {overflow-x:hidden}
+  #split-stage {
+    box-sizing:border-box;
+    width:100%;
+    min-width:0;
+    padding:8px 4px;
+    overflow:hidden;
+  }
+  #split-stage .split-group {min-width:0;padding:6px 0}
+  #split-stage .arch-grid {min-width:0;grid-template-columns:43px minmax(0,1fr)}
+  #split-stage .upper-grid {grid-template-rows:58px 48px 20px}
+  #split-stage .lower-grid {grid-template-rows:20px 48px 58px;margin-top:0;padding-bottom:0}
+  #split-stage .lower-grid .lower-label {transform:none}
+  #split-stage .teeth-row {
+    box-sizing:border-box;
+    width:82%; /* Mobile tooth spacing: lower this to bring teeth closer. */
+    min-width:0;
+    grid-template-columns:repeat(16,minmax(0,1fr)) !important;
+    justify-self:center;
+    margin-inline:auto;
+    padding:0;
+    column-gap:0;
+    transform:none;
+  }
+  #split-stage .tooth {width:100%;min-width:0}
+  #split-stage .tooth-art {zoom:.47}
+  #split-stage .number {position:relative;z-index:3;min-width:0;font-size:8px;line-height:1}
+  #split-stage .lower-number-row {z-index:4}
+  /* Mobile sizes for teeth 15–25 and 45–35; molars stay unchanged. */
+  #split-stage {
+    --mobile-upper-inner-width:1.3;
+    --mobile-upper-inner-height:1.08;
+    --mobile-lower-inner-width:1.4;
+    --mobile-lower-inner-height:1.08;
+    --mobile-lower-crown-width:1.2;
+    --mobile-lower-crown-height:1.8;
+    --mobile-lower-root-width:1.2;
+    --mobile-lower-root-height:1;
+  }
+  #split-stage .upper-grid .tooth.mobile-inner-tooth .tooth-art {
+    transform:scale(var(--mobile-upper-inner-width),var(--mobile-upper-inner-height));
+  }
+  #split-stage .lower-crown-row .tooth-art {
+    transform:scale(var(--mobile-lower-crown-width),var(--mobile-lower-crown-height));
+  }
+  #split-stage .lower-crown-row .tooth.mobile-inner-tooth .tooth-art {
+    transform:scale(var(--mobile-lower-crown-width),var(--mobile-lower-crown-height))
+      scale(var(--mobile-lower-inner-width),var(--mobile-lower-inner-height));
+  }
+  #split-stage .arch-label-text {font-size:8px;gap:3px;line-height:1.15}
+  #split-stage .split-status-label {font-size:8px;letter-spacing:0}
+  #split-stage .lower-root-row .tooth-art {
+    transform:scale(var(--mobile-lower-root-width),var(--mobile-lower-root-height));
+  }
+  #split-stage .lower-root-row .tooth.mobile-inner-tooth .tooth-art {
+    transform:scale(var(--mobile-lower-root-width),var(--mobile-lower-root-height))
+      scale(var(--mobile-lower-inner-width),var(--mobile-lower-inner-height));
+  }
+}
+
+@media screen and (min-width:480px) and (max-width:600px) {
+  #split-stage .tooth-art {zoom:.58}
+  #split-stage .number {font-size:9px}
+}
+
+@media screen and (max-width:360px) {
+  #split-stage .arch-grid {grid-template-columns:37px minmax(0,1fr)}
+  #split-stage .teeth-row {width:90%}
+  #split-stage .tooth-art {zoom:.70}
+  #split-stage .number {font-size:7px}
+  #split-stage .arch-label-text,#split-stage .split-status-label {font-size:7px}
 }
