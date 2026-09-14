@@ -1,7 +1,8 @@
-/* Clinical editor: surface → material → condition/treatment → status → note. */
+/* Clinical editor: surface → condition/treatment → material → status → note. */
 #editor .editor-fields > .field-pair,
 #editor .field-pair.treatment-row { display:flex; flex-direction:column; gap:16px; }
 #editor .treatment-field { min-width:0; }
+#editor .material-field[hidden] { display:none!important; }
 #material-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:7px; }
 #material-grid .material-chip { min-width:0; display:flex; align-items:center; gap:7px; padding:9px 7px; min-height:40px; font-size:11px; text-align:left; }
 .material-chip span:last-child { overflow-wrap:anywhere; font-weight:700; }
@@ -34,9 +35,10 @@
 .lower-root-row .condition-badges { bottom:0; transform:translate(-50%,calc(100% + 5px)); }
 .condition-badge { border-radius:4px; padding:2px 4px; font:700 9px/1.2 Inter,sans-serif; background:#fde68a; color:#422006; border:1px solid #fbbf24; }
 .condition-badge.badge-m1,.condition-badge.badge-m2,.condition-badge.badge-m3 { background:#fecdd3; color:#881337; border-color:#fb7185; }
-.condition-badge.badge-impacted { background:#ddd6fe; color:#4c1d95; border-color:#a78bfa; }
 .condition-badge.planned { border-style:dashed; }
 .mini-condition-badge { position:absolute; top:8px; left:50%; z-index:7; transform:translateX(-50%); pointer-events:none; }
+.impacted-tooth-label { position:absolute; left:50%; top:50%; z-index:12; transform:translate(-50%,-50%); display:block; padding:0; border:0; background:transparent; color:#0d1725; font:800 11px/1 Inter,sans-serif; letter-spacing:-.06em; white-space:nowrap; pointer-events:none; -webkit-text-stroke:1px rgba(255,255,255,.98); paint-order:stroke fill; text-shadow:0 1px 3px rgba(13,23,37,.42); }
+.mini-condition-badge.impacted-tooth-label { top:50%; font-size:16px; -webkit-text-stroke:1.5px rgba(255,255,255,.98); }
 .mini-preview .mini-bridge-preview { display:grid; place-items:center; padding:6px; }
 .mini-preview .mini-bridge-row { display:flex; align-items:center; justify-content:center; width:max-content; max-width:100%; height:100%; margin:auto; }
 .mini-preview .mini-bridge-tooth { position:relative; width:calc(46px * var(--bridge-scale)); height:100%; min-width:0; flex:0 0 calc(46px * var(--bridge-scale)); margin-inline:-1px; }

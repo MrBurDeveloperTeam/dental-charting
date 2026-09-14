@@ -16,6 +16,12 @@ function escapeChartText(value){return String(value??'').replace(/[&<>"']/g,c=>(
 function materialRecord(id){return dentalMaterials.find(item=>item.id===id||item.code===id);}
 function materialName(id){return materialRecord(id)?.name||'Unknown material';}
 function materialForTreatment(entry){return ['filling','inlay','onlay','overlay','crown','bridge','veneer','implant'].includes(entry.treatment)?entry.material||null:null;}
+function shouldShowMaterialField(treatment){return treatmentFor(treatment).category!=='condition';}
+function renderMaterialFieldVisibility(hasTooth){
+  const field=document.querySelector('.material-field');
+  if(!field)return;
+  field.hidden=Boolean(hasTooth)&&!shouldShowMaterialField(draft.treatment);
+}
 function entryColor(entry){
   if(typeof entry==='string')return COLORS[entry]||'#64748b';
   const materialId=materialForTreatment(entry)||(["composite","amalgam","gic"].includes(entry?.treatment)?(entry.material||entry.treatment):null);
@@ -27,6 +33,7 @@ function materialSelectionError(){
 }
 function showChartValidation(message){const node=document.getElementById('material-note');if(node){node.textContent=message;node.setAttribute('role','alert');}}
 function renderMaterialGrid(disabled=false){
+  renderMaterialFieldVisibility(Boolean(draft.tooth));
   const grid=document.getElementById('material-grid');if(!grid)return;
   grid.replaceChildren();
   for(const item of [...dentalMaterials,{id:null,name:'None',color:null}]){
@@ -137,15 +144,26 @@ function applyAnatomyClip(core,n,v,entry){
     core.insertAdjacentHTML('beforeend','<svg class="surface-svg pfm-line" width="'+b.width+'" height="'+b.height+'" viewBox="0 0 '+b.width+' '+b.height+'"><path d="M3 '+y+' Q'+b.width/2+' '+(y+2)+' '+(b.width-3)+' '+y+'" fill="none" stroke="#151515" stroke-width="2.6"/></svg>');
   }
 }
-function appendConditionBadges(holder,n,layer){
+function appendConditionBadges(holder,n,layer,view='front'){
   const entries=activeState()[n]?.entries||[];
   const labels=entries.filter(entry=>treatmentFor(entry.treatment).mode==='label'&&(layer==='combined'||entryLayer(entry)===layer));
   if(!labels.length)return;
+  const impacted=labels.find(entry=>entry.treatment==='impacted');
+  if(impacted){
+    const mark=document.createElement('span');
+    mark.className=`impacted-tooth-label${impacted.status==='planned'?' planned':''}`;
+    mark.textContent='IMP';
+    mark.title=`Impacted · ${statusLabel(impacted.status)}`;
+    holder.querySelector('.tooth-art')?.append(mark);
+  }
+  const externalLabels=view==='front'?labels.filter(entry=>entry.treatment!=='impacted'):[];
+  if(!externalLabels.length)return;
   const wrap=document.createElement('div');wrap.className='condition-badges';
-  for(const entry of labels){const badge=document.createElement('span');badge.className=`condition-badge badge-${entry.treatment}${entry.status==='planned'?' planned':''}`;badge.textContent=treatmentFor(entry.treatment).badge||treatmentFor(entry.treatment).label;badge.title=`${treatmentFor(entry.treatment).label} · ${statusLabel(entry.status)}`;wrap.append(badge);}
+  for(const entry of externalLabels){const badge=document.createElement('span');badge.className=`condition-badge badge-${entry.treatment}${entry.status==='planned'?' planned':''}`;badge.textContent=treatmentFor(entry.treatment).badge||treatmentFor(entry.treatment).label;badge.title=`${treatmentFor(entry.treatment).label} · ${statusLabel(entry.status)}`;wrap.append(badge);}
   holder.append(wrap);
 }
 function conditionBadgeHTML(entry,className=''){
   const treatment=treatmentFor(entry.treatment);
-  return `<span class="condition-badge${className?' '+className:''} badge-${entry.treatment}${entry.status==='planned'?' planned':''}">${escapeChartText(treatment.badge||treatment.label)}</span>`;
+  const impactedClass=entry.treatment==='impacted'?' impacted-tooth-label':'';
+  return `<span class="condition-badge${className?' '+className:''} badge-${entry.treatment}${impactedClass}${entry.status==='planned'?' planned':''}">${escapeChartText(treatment.badge||treatment.label)}</span>`;
 }
