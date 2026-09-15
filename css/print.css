@@ -104,16 +104,28 @@
   /* iOS Safari paginates the screen-sized grid before applying CSS zoom.
      Use genuinely shorter print rows and keep the complete odontogram on page 1. */
   @supports (-webkit-touch-callout:none){
+    #split-stage{
+      /* iOS PDF tooth controls: reduce width/height here; keep gap at 0 for touching slots. */
+      --ios-pdf-tooth-width:1.08;
+      --ios-pdf-tooth-height:.78;
+      --ios-pdf-column-scale:.78;
+      --pdf-tooth-gap:0px;
+      --arch-column-scale:var(--ios-pdf-column-scale);
+    }
     .chart-card,.chart-stage-wrap,#split-stage{
       break-inside:avoid!important;
       page-break-inside:avoid!important;
     }
-    .chart-stage{zoom:1!important}
+    .chart-stage{min-width:0!important;width:100%!important;zoom:1!important}
+    .split-stage{min-width:0!important;width:100%!important}
     .split-stage{gap:3px!important;padding:8px 12px!important}
     .split-group{padding:4px 6px 3px!important}
     .split-stage .upper-grid{grid-template-rows:72px 76px 17px!important}
     .split-stage .lower-grid{grid-template-rows:17px 56px 72px!important;padding-bottom:8px!important}
     .split-stage .tooth-art{zoom:.72!important}
+    .split-stage .upper-root-row .art-core{transform:scale(var(--ios-pdf-tooth-width),var(--ios-pdf-tooth-height)) scaleY(-1)!important}
+    .split-stage .lower-root-row .art-core{transform:scale(var(--ios-pdf-tooth-width),var(--ios-pdf-tooth-height))!important}
+    .split-stage .upper-crown-row .art-core,.split-stage .lower-crown-row .art-core{transform:scale(var(--ios-pdf-tooth-width),var(--ios-pdf-tooth-height))!important}
     .split-stage .arch-label-text{margin:8px 0!important;font-size:10px!important}
     .split-stage .split-status-label{font-size:10px!important}
     .split-stage .number{font-size:9px!important}

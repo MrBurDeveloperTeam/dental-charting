@@ -52,6 +52,11 @@ body{
 }
 /* .page{max-width:1680px;margin:0 auto;padding:20px} */
 .app-header{position:static;display:grid;gap:0;margin-bottom:0;border:1px solid var(--line);background:#fff;box-shadow:none}
+.profile-settings-fallback{position:relative;z-index:1200;justify-self:end}
+#profile-settings-root:has(>.profile-settings:not(.profile-settings-fallback))>.profile-settings-fallback{display:none}
+.profile-settings-fallback .profile-settings-trigger{appearance:none;width:42px;height:42px;padding:0;display:grid;place-items:center;border:0;border-radius:50%;background:#2187ed;color:#fff;box-shadow:0 5px 14px rgba(26,120,232,.22);cursor:pointer}
+.profile-settings-fallback .profile-settings-trigger svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+body:has(.modal-backdrop.show) .profile-settings-fallback{z-index:90;pointer-events:none}
 .topbar{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto;align-items:center;gap:28px;min-height:68px;padding:0 28px;border-bottom:1px solid var(--line);background:#fff}
 .brand{display:flex;align-items:center;min-width:0;padding-right:24px;border-right:1px solid var(--line)}
 .snabbb-home{display:flex;align-items:center;justify-content:center;width:82px;height:34px;flex:none;border-radius:8px;transition:background-color .16s ease,transform .16s ease}
