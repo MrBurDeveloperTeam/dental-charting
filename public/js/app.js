@@ -25,8 +25,8 @@ const TOOTH_NAMES={
   permanent:{11:"Upper right central incisor",12:"Upper right lateral incisor",13:"Upper right canine",14:"Upper right first premolar",15:"Upper right second premolar",16:"Upper right first molar",17:"Upper right second molar",18:"Upper right wisdom tooth",21:"Upper left central incisor",22:"Upper left lateral incisor",23:"Upper left canine",24:"Upper left first premolar",25:"Upper left second premolar",26:"Upper left first molar",27:"Upper left second molar",28:"Upper left wisdom tooth",31:"Lower left central incisor",32:"Lower left lateral incisor",33:"Lower left canine",34:"Lower left first premolar",35:"Lower left second premolar",36:"Lower left first molar",37:"Lower left second molar",38:"Lower left wisdom tooth",41:"Lower right central incisor",42:"Lower right lateral incisor",43:"Lower right canine",44:"Lower right first premolar",45:"Lower right second premolar",46:"Lower right first molar",47:"Lower right second molar",48:"Lower right wisdom tooth"},
   primary:{51:"Upper right central primary incisor",52:"Upper right lateral primary incisor",53:"Upper right primary canine",54:"Upper right first primary molar",55:"Upper right second primary molar",61:"Upper left central primary incisor",62:"Upper left lateral primary incisor",63:"Upper left primary canine",64:"Upper left first primary molar",65:"Upper left second primary molar",71:"Lower left central primary incisor",72:"Lower left lateral primary incisor",73:"Lower left primary canine",74:"Lower left first primary molar",75:"Lower left second primary molar",81:"Lower right central primary incisor",82:"Lower right lateral primary incisor",83:"Lower right primary canine",84:"Lower right first primary molar",85:"Lower right second primary molar"}
 };
-const COLORS={composite:"#15803d",amalgam:"#1d4ed8",gic:"#ef4444",sealant:"#55a8e8",caries:"#4b5563",rootCaries:"#ae7042",fracture:"#bd4a2e",missing:"#a8b4c1",extraction:"#d85852",implant:"#0f9fa8",rootCanal:"#d85852",bridge:"#6366f1",crown:"#8c25f4",veneer:"#00fbff"};
-const TREATMENTS={composite:{label:"Composite",category:"restoration",mode:"surface",views:["occ","front"]},amalgam:{label:"Amalgam",category:"restoration",mode:"surface",views:["occ","front"]},gic:{label:"GIC",category:"restoration",mode:"surface",views:["occ","front"]},sealant:{label:"Sealant",category:"restoration",mode:"surface",views:["occ"]},caries:{label:"Caries",category:"condition",mode:"surface",views:["occ","front"]},rootCaries:{label:"Root caries",category:"condition",mode:"surface",views:["front"]},fracture:{label:"Fracture",category:"condition",mode:"surface",views:["occ","front"]},missing:{label:"Missing",category:"condition",mode:"whole",views:["occ","front"]},rootCanal:{label:"Root canal",category:"procedure",mode:"root",views:["front"]},extraction:{label:"Extraction",category:"procedure",mode:"whole",views:["occ","front"]},implant:{label:"Implant",category:"procedure",mode:"whole",views:["occ","front"]},bridge:{label:"Bridge",category:"prosthetic",mode:"whole",views:["occ","front"]},crown:{label:"Crown",category:"prosthetic",mode:"whole",views:["occ","front"]},veneer:{label:"Veneer",category:"prosthetic",mode:"whole",views:["occ","front"]}};
+const COLORS={composite:"#15803d",amalgam:"#1d4ed8",gic:"#ef4444",sealant:"#55a8e8",caries:"#4b5563",rootCaries:"#ae7042",fracture:"#bd4a2e",missing:"#a8b4c1",extraction:"#d85852",implant:"#0f9fa8",rootCanal:"#d85852",bridge:"#6366f1",partialDenture:"#ec7890",crown:"#8c25f4",veneer:"#00fbff"};
+const TREATMENTS={composite:{label:"Composite",category:"restoration",mode:"surface",views:["occ","front"]},amalgam:{label:"Amalgam",category:"restoration",mode:"surface",views:["occ","front"]},gic:{label:"GIC",category:"restoration",mode:"surface",views:["occ","front"]},sealant:{label:"Sealant",category:"restoration",mode:"surface",views:["occ"]},caries:{label:"Caries",category:"condition",mode:"surface",views:["occ","front"]},rootCaries:{label:"Root caries",category:"condition",mode:"surface",views:["front"]},fracture:{label:"Fracture",category:"condition",mode:"surface",views:["occ","front"]},missing:{label:"Missing",category:"condition",mode:"whole",views:["occ","front"]},rootCanal:{label:"Root canal",category:"procedure",mode:"root",views:["front"]},extraction:{label:"Extraction",category:"procedure",mode:"whole",views:["occ","front"]},implant:{label:"Implant",category:"procedure",mode:"whole",views:["occ","front"]},bridge:{label:"Bridge",category:"prosthetic",mode:"whole",views:["occ","front"]},partialDenture:{label:"Partial denture",category:"prosthetic",mode:"whole",views:["occ","front"]},crown:{label:"Crown",category:"prosthetic",mode:"whole",views:["occ","front"]},veneer:{label:"Veneer",category:"prosthetic",mode:"whole",views:["occ","front"]}};
 const CATEGORIES=[{id:"condition",label:"Condition"},{id:"restoration",label:"Restoration"},{id:"procedure",label:"Procedure"},{id:"prosthetic",label:"Prosthetic"}];
 for(const id of ['composite','amalgam','gic','rootCaries'])TREATMENTS[id].visible=false;
 Object.assign(TREATMENTS, {
@@ -234,7 +234,7 @@ function loadVisit(){try{const raw=localStorage.getItem(STORAGE_VISIT_KEY); if(!
 function persistVisit(){localStorage.setItem(STORAGE_VISIT_KEY,JSON.stringify(visit))}
 function loadChartMode(){try{const raw=localStorage.getItem(STORAGE_MODE_KEY); return raw==="primary"?"primary":"permanent"}catch{return"permanent"}}
 function persistChartMode(){localStorage.setItem(STORAGE_MODE_KEY,chartMode)}
-function defaultTreatmentIcon(id){if(id==="rootCanal")return"canal";if(id==="crown")return"crown";if(id==="bridge")return"bridge";if(id==="veneer")return"veneer";if(id==="implant")return"implant";if(id==="extraction")return"extraction";if(id==="missing")return"cross";if(id==="sealant")return"seal";if(id==="caries"||id==="rootCaries")return"circle";if(id==="fracture")return"bolt";if(id==="crack")return"crack";if(id==="inlay")return"inlay";if(id==="onlay")return"onlay";if(id==="overlay")return"overlay";if(id==="impacted")return"imp";if(id==="retainedRoot")return"root";if(["m1","m2","m3","kiv"].includes(id))return id;return"filling"}
+function defaultTreatmentIcon(id){if(id==="rootCanal")return"canal";if(id==="crown")return"crown";if(id==="bridge")return"bridge";if(id==="partialDenture")return"partialDenture";if(id==="veneer")return"veneer";if(id==="implant")return"implant";if(id==="extraction")return"extraction";if(id==="missing")return"cross";if(id==="sealant")return"seal";if(id==="caries"||id==="rootCaries")return"circle";if(id==="fracture")return"bolt";if(id==="crack")return"crack";if(id==="inlay")return"inlay";if(id==="onlay")return"onlay";if(id==="overlay")return"overlay";if(id==="impacted")return"imp";if(id==="retainedRoot")return"root";if(["m1","m2","m3","kiv"].includes(id))return id;return"filling"}
 function treatmentViewsForMode(mode){return mode==="root"?["front"]:["occ","front"]}
 function treatmentMethodsSnapshot(){return Object.entries(TREATMENTS).map(([id,t])=>({id,label:t.label,category:t.category,mode:t.mode,views:[...t.views],icon:t.icon||defaultTreatmentIcon(id),color:COLORS[id]||"#3b82f6",visible:t.visible!==false,builtin:BUILTIN_TREATMENT_IDS.has(id)}))}
 function loadTreatmentMethods(){try{const payload=JSON.parse(localStorage.getItem(STORAGE_TREATMENTS_KEY)||"[]"),saved=Array.isArray(payload)?payload:payload.methods;if(!Array.isArray(saved))return;saved.forEach(method=>{if(!method||typeof method.id!=="string"||typeof method.label!=="string")return;const category=CATEGORIES.some(item=>item.id===method.category)?method.category:"restoration",mode=["surface","whole","root"].includes(method.mode)?method.mode:"surface",icon=TREATMENT_ICON_OPTIONS.some(item=>item.id===method.icon)?method.icon:"filling",color=/^#[0-9a-f]{6}$/i.test(method.color||"")?method.color:"#3b82f6",visible=method.visible!==false;if(TREATMENTS[method.id])Object.assign(TREATMENTS[method.id],{label:method.label.slice(0,40),icon,visible});else if(method.id.startsWith("custom-"))TREATMENTS[method.id]={label:method.label.slice(0,40),category,mode,views:treatmentViewsForMode(mode),icon,visible};COLORS[method.id]=color})}catch{}}
@@ -699,6 +699,7 @@ function treatmentHint(id){
     extraction:"extracted tooth",
     implant:"implant fixture",
     crown:"full crown",
+    partialDenture:"removable denture",
     veneer:"facial shell"
   };
   return hints[id]||(TREATMENTS[id]?.mode==="surface"?"surface method":TREATMENTS[id]?.mode==="root"?"root method":"whole-tooth method");
@@ -716,7 +717,7 @@ function treatmentHelp(id){
     rootCanal:"Shows canal lines on root view only.",
     extraction:"Whole-tooth procedure.",
     implant:"Whole-tooth replacement marker.",
-    bridge:"Connects at least 3 neighbouring teeth in one arch. Surface selection is not used.",crown:"Covers the whole crown view.",
+    bridge:"Connects at least 3 neighbouring teeth in one arch. Surface selection is not used.",partialDenture:"Select one or more consecutive replacement teeth in the same arch. They are saved as one removable partial denture.",crown:"Covers the whole crown view.",
     veneer:"Covers the visible front shell."
   };
   return help[id]||(TREATMENTS[id]?.mode==="surface"?"Colors the selected surface only.":TREATMENTS[id]?.mode==="root"?"Uses the root view only.":"Applies to the whole tooth.");
@@ -730,6 +731,7 @@ function treatmentIconMarkup(icon,color){
   if(icon==="canal")return svg(`${tooth}<path d="M9 7 Q14 11.5 19 7 Q18 12 17 17 L16.7 24 M9 7 Q10 12 11 17 L11.3 24" fill="none" stroke="#ef5b58" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`);
   if(icon==="crown")return svg(`${tooth}<path d="M5.4 8 Q7 4.3 11 5 Q14 8 17 5 Q21 4.3 22.6 8 L21 14 Q17.5 16 14 15.5 Q10.5 16 7 14Z" fill="${color}" fill-opacity=".82" stroke="${color}" stroke-width="1.1"/>`);
   if(icon==="bridge")return `<svg class="bridge-treatment-svg" viewBox="0 0 54 28" width="60" height="28" aria-hidden="true"><g fill="#fffaf2" stroke="#20324d" stroke-width="1.7" stroke-linejoin="round"><path d="M1 8 Q3 4 7 5 Q10 8 13 5 Q17 4 19 8 Q18 14 16 17 L14 25 Q12 27 11 21 Q10 17 9 21 Q8 27 6 25 L4 17 Q2 14 1 8Z"/><path d="M36 8 Q38 4 42 5 Q45 8 48 5 Q52 4 54 8 Q53 14 51 17 L49 25 Q47 27 46 21 Q45 17 44 21 Q43 27 41 25 L39 17 Q37 14 36 8Z"/></g><g fill="${color}" stroke="#20324d" stroke-width="1.1" stroke-linejoin="round"><path d="M1.4 8 Q3 4.3 7 5 Q10 8 13 5 Q17 4.3 18.6 8 L17 14 Q13.5 16 10 15.5 Q6.5 16 3 14Z"/><path d="M18.4 8 Q20 4.3 24 5 Q27 8 30 5 Q34 4.3 35.6 8 L34 14 Q30.5 16 27 15.5 Q23.5 16 20 14Z"/><path d="M36.4 8 Q38 4.3 42 5 Q45 8 48 5 Q52 4.3 53.6 8 L52 14 Q48.5 16 45 15.5 Q41.5 16 38 14Z"/></g></svg>`;
+  if(icon==="partialDenture")return `<svg class="partial-denture-treatment-svg" viewBox="0 0 54 28" width="60" height="28" aria-hidden="true"><path d="M7 12 Q27 6 47 12 L44 23 Q27 27 10 23Z" fill="${color}" stroke="#9f4058" stroke-width="1.4"/><g fill="#fffaf2" stroke="#20324d" stroke-width="1.5"><path d="M10 6 Q14 2 18 6 L17 17 Q14 20 11 17Z"/><path d="M21 5 Q27 1 33 5 L32 17 Q27 20 22 17Z"/><path d="M36 6 Q40 2 44 6 L43 17 Q40 20 37 17Z"/></g><path d="M8 10 Q2 10 3 16 Q4 20 9 18 M46 10 Q52 10 51 16 Q50 20 45 18" fill="none" stroke="#6b7280" stroke-width="2.4" stroke-linecap="round"/></svg>`;
   if(icon==="veneer")return svg(`${tooth}<path d="M7 7 Q10 4.8 12 6.2 L11.2 18 Q10.5 21 9.2 22 L8 17 Q6.5 13 7 7Z" fill="${color}" fill-opacity=".78" stroke="${color}" stroke-width="1.2"/>`);
   if(icon==="implant")return svg(`<path d="M4 7 Q6 2.5 10.5 4 Q14 6.5 17.5 4 Q22 2.5 24 7 L22 12 Q21.5 14 19.5 14 H8.5 Q6.5 14 6 12Z" fill="#fffaf2" stroke="#20324d" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 14 H19 V17 Q19 18.5 17.5 18.5 H10.5 Q9 18.5 9 17Z" fill="#d9dee5" stroke="#20324d" stroke-width="1.6"/><path d="M10.5 18.5 H17.5 L16.5 26 H11.5Z" fill="#d9dee5" stroke="#20324d" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.7 20.5 L18 21.6 M9.5 23 L17.5 24.1" stroke="#20324d" stroke-width="1.5" stroke-linecap="square"/>`);
   if(icon==="extraction")return svg(`${tooth}<path d="M5 6L23 24 M23 6L5 24" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`);
@@ -756,7 +758,7 @@ function latestWatch(n,layer=null){const m=entriesByStatus(n,"watch",layer); ret
 function reviewBadgeHTML(n,v){if(v!=="front") return ""; return `<div class="review-badge${isUpper(n)?"":" bottom"}">R</div>`}
 function surfaceMap(n,v,s,layer=null){const map={}; entriesByStatus(n,s,layer).filter(e=>treatmentFor(e.treatment).mode==="surface").filter(e=>e.view===v).forEach(e=>e.surfaces.forEach(sf=>map[sf]=e)); return map}
 function isVeneer(t){return t==="veneer"}
-function hideWholeRing(t){return t==="retainedRoot"||t==="bridge"||t==="crown"||t==="implant"||t==="rootCanal"||t==="extraction"}
+function hideWholeRing(t){return t==="retainedRoot"||t==="bridge"||t==="partialDenture"||t==="crown"||t==="implant"||t==="rootCanal"||t==="extraction"}
 function selectionSummary(){const viewText=draft.view==="occ"?"Crown + inner view":"Root view"; const surfaceText=draft.surfaces.length?` · ${draft.surfaces.join("/")} surface`:""; return `${viewText}${surfaceText}`}
 function flatEntries(){return Object.keys(activeState()).flatMap(key=>activeState()[key].entries.map(entry=>({tooth:Number(key),...entry}))).sort((a,b)=>String(b.id).localeCompare(String(a.id)))}
 function statusLabel(status){return STATUSES.find(s=>s.id===status)?.label||status}
@@ -767,17 +769,17 @@ function normalizeDraft(){if(!draft.tooth)return; const avail=Object.entries(TRE
 function openTooth(n,v,surface=null,preserve=false,statusContext="existing"){if(!canStartCharting())return; if(!editingEntry?.bridgeId)editingEntry=null; draft.tooth=n; draft.view=v; draft.layer=statusContext; if(!preserve&&draft.treatment!=="bridge"){draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.status=statusContext; draft.note=""; els.noteInput.value=""} else {draft.status=statusContext} draft.surfaces=surface?[surface]:defaultSurfaceFor(n,v); if(selection.multi){if(!selection.teeth.includes(n)) selection.teeth.push(n)} else selection.teeth=[n]; normalizeDraft(); renderAll()}
 function resetDraft(){if(!draft.tooth)return; editingEntry=null; draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.view="occ"; draft.status="existing"; draft.layer="existing"; draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view); draft.note=""; els.noteInput.value=""; normalizeDraft(); renderAll()}
 function clearCurrentTooth(){const selectedTargets=selection.multi&&selection.teeth.length?selection.teeth:(draft.tooth?[draft.tooth]:[]);
-  const targets=draft.treatment==="bridge"?bridgeSpan(selectedTargets):selectedTargets; if(!targets.length)return; targets.forEach(n=>activeState()[n].entries=[]); draft.note=""; els.noteInput.value=""; renderAll()}
+  const targets=isGroupedProsthetic()?groupedTargets(selectedTargets):selectedTargets; if(!targets.length)return; targets.forEach(n=>activeState()[n].entries=[]); draft.note=""; els.noteInput.value=""; renderAll()}
 function saveDraft(){
   if(!canStartCharting()){window.alert(chartPrerequisiteMessage());return}
   const selectedTargets=selection.multi&&selection.teeth.length?selection.teeth:(draft.tooth?[draft.tooth]:[]);
-  const targets=draft.treatment==="bridge"?bridgeSpan(selectedTargets):selectedTargets;
+  const targets=isGroupedProsthetic()?groupedTargets(selectedTargets):selectedTargets;
   if(!targets.length)return;
   normalizeDraft();
   if(materialSelectionError()){showChartValidation(materialSelectionError());return;}
-  const bridgeError=draft.treatment==="bridge"?bridgeSelectionError(targets):"";
+  const bridgeError=isGroupedProsthetic()?groupedSelectionError(targets):"";
   if(bridgeError){showChartValidation(bridgeError);return}
-  const bridgeId=draft.treatment==="bridge"?(editingEntry?.bridgeId||crypto.randomUUID()):null;
+  const bridgeId=isGroupedProsthetic()?(editingEntry?.bridgeId||crypto.randomUUID()):null;
   const previousBridge=editingEntry?.bridgeId?flatEntries().filter(e=>e.bridgeId===editingEntry.bridgeId):[];
   const removed=previousBridge.filter(e=>!targets.includes(e.tooth));
   removed.forEach(e=>{activeState()[e.tooth].entries=activeState()[e.tooth].entries.filter(item=>item.id!==e.id)});
@@ -785,7 +787,7 @@ function saveDraft(){
   const savedEntries=[];
   targets.forEach(n=>{
     const previous=previousBridge.find(e=>e.tooth===n);
-    const entry={bridgeId,id:previous?previous.id:editingEntry&&editingEntry.tooth===n?editingEntry.id:uid(),tooth:n,treatment:draft.treatment,material:materialForTreatment(draft),bridgeRole:bridgeId?(n===targets[0]||n===targets[targets.length-1]?"abutment":"pontic"):null,category:draft.category,status:draft.status,layer:draft.status==="watch"?draft.layer:(draft.status==="planned"?"planned":"existing"),view:draft.view,surfaces:[...draft.surfaces],note:draft.note.trim()};
+    const entry={bridgeId,id:previous?previous.id:editingEntry&&editingEntry.tooth===n?editingEntry.id:uid(),tooth:n,treatment:draft.treatment,material:materialForTreatment(draft),bridgeRole:bridgeId?(draft.treatment==="bridge"&&(n===targets[0]||n===targets[targets.length-1])?"abutment":"pontic"):null,category:draft.category,status:draft.status,layer:draft.status==="watch"?draft.layer:(draft.status==="planned"?"planned":"existing"),view:draft.view,surfaces:[...draft.surfaces],note:draft.note.trim()};
     const entries=activeState()[n].entries,index=entries.findIndex(item=>item.id===entry.id);
     if(index>=0)entries[index]=entry; else entries.push(entry);
     savedEntries.push(entry);
@@ -807,10 +809,10 @@ function downloadPdf(){
 }
 function pickCategory(c){if(editingEntry?.bridgeId&&c!=="prosthetic")editingEntry=null;draft.category=c; normalizeDraft(); renderAll()}
 function pickView(v){draft.view=v; normalizeDraft(); renderAll()}
-function pickTreatment(t){if(editingEntry?.bridgeId&&t!=="bridge")editingEntry=null;if(t==="bridge"){selection.multi=true;if(draft.tooth&&!selection.teeth.includes(draft.tooth))selection.teeth.push(draft.tooth)}else if(draft.treatment==="bridge"){selection.multi=false;selection.teeth=draft.tooth?[draft.tooth]:[]} draft.treatment=t; draft.category=treatmentFor(t).category; normalizeDraft(); renderAll()}
-function pickStatus(s){draft.status=s; if(s==="existing"||s==="planned") draft.layer=s; if(draft.treatment==="bridge")renderAll();else renderSidebar()}
+function pickTreatment(t){if(editingEntry?.bridgeId&&t!==draft.treatment)editingEntry=null;if(isGroupedProsthetic(t)){selection.multi=true;if(draft.tooth&&!selection.teeth.includes(draft.tooth))selection.teeth.push(draft.tooth)}else if(isGroupedProsthetic()){selection.multi=false;selection.teeth=draft.tooth?[draft.tooth]:[]} draft.treatment=t; draft.category=treatmentFor(t).category; normalizeDraft(); renderAll()}
+function pickStatus(s){draft.status=s; if(s==="existing"||s==="planned") draft.layer=s; if(isGroupedProsthetic())renderAll();else renderSidebar()}
 function toggleSurface(s){if(treatmentFor(draft.treatment).mode!=="surface")return;const set=new Set(draft.surfaces); if(set.has(s)) set.delete(s); else set.add(s); draft.surfaces=[...set]; if(!draft.surfaces.length) draft.surfaces=[s]; renderAll()}
-function toggleMultiMode(){if(draft.treatment==="bridge")return;selection.multi=!selection.multi; selection.teeth=draft.tooth?[draft.tooth]:[]; renderAll()}
+function toggleMultiMode(){if(isGroupedProsthetic())return;selection.multi=!selection.multi; selection.teeth=draft.tooth?[draft.tooth]:[]; renderAll()}
 function isMobileToothModalViewport(){return window.matchMedia("(max-width: 600px)").matches}
 function closeMobileToothModal(){
   mobileToothModalOpen=false;
@@ -1007,7 +1009,7 @@ function renderMobileToothModal(){
   mobileToothEls.selection.textContent=optionalMolar&&!optionalMolarActive?"This permanent molar is inactive.":`Current selection: ${viewLabel} view · ${surfaceLabel}`;
 }
 function handleToothClick(n,v,statusContext="existing"){if(!selection.multi){if(isMobileToothModalViewport())mobileToothModalOpen=true;openTooth(n,v,null,false,statusContext); return} if(selection.teeth.includes(n)){selection.teeth=selection.teeth.filter(i=>i!==n); if(draft.tooth===n){draft.tooth=selection.teeth.length?selection.teeth[selection.teeth.length-1]:null} renderAll(); return} openTooth(n,v,null,selection.teeth.length>0,statusContext)}
-function openEntry(tooth,id){const entry=activeState()[tooth].entries.find(item=>item.id===id); if(!entry)return; editingEntry={tooth,id,bridgeId:entry.bridgeId}; if(chartMode==="primary"&&isPrimaryOptionalMolar(tooth)) primaryOptionalActive.add(tooth); selection.multi=entry.treatment==="bridge"; selection.teeth=entry.bridgeId?flatEntries().filter(e=>e.bridgeId===entry.bridgeId).map(e=>e.tooth):[tooth]; draft.tooth=tooth; draft.category=entry.category; draft.treatment=entry.treatment; draft.material=entry.material||null; draft.view=entry.view; draft.status=entry.status; draft.layer=entryLayer(entry); draft.surfaces=[...entry.surfaces]; draft.note=entry.note||""; els.noteInput.value=draft.note; normalizeDraft(); renderAll(); if(isMobileToothModalViewport())openMobileEntryWizard()}
+function openEntry(tooth,id){const entry=activeState()[tooth].entries.find(item=>item.id===id); if(!entry)return; editingEntry={tooth,id,bridgeId:entry.bridgeId}; if(chartMode==="primary"&&isPrimaryOptionalMolar(tooth)) primaryOptionalActive.add(tooth); selection.multi=isGroupedProsthetic(entry.treatment); selection.teeth=entry.bridgeId?flatEntries().filter(e=>e.bridgeId===entry.bridgeId).map(e=>e.tooth):[tooth]; draft.tooth=tooth; draft.category=entry.category; draft.treatment=entry.treatment; draft.material=entry.material||null; draft.view=entry.view; draft.status=entry.status; draft.layer=entryLayer(entry); draft.surfaces=[...entry.surfaces]; draft.note=entry.note||""; els.noteInput.value=draft.note; normalizeDraft(); renderAll(); if(isMobileToothModalViewport())openMobileEntryWizard()}
 function removeEntry(tooth,id){
   const toothState=activeState()[tooth];
   if(!toothState)return;
@@ -1092,7 +1094,7 @@ function wholeStatusOverlaySVG(n, v, treatment, status, entry = draft, colorTrea
 
   // Whole-tooth treatments use the photo silhouette so their tint and border
   // follow the anatomy instead of a generic geometric shape.
-  if (["bridge", "crown", "extraction", "implant", "veneer"].includes(treatment)) {
+  if (["bridge", "partialDenture", "crown", "extraction", "implant", "veneer"].includes(treatment)) {
     const serial = wholeStatusOverlaySerial++;
     const clipId = `prosthetic-tooth-${treatment}-${serial}`;
     const regionId = `prosthetic-crown-region-${treatment}-${serial}`;
@@ -1105,7 +1107,7 @@ function wholeStatusOverlaySVG(n, v, treatment, status, entry = draft, colorTrea
     const review = status === "watch";
     const opacity = review ? "0.20" : status === "preview" ? "0.55" : "0.82";
     const prostheticPath = surfaceClipPath(n, v);
-    const crownOnly = treatment === "bridge" || treatment === "crown" || treatment === "veneer";
+    const crownOnly = treatment === "bridge" || treatment === "partialDenture" || treatment === "crown" || treatment === "veneer";
     const bounds=crownBounds(n,v);
     const crownHeight = crownOnly ? bounds.end : dims.height;
     const cervicalY = crownHeight - 2;
@@ -1113,6 +1115,24 @@ function wholeStatusOverlaySVG(n, v, treatment, status, entry = draft, colorTrea
     const paths = prostheticPath.replace(/<path /g, `<path fill="${color}" fill-opacity="${opacity}" stroke="none" `);
     const outerShape = prostheticPath.replace(/<path /g, '<path fill="white" stroke="none" ');
     const innerShape = prostheticPath.replace(/<path /g, '<path fill="black" stroke="none" ');
+
+    if(treatment==="partialDenture"){
+      const grouped=entry.bridgeId?flatEntries().filter(item=>item.bridgeId===entry.bridgeId&&item.treatment==="partialDenture").map(item=>item.tooth):selection.teeth;
+      const targets=groupedTargets(grouped.length?grouped:[n],"partialDenture");
+      const first=n===targets[0],last=n===targets[targets.length-1];
+      // Work from the biting edge toward the gum; lower occlusal art is reversed.
+      const w=dims.width,h=bounds.end-bounds.start;
+      const reverse=v==="occ"&&bounds.start>0;
+      const origin=reverse?bounds.end:bounds.start;
+      const gumId=`rpd-gum-${serial}`,metalId=`rpd-metal-${serial}`;
+      const neck=h*.82,bottom=h+5,left=first?-1:-3,right=last?w+1:w+3;
+      const leftRim=first?h*.58:h*.78,rightRim=last?h*.58:h*.78;
+      // Low interproximal scallops avoid tall acrylic fins between replacement crowns.
+      const saddle=`M${left},${leftRim} C${w*.06},${leftRim} ${w*.08},${neck} ${w*.25},${neck+2} Q${w*.5},${h+1} ${w*.75},${neck+2} C${w*.92},${neck} ${w*.94},${rightRim} ${right},${rightRim} Q${right+1},${bottom-5} ${last?w-2:right},${bottom-2} Q${w*.75},${bottom+2} ${w*.5},${bottom} Q${w*.25},${bottom+2} ${first?2:left},${bottom-2} Q${left-1},${bottom-5} ${left},${leftRim} Z`;
+      const clasp=`M-2,${h*.48} C-5,${h*.64} -3,${h*.78} -12,${h*.8} L-22,${h*.82} M-4,${h*.68} Q-9,${h*.81} -8,${h*.97}`;
+      const metal=side=>`<g transform="${side==='right'?`translate(${w} 0) scale(-1 1)`:''} translate(0 ${h*.7}) scale(.7) translate(0 ${-h*.7})" fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="rpd-clasp-shadow" d="${clasp}" stroke="#353b41" stroke-width="4.6"/><path class="rpd-clasp-metal" d="${clasp}" stroke="url(#${metalId})" style="stroke:url(#${metalId})!important" stroke-width="2.9"/><path class="rpd-clasp-shine" d="${clasp}" stroke="#fff9ee" stroke-width=".65" transform="translate(0 -.65)"/></g>`;
+      return `<svg class="surface-svg prosthetic-tooth-overlay partial-denture-overlay${planned?" planned-prosthetic-overlay":""}" width="${w}" height="${dims.height}" viewBox="0 0 ${w} ${dims.height}" style="overflow:visible" aria-hidden="true"><defs><linearGradient id="${gumId}" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f8a6b4"/><stop offset=".35" stop-color="#e77791"/><stop offset=".7" stop-color="#ce506f"/><stop offset="1" stop-color="#ed8c9e"/></linearGradient><linearGradient id="${metalId}" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f9f5eb"/><stop offset=".35" stop-color="#aeb7ba"/><stop offset=".55" stop-color="#626c73"/><stop offset=".8" stop-color="#e5e5df"/><stop offset="1" stop-color="#858f97"/></linearGradient></defs><g transform="translate(0 ${origin}) scale(1 ${reverse?-1:1})" opacity="${status==='preview'?.7:planned?.76:status==='watch'?.6:1}"><path d="${saddle}" fill="url(#${gumId})" stroke="#ad4662" stroke-width=".8"/><path class="rpd-gum-highlight" d="M${w*.1},${neck-3} Q${w*.17},${h+3} ${w*.5},${h+2} Q${w*.83},${h+3} ${w*.9},${neck-3}" fill="none" stroke="#ffd0d7" stroke-width="1.2"/><path class="rpd-gum-highlight" d="M${w*.16},${bottom-2} Q${w*.5},${bottom-5} ${w*.84},${bottom-2}" fill="none" stroke="#f9acba" stroke-width=".7"/>${first?metal('left'):''}${last?metal('right'):''}</g></svg>`;
+    }
 
     return `
       <svg
@@ -1330,8 +1350,16 @@ function renderBridgeMiniPreview(){
     applyAnatomyClip(node.querySelector('.art-core'),n,'front',entry);
   });
 }
+function renderPartialDentureMiniPreview(){
+  const targets=groupedTargets(selection.teeth.length?selection.teeth:[draft.tooth],"partialDenture");
+  const scale=Math.min(.9,3.1/Math.max(1,targets.length));
+  els.miniPreview.innerHTML=`<div class="mini-art mini-bridge-preview"><div class="mini-bridge-row" style="--bridge-count:${targets.length};--bridge-scale:${scale}">${targets.map(n=>{const entry={...draft,treatment:'partialDenture',bridgeRole:'pontic'};const modeClass=`front ${isUpper(n)?'upper':'lower'}`;return `<div class="mini-bridge-tooth" data-tooth="${n}"><div class="art-core ${modeClass}">${anatomySVG(n,'front',entry)}${wholeStatusOverlaySVG(n,'front','partialDenture',draft.status==='planned'?'planned':'existing',entry)}</div></div>`}).join('')}</div></div>`;
+  els.miniPreview.querySelectorAll('.mini-bridge-tooth').forEach((node,index)=>applyAnatomyClip(node.querySelector('.art-core'),targets[index],'front',{...draft,treatment:'partialDenture',bridgeRole:'pontic'}));
+}
 function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=treatmentFor(draft.treatment),whole=t.mode==="whole",missing=draft.treatment==="missing"; if(draft.treatment==="bridge"){renderBridgeMiniPreview();return} if(missing){els.miniPreview.innerHTML=missingSVG(draft.tooth,draft.view); return} const baseSVG=anatomySVG(draft.tooth,draft.view,draft); let html=baseSVG; if(whole) html+=wholeStatusOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status==="planned"?"planned":draft.status==="watch"?"watch":"existing"); if(t.mode==="root") html+=rctOverlayHTML(draft.tooth); if(t.mode==="surface"){const map={}; draft.surfaces.forEach(s=>map[s]={...draft}); html+=renderSurfaceOverlay(draft.tooth,draft.view,{complete:draft.status==="existing"?map:{},planned:draft.status==="planned"?map:{},review:draft.status==="watch"?map:{},selected:new Set(),previewColor:null,preview:false,clipKey:"draft-mini"})} const modeClass=draft.view==="front"?`front ${isUpper(draft.tooth)?"upper":"lower"}`:"occ"; const reviewBadge=draft.status==="watch"?reviewBadgeHTML(draft.tooth,draft.view):""; const conditionBadge=t.mode==="label"?conditionBadgeHTML(draft,'mini-condition-badge'):""; els.miniPreview.innerHTML=`<div class="mini-art ${modeClass}"><div class="art-core ${modeClass}" style="transform:${miniPreviewTransform(draft.tooth,draft.view)}">${html}</div>${reviewBadge}${conditionBadge}</div>`; applyAnatomyClip(els.miniPreview.querySelector(".art-core"),draft.tooth,draft.view,draft)}
 function renderPreview(){const t=treatmentFor(draft.treatment),surfaceText=t.mode==="surface"?draft.surfaces.join(""):(t.mode==="root"?"Root":"Whole tooth"),status=(STATUSES.find(i=>i.id===draft.status)?.label||"Legacy review"),targetText=selection.multi&&selection.teeth.length>1?`${selection.teeth.length} teeth`: `Tooth ${draft.tooth}`; els.previewBox.innerHTML=`<strong>${t.label}</strong><br>${targetText} · ${draft.view==="occ"?"Crown + inner view":"Root view"} · ${surfaceText}<br>Status: ${status}`}
+const renderSingleToothMiniPreview=renderMiniPreview;
+renderMiniPreview=function(){if(draft.treatment==="partialDenture"){els.miniPreview.classList.remove("empty");renderPartialDentureMiniPreview();return}renderSingleToothMiniPreview()};
 function createEntryRow(entry){
   const row=document.createElement("div");row.className="entry-row";
   const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.className="entry-checkbox";checkbox.checked=selectedEntryIds.has(entry.id);checkbox.setAttribute("aria-label",`Select entry for tooth ${entry.tooth}`);checkbox.addEventListener("change",()=>{if(checkbox.checked)selectedEntryIds.add(entry.id);else selectedEntryIds.delete(entry.id);renderEntries()});
@@ -1386,6 +1414,24 @@ function bridgeSpan(teeth){
   const positions=teeth.map(n=>arch.indexOf(n));
   return arch.slice(Math.min(...positions),Math.max(...positions)+1);
 }
+function isGroupedProsthetic(treatment=draft.treatment){return treatment==="bridge"||treatment==="partialDenture"}
+function partialDentureSelectionError(teeth){
+  const unique=[...new Set(teeth)];
+  if(!unique.length)return 'Select at least one replacement tooth for the partial denture.';
+  const arch=[activeUpperDisplay(),activeLowerDisplay()].find(row=>unique.every(n=>row.includes(n)));
+  if(!arch)return 'Select partial-denture teeth in the same arch.';
+  const positions=unique.map(n=>arch.indexOf(n)).sort((a,b)=>a-b);
+  if(positions.at(-1)-positions[0]+1!==positions.length)return 'Select consecutive replacement teeth for one partial-denture saddle.';
+  if(unique.some(n=>!n||isGhostPrimarySlot(n)))return 'The partial denture cannot use an inactive tooth or empty chart slot.';
+  return '';
+}
+function groupedSelectionError(teeth,treatment=draft.treatment){return treatment==="bridge"?bridgeSelectionError(teeth):treatment==="partialDenture"?partialDentureSelectionError(teeth):''}
+function groupedTargets(teeth,treatment=draft.treatment){
+  if(treatment==="bridge")return bridgeSpan(teeth);
+  if(treatment!=="partialDenture"||partialDentureSelectionError(teeth))return [...new Set(teeth)];
+  const arch=[activeUpperDisplay(),activeLowerDisplay()].find(row=>teeth.every(n=>row.includes(n)));
+  return [...new Set(teeth)].sort((a,b)=>arch.indexOf(a)-arch.indexOf(b));
+}
 function renderBridgeSelectionHint(){
   let hint=document.getElementById("bridge-selection-hint");
   const selectionField=els.selectedTeeth.closest('.selection-field');
@@ -1402,9 +1448,10 @@ function renderBridgeSelectionHint(){
     hint.innerHTML='<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M10 9v5 M10 6.2v.2"/></svg>';
     title?.append(hint);
   }
-  hint.hidden=draft.treatment!=="bridge";
-  const error=bridgeSelectionError(selection.teeth);
-  const message=error||`Bridge: ${bridgeSpan(selection.teeth).join(" · ")}. Intermediate teeth are pontics (no roots).`;
+  hint.hidden=!isGroupedProsthetic();
+  const error=groupedSelectionError(selection.teeth);
+  const targets=groupedTargets(selection.teeth);
+  const message=error||(draft.treatment==="bridge"?`Bridge: ${targets.join(" · ")}. Intermediate teeth are pontics (no roots).`:`Partial denture: ${targets.join(" · ")}. These replacement teeth form one removable appliance.`);
   hint.dataset.tooltip=message;hint.setAttribute('aria-label',message);
   hint.classList.toggle("valid",!error);
 }

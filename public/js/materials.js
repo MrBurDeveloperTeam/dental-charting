@@ -127,6 +127,16 @@ function crownBounds(n,v){
 }
 function anatomySVG(n,v,entry){
   const base=v==='front'?toothSVG(n,'#F5F2EC'):crownOnlySVG(n,'#F5F2EC');
+  if(entry?.treatment==='partialDenture'){
+    const b=crownBounds(n,v);
+    if(v==='front'){
+      const oc=crownBounds(n,'occ');
+      const crown=crownOnlySVG(n,'#F5F2EC');
+      return `<svg class="partial-denture-crown" width="${b.width}" height="${b.height}" viewBox="0 0 ${b.width} ${b.height}"><g transform="${!isUpper(n)?`translate(0 ${b.end}) scale(1 -1)`:``}"><svg width="${b.width}" height="${b.end}" viewBox="0 ${oc.start} ${oc.width} ${oc.end-oc.start}" preserveAspectRatio="xMidYMid meet" overflow="hidden">${crown}</svg></g></svg>`;
+    }
+    // Clip only the replacement anatomy so the acrylic and clasps can extend outside it.
+    return '<div class="partial-denture-crown" style="clip-path:inset('+b.start/b.height*100+'% 0 '+(100-b.end/b.height*100)+'% 0)">'+base+'</div>';
+  }
   if(entry?.treatment!=='implant')return base;
   const b=crownBounds(n,v),w=b.width,h=b.height,x=w/2,reverse=b.start>0;
   const cervical=reverse?b.start:b.end,length=reverse?b.start:h-b.end;
