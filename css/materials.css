@@ -35,7 +35,7 @@
 .lower-root-row .condition-badges { bottom:0; transform:translate(-50%,calc(100% + 5px)); }
 .condition-badge { border-radius:4px; padding:2px 4px; font:700 9px/1.2 Inter,sans-serif; background:#fde68a; color:#422006; border:1px solid #fbbf24; }
 .condition-badge.badge-m1,.condition-badge.badge-m2,.condition-badge.badge-m3 { background:#fecdd3; color:#881337; border-color:#fb7185; }
-.condition-badge.planned { border-style:dashed; }
+.condition-badge.planned { border-style:solid; }
 .mini-condition-badge { position:absolute; top:8px; left:50%; z-index:7; transform:translateX(-50%); pointer-events:none; }
 .impacted-tooth-label { 
   position:absolute; 
@@ -81,6 +81,7 @@
 .art-core.occ .surface-svg .damage-shadow { stroke:#111827!important; opacity:1!important; }
 .art-core.occ .surface-svg .damage-fracture { stroke:#fb923c!important; opacity:1!important; }
 .art-core.occ .surface-svg .damage-crack { stroke:#fde047!important; opacity:1!important; }
+.art-core.occ .surface-svg .sealant-groove { stroke:var(--sealant-color)!important; opacity:1!important; }
 
 @media screen and (min-width:1101px){
   .layout>.sidebar .selected-head { grid-template-columns:minmax(0,1.08fr) minmax(210px,1fr); gap:12px; align-items:stretch; overflow:visible; }

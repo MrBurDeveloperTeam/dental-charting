@@ -186,7 +186,7 @@
 .surface-region.selected{stroke:#1a78e8;stroke-width:2.5;filter:none;fill-opacity:.48}
 .status-ring,.plan-ring{position:absolute;inset:-3px;pointer-events:none}
 .status-ring{border-radius:14px;border:2px solid var(--ring-color)}
-.plan-ring{border-radius:14px;border:2.4px dashed var(--ring-color);background:color-mix(in srgb,var(--ring-color) 12%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--ring-color) 32%,transparent),0 0 12px color-mix(in srgb,var(--ring-color) 18%,transparent)}
+.plan-ring{border-radius:14px;border:2px solid var(--ring-color);background:transparent;box-shadow:none}
 .plan-ring{display:none}
 .review-badge{position:absolute;top:3px;left:50%;right:auto;transform:translateX(-50%);min-width:16px;height:16px;padding:0 4px;border-radius:999px;display:grid;place-items:center;background:#526f8f;color:#fff;font-size:10px;font-weight:800;line-height:1;border:1px solid rgba(220,232,244,.88);box-shadow:0 4px 10px rgba(26,45,66,.3);pointer-events:none;z-index:4}
 .review-badge.bottom{top:auto;bottom:3px}
