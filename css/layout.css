@@ -775,6 +775,21 @@ input[type="reset"],
 #split-stage{min-width:680px;gap:8px;padding:18px 14px;overflow:visible}
 #split-stage .split-group{display:grid;padding:8px 0;gap:0}
 #split-stage .split-group + .split-group{border-top:1px solid rgba(255,255,255,.12)}
+#split-stage > .split-group[data-chart-layer="planned"]{
+    background:#313843;
+
+  /* border-left:4px solid #3699f5; */
+}
+#split-stage > .split-group[data-chart-layer="existing"]{
+    background:#012035;
+  /* border-left:4px solid #8995a3; */
+}
+#split-stage > .split-group[data-chart-layer]{
+  box-sizing:border-box;
+  border-radius:8px;
+}
+#split-stage .split-status-label.planned{color:#63b3ff}
+#split-stage .split-status-label.existing{color:#fff}
 #split-stage .arch-grid{display:grid;grid-template-columns:100px minmax(0,1fr);padding:0}
 #split-stage .upper-grid{grid-template-rows:94px 112px 24px}
 #split-stage .lower-grid{grid-template-rows:24px 82px 94px}
@@ -895,7 +910,12 @@ input[type="reset"],
   .sidebar .desktop-batch-selection{display:grid;gap:8px;min-width:0}
   .sidebar .desktop-batch-selection .selection-row{display:grid;gap:8px}
   .sidebar .desktop-batch-selection #multi-toggle-btn{width:100%}
-  .layout>.sidebar .editor-fields{display:flex;flex-direction:column;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;padding:0 8px 12px 0;gap:18px}
+  .layout>.sidebar .editor-fields{display:flex;flex-direction:column;min-height:0;overflow-y:scroll;overflow-x:hidden;overscroll-behavior-y:auto;scrollbar-gutter:stable;padding:0 8px 12px 0;gap:18px;scrollbar-width:auto;scrollbar-color:var(--scrollbar-thumb) var(--scrollbar-track)}
+  .layout>.sidebar .editor-fields::-webkit-scrollbar{display:block;width:12px;background:var(--scrollbar-track)}
+  .layout>.sidebar .editor-fields::-webkit-scrollbar-track{background:var(--scrollbar-track);border-radius:999px}
+  .layout>.sidebar .editor-fields::-webkit-scrollbar-thumb{min-height:44px;border:3px solid var(--scrollbar-track);border-radius:999px;background:var(--scrollbar-thumb)}
+  .layout>.sidebar .editor-fields::-webkit-scrollbar-thumb:hover{background:var(--scrollbar-thumb-hover)}
+  .layout>.sidebar .editor-fields::-webkit-scrollbar-thumb:active{background:var(--scrollbar-thumb-active)}
   .layout>.sidebar .editor-fields>.field-pair{flex-shrink:0}
   .sidebar #treatment-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
@@ -977,9 +997,10 @@ input[type="reset"],
   .sidebar .form-actions .btn{height:38px;padding-inline:6px}
 
   .layout>.sidebar .editor-fields{
-    overflow-y:auto;
+    overflow-y:scroll;
     overflow-x:hidden;
-    overscroll-behavior:contain;
+    /* Let continued wheel/trackpad movement scroll the page at either edge. */
+    overscroll-behavior-y:auto;
     scrollbar-gutter:stable;
     padding:2px 8px 16px 2px;
   }
