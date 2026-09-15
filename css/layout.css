@@ -1419,9 +1419,17 @@ button.number:focus-visible {
     --mobile-lower-crown-height:1.8;
     --mobile-lower-root-width:1.2;
     --mobile-lower-root-height:1;
+    /* Primary 53–63 and 83–73 only: adjust width and height here. */
+    --mobile-primary-upper-inner-width:1.7;
+    --mobile-primary-upper-inner-height:1.25;
+    --mobile-primary-lower-inner-width:1.6;
+    --mobile-primary-lower-inner-height:1.25;
   }
   #split-stage .upper-grid .tooth.mobile-inner-tooth .tooth-art {
     transform:scale(var(--mobile-upper-inner-width),var(--mobile-upper-inner-height));
+  }
+  #split-stage .upper-grid .tooth.mobile-primary-inner-tooth .tooth-art {
+    transform:scale(var(--mobile-primary-upper-inner-width),var(--mobile-primary-upper-inner-height));
   }
   #split-stage .lower-crown-row .tooth-art {
     transform:scale(var(--mobile-lower-crown-width),var(--mobile-lower-crown-height));
@@ -1429,6 +1437,10 @@ button.number:focus-visible {
   #split-stage .lower-crown-row .tooth.mobile-inner-tooth .tooth-art {
     transform:scale(var(--mobile-lower-crown-width),var(--mobile-lower-crown-height))
       scale(var(--mobile-lower-inner-width),var(--mobile-lower-inner-height));
+  }
+  #split-stage .lower-crown-row .tooth.mobile-primary-inner-tooth .tooth-art {
+    transform:scale(var(--mobile-lower-crown-width),var(--mobile-lower-crown-height))
+      scale(var(--mobile-primary-lower-inner-width),var(--mobile-primary-lower-inner-height));
   }
   #split-stage .arch-label-text {font-size:8px;gap:3px;line-height:1.15}
   #split-stage .split-status-label {font-size:8px;letter-spacing:0}
@@ -1438,6 +1450,10 @@ button.number:focus-visible {
   #split-stage .lower-root-row .tooth.mobile-inner-tooth .tooth-art {
     transform:scale(var(--mobile-lower-root-width),var(--mobile-lower-root-height))
       scale(var(--mobile-lower-inner-width),var(--mobile-lower-inner-height));
+  }
+  #split-stage .lower-root-row .tooth.mobile-primary-inner-tooth .tooth-art {
+    transform:scale(var(--mobile-lower-root-width),var(--mobile-lower-root-height))
+      scale(var(--mobile-primary-lower-inner-width),var(--mobile-primary-lower-inner-height));
   }
 }
 

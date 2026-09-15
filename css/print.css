@@ -23,6 +23,8 @@
     border: none !important;
     border-radius: 0;
     box-shadow: none !important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
   }
   .chart-head{display:none!important}
   /* .chart-stage-wrap{overflow:visible;padding-inline:1.2%;box-sizing:border-box} */
@@ -98,4 +100,22 @@
   .chart-stage .surface-region{stroke-width:1.1!important}
   .print-patient-card,.print-note-card{display:block}
   .print-note-card{background:#fff!important}
+
+  /* iOS Safari paginates the screen-sized grid before applying CSS zoom.
+     Use genuinely shorter print rows and keep the complete odontogram on page 1. */
+  @supports (-webkit-touch-callout:none){
+    .chart-card,.chart-stage-wrap,#split-stage{
+      break-inside:avoid!important;
+      page-break-inside:avoid!important;
+    }
+    .chart-stage{zoom:1!important}
+    .split-stage{gap:3px!important;padding:8px 12px!important}
+    .split-group{padding:4px 6px 3px!important}
+    .split-stage .upper-grid{grid-template-rows:72px 76px 17px!important}
+    .split-stage .lower-grid{grid-template-rows:17px 56px 72px!important;padding-bottom:8px!important}
+    .split-stage .tooth-art{zoom:.72!important}
+    .split-stage .arch-label-text{margin:8px 0!important;font-size:10px!important}
+    .split-stage .split-status-label{font-size:10px!important}
+    .split-stage .number{font-size:9px!important}
+  }
 }
