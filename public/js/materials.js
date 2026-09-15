@@ -15,7 +15,7 @@ let materialManagerLoadVersion = 0;
 function escapeChartText(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function materialRecord(id){return dentalMaterials.find(item=>item.id===id||item.code===id);}
 function materialName(id){return materialRecord(id)?.name||'Unknown material';}
-function materialForTreatment(entry){return ['filling','inlay','onlay','overlay','crown','bridge','veneer','implant'].includes(entry.treatment)?entry.material||null:null;}
+function materialForTreatment(entry){return ['sealant','filling','inlay','onlay','overlay','crown','bridge','veneer','implant'].includes(entry.treatment)?entry.material||null:null;}
 function shouldShowMaterialField(treatment){return treatmentFor(treatment).category!=='condition';}
 function renderMaterialFieldVisibility(hasTooth){
   const field=document.querySelector('.material-field');
