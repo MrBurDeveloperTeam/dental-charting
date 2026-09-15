@@ -54,6 +54,7 @@ body{
 .app-header{position:static;display:grid;gap:0;margin-bottom:0;border:1px solid var(--line);background:#fff;box-shadow:none}
 .profile-settings-fallback{position:relative;z-index:1200;justify-self:end}
 #profile-settings-root:has(>.profile-settings:not(.profile-settings-fallback))>.profile-settings-fallback{display:none}
+body.auth-session-gated .profile-settings-fallback,body:has(.auth-gate) .profile-settings-fallback{display:none}
 .profile-settings-fallback .profile-settings-trigger{appearance:none;width:42px;height:42px;padding:0;display:grid;place-items:center;border:0;border-radius:50%;background:#2187ed;color:#fff;box-shadow:0 5px 14px rgba(26,120,232,.22);cursor:pointer}
 .profile-settings-fallback .profile-settings-trigger svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 body:has(.modal-backdrop.show) .profile-settings-fallback{z-index:90;pointer-events:none}
