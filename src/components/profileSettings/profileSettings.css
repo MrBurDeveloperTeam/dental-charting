@@ -1,4 +1,5 @@
 .profile-settings{position:relative;z-index:1200;justify-self:end}
+body:has(.modal-backdrop.show) .profile-settings{z-index:90;pointer-events:none}
 .profile-settings-trigger{appearance:none;width:42px;height:42px;padding:0;display:grid;place-items:center;border:0;border-radius:50%;background:#2187ed;color:#fff;box-shadow:0 5px 14px rgba(26,120,232,.22);cursor:pointer;transition:.16s ease}
 .profile-settings-trigger:hover{transform:translateY(-1px);background:#1679db;box-shadow:0 7px 18px rgba(26,120,232,.28)}
 .profile-settings-trigger:focus-visible{outline:3px solid rgba(26,120,232,.25);outline-offset:3px}
