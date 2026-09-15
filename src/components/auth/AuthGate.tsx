@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
 
 const SNABBB_APP_URL = "https://app.snabbb.com";
 const VERIFY_URL = `${SNABBB_APP_URL}/api/verify-token`;
@@ -7,6 +7,11 @@ type AuthState = "checking" | "authenticated" | "unauthenticated" | "error";
 
 export function AuthGate({ children, authenticatedChrome }: { children: ReactNode; authenticatedChrome?: ReactNode }) {
   const [authState, setAuthState] = useState<AuthState>("checking");
+
+  useLayoutEffect(() => {
+    document.body.classList.toggle("auth-session-gated", authState !== "authenticated");
+    return () => document.body.classList.remove("auth-session-gated");
+  }, [authState]);
 
   const verifySession = useCallback(async () => {
     setAuthState("checking");
