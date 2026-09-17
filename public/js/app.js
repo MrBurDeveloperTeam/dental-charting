@@ -621,6 +621,11 @@ function innerSurfaceDefs(n){
   }
   return result;
 }
+function rightRootNeedsMDSwap(n,v){
+  if(v!=="front")return false;
+  if(chartMode==="permanent")return (n>=11&&n<=18)||(n>=41&&n<=48);
+  return [17,16,55,54,53,52,51,47,46,85,84,83,82,81].includes(n)
+}
 function surfaceDefs(n,v)
 {const t=toothType(n);
   if(v==="occ"&&innerAnatomy(n))return innerSurfaceDefs(n);
@@ -631,18 +636,18 @@ function surfaceDefs(n,v)
         {key:"O",path:"M18,13 C23,9 31,8 37,13 C42,17 42,24 37,29 C32,34 23,34 17,29 C13,25 13,18 18,13 Z",cx:27,cy:21},
         {key:"L",path:"M16,27 L38,27 L50,31 C47,37 40,40 29,40 C17,40 7,38 3,33 Z",cx:27,cy:34},
         {key:"D",path:"M36,2 C44,2 50,7 52,13 L51,30 C47,35 42,36 36,29 L34,15 Z",cx:44,cy:20}];
-        return[{key:"M",path:"M3,4 C7,1 13,1 18,4 L20,35 L16,54 C10,56 5,52 3,45 Z",cx:11,cy:28},
+        return[{key:"D",path:"M3,4 C7,1 13,1 18,4 L20,35 L16,54 C10,56 5,52 3,45 Z",cx:11,cy:28},
           {key:"B",path:"M16,3 C23,0 34,0 41,3 L40,35 C34,40 23,40 17,35 Z",cx:28,cy:19},
-          {key:"D",path:"M39,4 C45,1 51,2 54,6 L53,46 C50,52 45,55 40,52 L37,35 Z",cx:47,cy:28},
+          {key:"M",path:"M39,4 C45,1 51,2 54,6 L53,46 C50,52 45,55 40,52 L37,35 Z",cx:47,cy:28},
           {key:"L",path:"M17,33 C23,37 34,37 40,33 L40,52 C34,57 23,57 16,52 Z",cx:28,cy:46}]}
  if(v==="front")
-  {const w=toothW(n),endY=frontSurfaceEndY(n),midTop=endY*.58; 
+  {const w=toothW(n),endY=frontSurfaceEndY(n),midTop=endY*.58,swapMD=rightRootNeedsMDSwap(n,v),leftCode=swapMD?"D":"M",rightCode=swapMD?"M":"D";
     if(t==="incisor"||t==="canine"){
-      return[{key:"M",path:`M4,4 L${w*.34},4 L${w*.29},${endY} L8,${endY} Z`,cx:w*.22,cy:endY*.52},
+      return[{key:leftCode,path:`M4,4 L${w*.34},4 L${w*.29},${endY} L8,${endY} Z`,cx:w*.22,cy:endY*.52},
         {key:"F",path:`M${w*.3},4 L${w*.7},4 L${w*.63},${midTop} L${w*.37},${midTop} Z`,cx:w*.5,cy:endY*.34},
-        {key:"D",path:`M${w*.66},4 L${w-4},4 L${w-8},${endY} L${w*.71},${endY} Z`,cx:w*.78,cy:endY*.52},
+        {key:rightCode,path:`M${w*.66},4 L${w-4},4 L${w-8},${endY} L${w*.71},${endY} Z`,cx:w*.78,cy:endY*.52},
         {key:"L",path:`M${w*.36},${midTop-2} L${w*.64},${midTop-2} L${w*.58},${endY} L${w*.42},${endY} Z`,cx:w*.5,cy:endY*.76}]}
- return[{key:"M",path:`M4,4 L${w*.31},4 L${w*.27},${endY} L8,${endY} Z`,cx:w*.18,cy:endY*.5},{key:"B",path:`M${w*.29},4 L${w*.71},4 L${w*.64},${midTop} L${w*.36},${midTop} Z`,cx:w*.5,cy:endY*.34},{key:"D",path:`M${w*.69},4 L${w-4},4 L${w-8},${endY} L${w*.73},${endY} Z`,cx:w*.82,cy:endY*.5},{key:"L",path:`M${w*.35},${midTop-2} L${w*.65},${midTop-2} L${w*.6},${endY} L${w*.4},${endY} Z`,cx:w*.5,cy:endY*.76}]}
+ return[{key:leftCode,path:`M4,4 L${w*.31},4 L${w*.27},${endY} L8,${endY} Z`,cx:w*.18,cy:endY*.5},{key:"B",path:`M${w*.29},4 L${w*.71},4 L${w*.64},${midTop} L${w*.36},${midTop} Z`,cx:w*.5,cy:endY*.34},{key:rightCode,path:`M${w*.69},4 L${w-4},4 L${w-8},${endY} L${w*.73},${endY} Z`,cx:w*.82,cy:endY*.5},{key:"L",path:`M${w*.35},${midTop-2} L${w*.65},${midTop-2} L${w*.6},${endY} L${w*.4},${endY} Z`,cx:w*.5,cy:endY*.76}]}
  const {width:w,height:h}=crownDims(n); if(t==="incisor"||t==="canine"){return[{key:"M",path:`M2,${h/2} C3,4 ${w*.3},2 ${w*.42},${h/2} C${w*.3},${h-2} 3,${h-4} 2,${h/2} Z`,cx:w*.24,cy:h*.5},{key:"I",path:`M${w*.32},${h/2} C${w*.4},4 ${w*.6},4 ${w*.68},${h/2} C${w*.6},${h-4} ${w*.4},${h-4} ${w*.32},${h/2} Z`,cx:w*.5,cy:h*.5},{key:"D",path:`M${w-2},${h/2} C${w-3},4 ${w*.7},2 ${w*.58},${h/2} C${w*.7},${h-2} ${w-3},${h-4} ${w-2},${h/2} Z`,cx:w*.76,cy:h*.5}]}
  return[{key:"M",path:`M3,${h/2} C4,7 ${w*.2},5 ${w*.34},${h/2} C${w*.2},${h-5} 4,${h-7} 3,${h/2} Z`,cx:w*.18,cy:h*.5},
   {key:"B",path:`M${w/2},3 C${w*.28},4 ${w*.22},${h*.24} ${w*.36},${h*.4} L${w*.64},${h*.4} C${w*.78},${h*.24} ${w*.72},4 ${w/2},3 Z`,cx:w*.5,cy:h*.22},
@@ -680,7 +685,8 @@ function surfacePadSpec(n,v){
     }
   } else {
     const topCode=(t==="incisor"||t==="canine")?"F":"B";
-    spec.push({area:"top",code:topCode},{area:"left",code:"M"},{area:"right",code:"D"});
+    const swapMD=rightRootNeedsMDSwap(n,v);
+    spec.push({area:"top",code:topCode},{area:"left",code:swapMD?"D":"M"},{area:"right",code:swapMD?"M":"D"});
     if(codes.has("L")) spec.push({area:"bottom",code:"L"});
   }
   const byArea={top:null,left:null,center:null,right:null,bottom:null};
