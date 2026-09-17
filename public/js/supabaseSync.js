@@ -343,6 +343,7 @@
 
   async function pullDatabaseChart() {
     if (!currentPatientId()) return;
+    if (typeof setChartEntriesLoadState === "function") setChartEntriesLoadState("loading");
     setBadge("Cloud: loading…", "#1d4ed8");
     try {
       if (!window.dentalCharts) throw new Error("Dental chart access is not ready. Refresh and try again.");
@@ -350,15 +351,18 @@
       try { await loadMaterialCatalog(); }
       catch (materialError) {
         materialCatalogLoaded=false;
+        if (typeof setChartEntriesLoadState === "function") setChartEntriesLoadState("ready");
         applyDatabaseEntries(result.entries);
         setBadge('Cloud: materials unavailable', '#b91c1c');
         showChartValidation('Clinic materials could not be loaded. Apply the material database migration, then retry sync.');
         return;
       }
+      if (typeof setChartEntriesLoadState === "function") setChartEntriesLoadState("ready");
       applyDatabaseEntries(result.entries);
       setBadge(result.entries.length ? "Cloud: loaded ✓" : "Cloud: no saved entries", "#15803d");
     } catch (error) {
       console.error("Unable to load dental chart", error);
+      if (typeof setChartEntriesLoadState === "function") setChartEntriesLoadState("error");
       setBadge("Cloud: load failed", "#b91c1c");
     }
   }
