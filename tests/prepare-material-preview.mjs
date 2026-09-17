@@ -1,0 +1,10 @@
+import fs from 'node:fs';
+import ts from 'typescript';
+import {createRequire} from 'node:module';
+import React from 'react';
+import {renderToStaticMarkup} from 'react-dom/server';
+const require=createRequire(import.meta.url);
+const code=ts.transpileModule(fs.readFileSync('src/components/patient/PatientModal.tsx','utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,jsx:ts.JsxEmit.ReactJSX}}).outputText;
+const mod={exports:{}};new Function('require','module','exports',code)(require,mod,mod.exports);
+let html=fs.readFileSync('index.html','utf8').replace('<head>','<head><base href="/">').replace('<script type="module" src="/src/main.tsx"></script>',renderToStaticMarkup(React.createElement(mod.exports.PatientModal))).replace('<script defer src="./js/supabaseSync.js?v=9"></script>','<script defer src="/tests/material-fixture.js"></script>');
+fs.writeFileSync('tests/material-preview.html',html);
