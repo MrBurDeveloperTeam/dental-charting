@@ -767,7 +767,14 @@ function toothTooltipText(n){if(isGhostPrimarySlot(n)) return "Double-click to a
 function tooltipOnLeft(n){const order=isUpper(n)?activeUpper():activeLower(); return order.indexOf(n)>=Math.max(0,order.length-4)}
 function normalizeDraft(){if(!draft.tooth)return; const avail=Object.entries(TREATMENTS).filter(([,t])=>t.category===draft.category); if(!avail.find(([id])=>id===draft.treatment)) draft.treatment=avail[0][0]; const t=treatmentFor(draft.treatment); if(t.category==="condition")draft.material=null; if(!t.views.includes(draft.view)) draft.view=t.views[0]; if(t.mode==="surface"){const allowed=new Set(availableSurfaceCodes(draft.tooth,draft.view)); draft.surfaces=draft.surfaces.filter(s=>allowed.has(s)); if(!draft.surfaces.length) draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view)} else draft.surfaces=[]}
 function openTooth(n,v,surface=null,preserve=false,statusContext="existing"){if(!canStartCharting())return; if(!editingEntry?.bridgeId)editingEntry=null; draft.tooth=n; draft.view=v; draft.layer=statusContext; if(!preserve&&draft.treatment!=="bridge"){draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.status=statusContext; draft.note=""; els.noteInput.value=""} else {draft.status=statusContext} draft.surfaces=surface?[surface]:defaultSurfaceFor(n,v); if(selection.multi){if(!selection.teeth.includes(n)) selection.teeth.push(n)} else selection.teeth=[n]; normalizeDraft(); renderAll()}
-function resetDraft(){if(!draft.tooth)return; editingEntry=null; draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.view="occ"; draft.status="existing"; draft.layer="existing"; draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view); draft.note=""; els.noteInput.value=""; normalizeDraft(); renderAll()}
+function resetDraft(){
+  if(!draft.tooth)return;
+  const selectedTeeth=selection.multi&&selection.teeth.length?[...selection.teeth]:[draft.tooth];
+  const selectedSet=new Set(selectedTeeth);
+  const entryIds=flatEntries().filter(entry=>selectedSet.has(entry.tooth)).map(entry=>entry.id);
+  if(entryIds.length)removeSelectedEntries(entryIds);
+  editingEntry=null; draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.view="occ"; draft.status="existing"; draft.layer="existing"; draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view); draft.note=""; els.noteInput.value=""; normalizeDraft(); renderAll()
+}
 function clearCurrentTooth(){const selectedTargets=selection.multi&&selection.teeth.length?selection.teeth:(draft.tooth?[draft.tooth]:[]);
   const targets=isGroupedProsthetic()?groupedTargets(selectedTargets):selectedTargets; if(!targets.length)return; targets.forEach(n=>activeState()[n].entries=[]); draft.note=""; els.noteInput.value=""; renderAll()}
 function saveDraft(){

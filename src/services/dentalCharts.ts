@@ -122,43 +122,17 @@ function entryPayload(entry: DentalChartEntryInput) {
 
 export async function loadDentalChart(context: VisitContext) {
   const supabase = getSupabaseClient();
-  const { clinicId } = await getClinicSession();
-  const { data: visits, error: visitError } = await supabase
-    .from("dental_chart_visits")
-    .select("*")
-    .eq("clinic_id", clinicId)
-    .eq("patient_id", context.patientId)
-    .lte("visit_date", context.visitDate)
-    .order("visit_date", { ascending: true })
-    .order("created_at", { ascending: true });
+  const currentVisit = await findVisit(context);
+  if (!currentVisit) return { visit: null, entries: [] as DentalChartEntryRow[] };
 
-  if (visitError) throw visitError;
-  if (!visits?.length) return { visit: null, entries: [] as DentalChartEntryRow[] };
-
-  const currentVisit = [...visits].reverse().find((visit) => visit.visit_date === context.visitDate) || null;
-  const visitIds = visits.map((visit) => visit.id);
   const { data, error } = await supabase
     .from("dental_chart_entries")
     .select("*")
-    .in("chart_visit_id", visitIds)
+    .eq("chart_visit_id", currentVisit.id)
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  const visitOrder = new Map(visits.map((visit, index) => [visit.id, index]));
-  const entries = ((data || []) as DentalChartEntryRow[])
-    .sort((left, right) => {
-      const visitDifference = (visitOrder.get(left.chart_visit_id) ?? 0) - (visitOrder.get(right.chart_visit_id) ?? 0);
-      return visitDifference || Date.parse(left.created_at) - Date.parse(right.created_at);
-    })
-    // A previous visit's completed/current findings form the patient's current
-    // odontogram. Previous plans remain historical until a carry-forward flow
-    // is explicitly introduced; they must not appear as completed conditions.
-    .filter((entry) => entry.chart_visit_id === currentVisit?.id || entry.status !== "planned")
-    .map((entry) => entry.chart_visit_id === currentVisit?.id
-      ? entry
-      : { ...entry, id: `inherited:${entry.id}` });
-
-  return { visit: currentVisit, entries };
+  return { visit: currentVisit, entries: (data || []) as DentalChartEntryRow[] };
 }
 
 export async function saveDentalChartEntry(context: VisitContext, entry: DentalChartEntryInput) {
