@@ -776,18 +776,17 @@ input[type="reset"],
 #split-stage .split-group{display:grid;padding:8px 0;gap:0}
 #split-stage .split-group + .split-group{border-top:1px solid rgba(255,255,255,.12)}
 #split-stage > .split-group[data-chart-layer="planned"]{
-    background:#313843;
-
-  /* border-left:4px solid #3699f5; */
+    background:#19283A;
+  /* border-left:2px solid #3699f5; */
 }
 #split-stage > .split-group[data-chart-layer="existing"]{
-    background:#012035;
-  /* border-left:4px solid #8995a3; */
+    background:#30343B;
+  /* border-left:2px solid #8995a3; */
 }
-#split-stage > .split-group[data-chart-layer]{
+/* #split-stage > .split-group[data-chart-layer]{
   box-sizing:border-box;
   border-radius:8px;
-}
+} */
 #split-stage .split-status-label.planned{color:#63b3ff}
 #split-stage .split-status-label.existing{color:#fff}
 #split-stage .arch-grid{display:grid;grid-template-columns:100px minmax(0,1fr);padding:0}
