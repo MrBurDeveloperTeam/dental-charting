@@ -1036,18 +1036,27 @@ function removeEntry(tooth,id){
 }
 function rctGeometry(n){
   const type=toothType(n),width=toothW(n),height=toothH(n),cervical=crownCutY(n);
-  const roots=type==="molar"||type==="wisdom"?[-.27,0,.27]:type==="premolar"?[-.16,.16]:[0];
+  const twoCanalLowerMolars=new Set([36,37,38,46,47,48]);
+  const singleCanalTeeth=new Set([18,28,34,35,44,45]);
+  const roots=singleCanalTeeth.has(n)?[0]:twoCanalLowerMolars.has(n)?[-.22,.22]:type==="molar"||type==="wisdom"?[-.27,0,.27]:type==="premolar"?[-.16,.16]:[0];
   return{type,width,height,cervical,roots};
 }
 function rctOverlayHTML(n){
   const g=rctGeometry(n),cx=g.width/2,spread=g.type==="molar"||g.type==="wisdom"?g.width*.24:g.width*.17;
   const wisdomTip=n===18||n===28,clipId=`rct-root-clip-${n}`;
-  const startY=Math.max(g.cervical+8,g.height*.57);
+  // Begin just below the crown/root junction so the obturation reads as a
+  // continuous canal without spilling into the visible crown.
+  const startY=Math.max(g.cervical+2,g.height*.52);
   const canals=g.roots.map((offset,index)=>{
     const startX=cx+offset*spread*.9,endX=cx+offset*g.width*(wisdomTip ? .48 : .8);
     const bend=(index%2?1:-1)*g.width*(wisdomTip ? .015 : .035);
-    const path=`M${startX} ${startY} C${startX+bend} ${g.height*.69} ${endX-bend} ${g.height*.8} ${endX} ${g.height*(wisdomTip ? .9 : .94)}`;
-    return `<path class="rct-canal" d="${path}"/>`;
+    const branchedWisdomCanal=n===18||n===28;
+    const endY=g.height*(wisdomTip ? .9 : .94),topRadius=branchedWisdomCanal?2.6:g.type==="molar"||g.type==="wisdom"?3.3:2.8,tipRadius=branchedWisdomCanal?1.05:.85;
+    const centerPath=`M${startX} ${startY+1} C${startX+bend} ${g.height*.69} ${endX-bend} ${g.height*.8} ${endX} ${endY-1}`;
+    const mainCanalPath=`M${startX-topRadius} ${startY+1} Q${startX} ${startY-1} ${startX+topRadius} ${startY+1} C${startX+bend+topRadius*.72} ${g.height*.69} ${endX-bend+tipRadius} ${g.height*.8} ${endX+tipRadius} ${endY-1} Q${endX} ${endY+1} ${endX-tipRadius} ${endY-1} C${endX-bend-tipRadius} ${g.height*.8} ${startX+bend-topRadius*.72} ${g.height*.69} ${startX-topRadius} ${startY+1} Z`;
+    const wisdomBranches=branchedWisdomCanal?` M${startX-1} ${startY+9} Q${startX-3.5} ${startY+4} ${startX-7} ${startY+1} Q${startX-7.5} ${startY+4} ${startX-2} ${startY+12} Z M${startX+1} ${startY+9} Q${startX+3.5} ${startY+4} ${startX+7} ${startY+1} Q${startX+7.5} ${startY+4} ${startX+2} ${startY+12} Z`:'';
+    const wisdomBranchDetail=branchedWisdomCanal?` M${startX} ${startY+10} Q${startX-3.5} ${startY+5} ${startX-6.5} ${startY+2} M${startX} ${startY+10} Q${startX+3.5} ${startY+5} ${startX+6.5} ${startY+2}`:'';
+    return `<path class="rct-canal" d="${mainCanalPath}${wisdomBranches}"/><path class="rct-canal-detail" d="${centerPath}${wisdomBranchDetail}"/>`;
   }).join('');
   return `<svg class="surface-svg rct-anatomy" width="${g.width}" height="${g.height}" viewBox="0 0 ${g.width} ${g.height}" aria-hidden="true"><defs><clipPath id="${clipId}">${surfaceClipPath(n,"front")}</clipPath></defs><g clip-path="url(#${clipId})">${canals}</g></svg>`;
 }

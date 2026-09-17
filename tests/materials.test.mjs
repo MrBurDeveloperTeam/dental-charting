@@ -73,6 +73,9 @@ test('root canal overlay draws root-only lines clipped to each tooth',()=>{
  assert.equal((c.rctOverlayHTML(11).match(/class="rct-canal"/g)||[]).length,1);
  assert.equal((c.rctOverlayHTML(14).match(/class="rct-canal"/g)||[]).length,2);
  assert.equal((c.rctOverlayHTML(16).match(/class="rct-canal"/g)||[]).length,3);
+ for(const n of [36,37,38,46,47,48])assert.equal((c.rctOverlayHTML(n).match(/class="rct-canal"/g)||[]).length,2);
+ for(const n of [18,28,34,35,44,45])assert.equal((c.rctOverlayHTML(n).match(/class="rct-canal"/g)||[]).length,1);
+ for(const n of [18,28])assert.match(c.rctOverlayHTML(n),/rct-canal-detail[^>]* d="[^"]* M[^"]* M/);
  for(const n of [18,28,46]){
    const overlay=c.rctOverlayHTML(n);
    assert.match(overlay,/<clipPath id="rct-root-clip-/);
