@@ -54,7 +54,7 @@
 .patient-search-empty strong{color:#667892;font-size:16px;font-weight:700;line-height:1.35}
 .patient-search-empty p{margin:0;font-size:13px;font-weight:400;line-height:1.45}
 .patient-search-icon{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;background:#f0f5fd;border:0;color:#a8b9d2;font-size:0}
-.patient-search-icon::before{content:'';width:32px;height:32px;background:center/32px 32px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8b9d2' stroke-width='1.8'%3E%3Ccircle cx='12' cy='7' r='3.5'/%3E%3Cpath d='M5.5 20v-2a6.5 6.5 0 0 1 13 0v2'/%3E%3C/svg%3E")}
+.patient-search-icon::before{content:'';display:block;place-self:center;width:32px;height:32px;background:center/32px 32px no-repeat url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23a8b9d2' stroke-width='1.8'%3E%3Ccircle cx='12' cy='7' r='3.5'/%3E%3Cpath d='M5.5 20v-2a6.5 6.5 0 0 1 13 0v2'/%3E%3C/svg%3E")}
 .patient-search-result{width:100%;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 16px;border:0;border-bottom:1px solid var(--line);background:#fff;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
 .patient-search-result:last-child{border-bottom:0}
 .patient-search-result:hover,.patient-search-result:focus-visible{background:#edf5ff;outline:none}

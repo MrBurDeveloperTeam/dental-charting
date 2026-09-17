@@ -92,6 +92,8 @@ let mobileEntryOpen=false;
 let mobileEntryStep=1;
 let editingEntry=null;
 const selectedEntryIds=new Set();
+let chartEntriesLoadState="ready";
+function setChartEntriesLoadState(state){chartEntriesLoadState=state;renderEntries()}
 const deleteEntryModal=document.getElementById("delete-entry-modal");
 const deleteEntryMessage=document.getElementById("delete-entry-message");
 let pendingDeleteAction=null;
@@ -1382,7 +1384,14 @@ function renderEntries(){
   if(selectAll){selectAll.checked=items.length>0&&selectedEntryIds.size===items.length;selectAll.indeterminate=selectedEntryIds.size>0&&selectedEntryIds.size<items.length;selectAll.disabled=!items.length}
   if(deleteSelected){deleteSelected.disabled=!selectedEntryIds.size;deleteSelected.textContent=selectedEntryIds.size?`Delete selected (${selectedEntryIds.size})`:"Delete selected"}
   els.entriesList.innerHTML="";
-  if(!items.length){els.entriesList.innerHTML='<div class="entry-empty">No saved chart entries yet.</div>';return}
+  if(!items.length){
+    const message=chartEntriesLoadState==="loading"
+      ? "Loading saved chart entries…"
+      : chartEntriesLoadState==="error"
+        ? "Unable to load saved chart entries. Please try again."
+        : "No saved chart entries yet.";
+    els.entriesList.innerHTML=`<div class="entry-empty" role="status">${message}</div>`;return
+  }
   [{id:"existing",label:"Existing"},{id:"planned",label:"Planning"},{id:"watch",label:"Review"}].forEach(group=>{
     const entries=items.filter(entry=>entry.status===group.id);if(!entries.length)return;
     const section=document.createElement("section");section.className=`entries-status-section entries-status-${group.id}`;
@@ -1396,7 +1405,7 @@ renderAll();
 function resetChartSession(){
   Object.assign(patient,emptyPatient());visit.date=isoToday();
   Object.values(state).forEach(dentition=>Object.keys(dentition).forEach(tooth=>{dentition[tooth]={entries:[]}}));
-  editingEntry=null;selectedEntryIds.clear();selection.multi=false;selection.teeth=[];
+  editingEntry=null;selectedEntryIds.clear();selection.multi=false;selection.teeth=[];chartEntriesLoadState="ready";
   Object.assign(draft,{tooth:null,category:"condition",treatment:"caries",material:null,view:"occ",status:"existing",layer:"existing",surfaces:[],note:""});
   els.noteInput.value="";localStorage.removeItem(STORAGE_PATIENT_KEY);localStorage.removeItem(STORAGE_VISIT_KEY);renderAll();
 }
