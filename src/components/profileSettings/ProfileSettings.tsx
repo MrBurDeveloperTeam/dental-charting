@@ -66,6 +66,10 @@ export function ProfileSettings() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    document.querySelectorAll(".profile-settings-fallback").forEach((fallback) => fallback.remove());
+  }, []);
+
+  useEffect(() => {
     fetch(`${SNABBB_APP_URL}/api/verify-token`, { credentials: "include", headers: { Accept: "application/json" } })
       .then((response) => response.ok ? response.json() : null)
       .then((payload) => setUser(readUser(payload)))
