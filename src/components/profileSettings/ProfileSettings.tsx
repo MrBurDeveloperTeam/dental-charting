@@ -194,6 +194,7 @@ export function ProfileSettings() {
           <div className="profile-settings-items">
             {items.map((item) => (
               <button key={item.type} type="button" role="menuitem" disabled={busy !== null} onClick={() => void goTo(item.type)}>
+                <i className={`profile-settings-item-icon ${item.type}`}><Icon type={item.type} /></i>
                 <span><strong>{item.title}</strong><small>{busy === item.type ? "Opening…" : item.subtitle}</small></span>
                 <b aria-hidden="true">›</b>
               </button>
