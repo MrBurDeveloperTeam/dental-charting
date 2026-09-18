@@ -89,3 +89,24 @@ test('permanent successors in primary mode use the new anatomy',()=>{
   for(const n of [11,12,13,14,15,21,31,41])assert.equal(c.innerAnatomy(n).asset,c.assets[`permanent:${n}`].asset);
   assert.equal(c.innerAnatomy(16).asset,c.assets['primary:16'].asset);
 });
+
+test('crown surfaces appear in root view without projecting occlusal or root-only findings',()=>{
+  const c=setup();
+  c.treatmentFor=id=>({mode:'surface',views:id==='sealant'?['occ']:['occ','front']});
+  const entry={view:'occ',treatment:'caries',surfaces:['M','O','D']};
+  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'front',entry)),['M','D']);
+  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'occ',entry)),['M','O','D']);
+  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'front',{...entry,treatment:'sealant'})),[]);
+  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'occ',{...entry,view:'front'})),[]);
+  c.draft={...entry,tooth:16};
+  assert.deepEqual(Array.from(c.selectedSurfaces(16,'front')),['M','D']);
+  assert.equal(c.selectedSurfaces(17,'front').size,0);
+  for(const status of ['existing','planned','watch']){
+    c.entriesByStatus=(n,s,layer)=>n===16&&s===status&&layer==='existing'?[entry]:[];
+    const map=c.surfaceMap(16,'front',status,'existing');
+    assert.equal(map.M,entry);
+    assert.equal(map.D,entry);
+    assert.equal(map.O,undefined);
+    assert.equal(Object.keys(c.surfaceMap(16,'front',status,'planned')).length,0);
+  }
+});
