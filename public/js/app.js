@@ -36,13 +36,14 @@ Object.assign(TREATMENTS, {
   overlay:{label:'Overlay',category:'restoration',mode:'surface',views:['occ','front'],requiresMaterial:true},
   crack:{label:'Crack',category:'condition',mode:'surface',views:['occ','front']},
   retainedRoot:{label:'Retained root',category:'condition',mode:'whole',views:['occ','front']},
+  spacing:{label:'Spacing',category:'condition',mode:'label',views:['front'],icon:'spacing'},
   m1:{label:'M1',category:'condition',mode:'label',views:['occ','front'],badge:'m1'},
   m2:{label:'M2',category:'condition',mode:'label',views:['occ','front'],badge:'m2'},
   m3:{label:'M3',category:'condition',mode:'label',views:['occ','front'],badge:'m3'},
   impacted:{label:'Impacted',category:'condition',mode:'label',views:['occ','front'],badge:'IMP'},
   kiv:{label:'KIV',category:'condition',mode:'label',views:['occ','front'],badge:'KIV'}
 });
-Object.assign(COLORS,{caries:'#000000',crack:'#facc15',fracture:'#f97316',extraction:'#ef4444',filling:'#ffe0ad',inlay:'#ffe0ad',onlay:'#ffe0ad',overlay:'#ffe0ad',impacted:'#8b5cf6',m1:'#fb7185',m2:'#fb7185',m3:'#fb7185',kiv:'#fbbf24'});
+Object.assign(COLORS,{caries:'#000000',crack:'#facc15',fracture:'#f97316',extraction:'#ef4444',filling:'#ffe0ad',inlay:'#ffe0ad',onlay:'#ffe0ad',overlay:'#ffe0ad',spacing:'#55a8e8',impacted:'#8b5cf6',m1:'#fb7185',m2:'#fb7185',m3:'#fb7185',kiv:'#fbbf24'});
 const STATUSES=[{id:"existing",label:"Existing"},{id:"planned",label:"Planning"}];
 const STORAGE_PATIENT_KEY="dental-charting-2-patient";
 const STORAGE_VISIT_KEY="dental-charting-2-visit";
@@ -236,7 +237,7 @@ function loadVisit(){try{const raw=localStorage.getItem(STORAGE_VISIT_KEY); if(!
 function persistVisit(){localStorage.setItem(STORAGE_VISIT_KEY,JSON.stringify(visit))}
 function loadChartMode(){try{const raw=localStorage.getItem(STORAGE_MODE_KEY); return raw==="primary"?"primary":"permanent"}catch{return"permanent"}}
 function persistChartMode(){localStorage.setItem(STORAGE_MODE_KEY,chartMode)}
-function defaultTreatmentIcon(id){if(id==="rootCanal")return"canal";if(id==="crown")return"crown";if(id==="bridge")return"bridge";if(id==="partialDenture")return"partialDenture";if(id==="veneer")return"veneer";if(id==="implant")return"implant";if(id==="extraction")return"extraction";if(id==="missing")return"cross";if(id==="sealant")return"seal";if(id==="caries"||id==="rootCaries")return"circle";if(id==="fracture")return"bolt";if(id==="crack")return"crack";if(id==="inlay")return"inlay";if(id==="onlay")return"onlay";if(id==="overlay")return"overlay";if(id==="impacted")return"imp";if(id==="retainedRoot")return"root";if(["m1","m2","m3","kiv"].includes(id))return id;return"filling"}
+function defaultTreatmentIcon(id){if(id==="rootCanal")return"canal";if(id==="crown")return"crown";if(id==="bridge")return"bridge";if(id==="partialDenture")return"partialDenture";if(id==="spacing")return"spacing";if(id==="veneer")return"veneer";if(id==="implant")return"implant";if(id==="extraction")return"extraction";if(id==="missing")return"cross";if(id==="sealant")return"seal";if(id==="caries"||id==="rootCaries")return"circle";if(id==="fracture")return"bolt";if(id==="crack")return"crack";if(id==="inlay")return"inlay";if(id==="onlay")return"onlay";if(id==="overlay")return"overlay";if(id==="impacted")return"imp";if(id==="retainedRoot")return"root";if(["m1","m2","m3","kiv"].includes(id))return id;return"filling"}
 function treatmentViewsForMode(mode){return mode==="root"?["front"]:["occ","front"]}
 function treatmentMethodsSnapshot(){return Object.entries(TREATMENTS).map(([id,t])=>({id,label:t.label,category:t.category,mode:t.mode,views:[...t.views],icon:t.icon||defaultTreatmentIcon(id),color:COLORS[id]||"#3b82f6",visible:t.visible!==false,builtin:BUILTIN_TREATMENT_IDS.has(id)}))}
 function loadTreatmentMethods(){try{const payload=JSON.parse(localStorage.getItem(STORAGE_TREATMENTS_KEY)||"[]"),saved=Array.isArray(payload)?payload:payload.methods;if(!Array.isArray(saved))return;saved.forEach(method=>{if(!method||typeof method.id!=="string"||typeof method.label!=="string")return;const category=CATEGORIES.some(item=>item.id===method.category)?method.category:"restoration",mode=["surface","whole","root"].includes(method.mode)?method.mode:"surface",icon=TREATMENT_ICON_OPTIONS.some(item=>item.id===method.icon)?method.icon:"filling",color=/^#[0-9a-f]{6}$/i.test(method.color||"")?method.color:"#3b82f6",visible=method.visible!==false;if(TREATMENTS[method.id])Object.assign(TREATMENTS[method.id],{label:method.label.slice(0,40),icon,visible});else if(method.id.startsWith("custom-"))TREATMENTS[method.id]={label:method.label.slice(0,40),category,mode,views:treatmentViewsForMode(mode),icon,visible};COLORS[method.id]=color})}catch{}}
@@ -725,7 +726,7 @@ function treatmentHelp(id){
     rootCanal:"Shows canal lines on root view only.",
     extraction:"Whole-tooth procedure.",
     implant:"Whole-tooth replacement marker.",
-    bridge:"Connects at least 3 neighbouring teeth in one arch. Surface selection is not used.",partialDenture:"Select one or more consecutive replacement teeth in the same arch. They are saved as one removable partial denture.",crown:"Covers the whole crown view.",
+    bridge:"Connects at least 3 neighbouring teeth in one arch. Surface selection is not used.",partialDenture:"Select one or more consecutive replacement teeth in the same arch. They are saved as one removable partial denture.",spacing:"Select exactly two neighbouring teeth. The spacing marker opens a gap between them while preserving tooth size.",crown:"Covers the whole crown view.",
     veneer:"Covers the visible front shell."
   };
   return help[id]||(TREATMENTS[id]?.mode==="surface"?"Colors the selected surface only.":TREATMENTS[id]?.mode==="root"?"Uses the root view only.":"Applies to the whole tooth.");
@@ -739,7 +740,8 @@ function treatmentIconMarkup(icon,color){
   if(icon==="canal")return svg(`${tooth}<path d="M9 7 Q14 11.5 19 7 Q18 12 17 17 L16.7 24 M9 7 Q10 12 11 17 L11.3 24" fill="none" stroke="#ef5b58" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`);
   if(icon==="crown")return svg(`${tooth}<path d="M5.4 8 Q7 4.3 11 5 Q14 8 17 5 Q21 4.3 22.6 8 L21 14 Q17.5 16 14 15.5 Q10.5 16 7 14Z" fill="${color}" fill-opacity=".82" stroke="${color}" stroke-width="1.1"/>`);
   if(icon==="bridge")return `<svg class="bridge-treatment-svg" viewBox="0 0 54 28" width="60" height="28" aria-hidden="true"><g fill="#fffaf2" stroke="#20324d" stroke-width="1.7" stroke-linejoin="round"><path d="M1 8 Q3 4 7 5 Q10 8 13 5 Q17 4 19 8 Q18 14 16 17 L14 25 Q12 27 11 21 Q10 17 9 21 Q8 27 6 25 L4 17 Q2 14 1 8Z"/><path d="M36 8 Q38 4 42 5 Q45 8 48 5 Q52 4 54 8 Q53 14 51 17 L49 25 Q47 27 46 21 Q45 17 44 21 Q43 27 41 25 L39 17 Q37 14 36 8Z"/></g><g fill="${color}" stroke="#20324d" stroke-width="1.1" stroke-linejoin="round"><path d="M1.4 8 Q3 4.3 7 5 Q10 8 13 5 Q17 4.3 18.6 8 L17 14 Q13.5 16 10 15.5 Q6.5 16 3 14Z"/><path d="M18.4 8 Q20 4.3 24 5 Q27 8 30 5 Q34 4.3 35.6 8 L34 14 Q30.5 16 27 15.5 Q23.5 16 20 14Z"/><path d="M36.4 8 Q38 4.3 42 5 Q45 8 48 5 Q52 4.3 53.6 8 L52 14 Q48.5 16 45 15.5 Q41.5 16 38 14Z"/></g></svg>`;
-  if(icon==="partialDenture")return `<svg class="partial-denture-treatment-svg" viewBox="0 0 54 28" width="60" height="28" aria-hidden="true"><path d="M7 12 Q27 6 47 12 L44 23 Q27 27 10 23Z" fill="${color}" stroke="#9f4058" stroke-width="1.4"/><g fill="#fffaf2" stroke="#20324d" stroke-width="1.5"><path d="M10 6 Q14 2 18 6 L17 17 Q14 20 11 17Z"/><path d="M21 5 Q27 1 33 5 L32 17 Q27 20 22 17Z"/><path d="M36 6 Q40 2 44 6 L43 17 Q40 20 37 17Z"/></g><path d="M8 10 Q2 10 3 16 Q4 20 9 18 M46 10 Q52 10 51 16 Q50 20 45 18" fill="none" stroke="#6b7280" stroke-width="2.4" stroke-linecap="round"/></svg>`;
+  if(icon==="partialDenture")return `<svg class="partial-denture-treatment-svg" viewBox="0 0 64 30" width="64" height="30" aria-hidden="true"><g stroke="#203b60" stroke-linecap="round" stroke-linejoin="round"><path d="M11 18 C1 21 0 9 7 8 C10 7 11 10 8 10 C3 10 4 17 11 15 M53 18 C63 21 64 9 57 8 C54 7 53 10 56 10 C61 10 60 17 53 15" fill="#aab6c4" stroke-width="1.1"/><path d="M13 12 C19 9 45 9 51 12 C54 15 54 23 51 25 C42 29 22 29 13 25 C10 23 10 15 13 12Z" fill="${color}" stroke-width="1.2"/><path d="M14 19 Q13 24 18 25 Q32 28 47 25" fill="none" stroke="#d95379" stroke-width="1.5" opacity=".5"/><path d="M14 17 Q13 22 17 22" fill="none" stroke="#ffc5d2" stroke-width="1.4"/><g fill="#fffaf2" stroke-width="1.1"><path d="M15 7 Q18 4 22 7 L23 15 Q22 19 18 18 Q16 18 15 14 L14 10 Q14 8 15 7Z"/><path d="M23 5 Q27 2 31 5 Q32 6 32 9 L31 18 Q30 21 26 20 Q23 20 23 17 L22 9 Q21 6 23 5Z"/><path d="M33 5 Q37 2 41 5 Q43 6 42 9 L41 17 Q41 20 38 20 Q34 21 33 18 L32 9 Q32 6 33 5Z"/><path d="M42 7 Q46 4 49 7 Q50 8 50 10 L49 14 Q48 18 46 18 Q42 19 41 15Z"/></g><path d="M17 9 Q17 7 19 7 M25 8 Q25 6 28 6 M35 8 Q35 6 38 6 M44 9 Q44 7 46 7" fill="none" stroke="#ffffff" stroke-width="1.7"/></g></svg>`;
+  if(icon==="spacing")return `<svg class="spacing-treatment-svg" viewBox="0 0 54 28" width="60" height="28" aria-hidden="true"><g fill="#fffaf2" stroke="#20324d" stroke-width="1.7" stroke-linejoin="round"><path d="M1 8 Q3 4 7 5 Q10 8 13 5 Q17 4 19 8 Q18 14 16 17 L14 25 Q12 27 11 21 Q10 17 9 21 Q8 27 6 25 L4 17 Q2 14 1 8Z"/><path d="M36 8 Q38 4 42 5 Q45 8 48 5 Q52 4 54 8 Q53 14 51 17 L49 25 Q47 27 46 21 Q45 17 44 21 Q43 27 41 25 L39 17 Q37 14 36 8Z"/></g><g fill="none" stroke="#20324d" stroke-width="2.5" stroke-linecap="round"><path d="M21 7l3 3M27 3v5M33 7l-3 3"/></g></svg>`;
   if(icon==="veneer")return svg(`${tooth}<path d="M7 7 Q10 4.8 12 6.2 L11.2 18 Q10.5 21 9.2 22 L8 17 Q6.5 13 7 7Z" fill="${color}" fill-opacity=".78" stroke="${color}" stroke-width="1.2"/>`);
   if(icon==="implant")return svg(`<path d="M4 7 Q6 2.5 10.5 4 Q14 6.5 17.5 4 Q22 2.5 24 7 L22 12 Q21.5 14 19.5 14 H8.5 Q6.5 14 6 12Z" fill="#fffaf2" stroke="#20324d" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 14 H19 V17 Q19 18.5 17.5 18.5 H10.5 Q9 18.5 9 17Z" fill="#d9dee5" stroke="#20324d" stroke-width="1.6"/><path d="M10.5 18.5 H17.5 L16.5 26 H11.5Z" fill="#d9dee5" stroke="#20324d" stroke-width="1.6" stroke-linejoin="round"/><path d="M9.7 20.5 L18 21.6 M9.5 23 L17.5 24.1" stroke="#20324d" stroke-width="1.5" stroke-linecap="square"/>`);
   if(icon==="extraction")return svg(`${tooth}<path d="M5 6L23 24 M23 6L5 24" stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>`);
@@ -802,7 +804,7 @@ function saveDraft(){
   const savedEntries=[];
   targets.forEach(n=>{
     const previous=previousBridge.find(e=>e.tooth===n);
-    const entry={bridgeId,id:previous?previous.id:editingEntry&&editingEntry.tooth===n?editingEntry.id:uid(),tooth:n,treatment:draft.treatment,material:materialForTreatment(draft),bridgeRole:bridgeId?(draft.treatment==="bridge"&&(n===targets[0]||n===targets[targets.length-1])?"abutment":"pontic"):null,category:draft.category,status:draft.status,layer:draft.status==="watch"?draft.layer:(draft.status==="planned"?"planned":"existing"),view:draft.view,surfaces:[...draft.surfaces],note:draft.note.trim()};
+    const entry={bridgeId,id:previous?previous.id:editingEntry&&editingEntry.tooth===n?editingEntry.id:uid(),tooth:n,treatment:draft.treatment,material:materialForTreatment(draft),bridgeRole:draft.treatment==="bridge"?(n===targets[0]||n===targets[targets.length-1]?"abutment":"pontic"):draft.treatment==="partialDenture"?"pontic":null,category:draft.category,status:draft.status,layer:draft.status==="watch"?draft.layer:(draft.status==="planned"?"planned":"existing"),view:draft.view,surfaces:[...draft.surfaces],note:draft.note.trim()};
     const entries=activeState()[n].entries,index=entries.findIndex(item=>item.id===entry.id);
     if(index>=0)entries[index]=entry; else entries.push(entry);
     savedEntries.push(entry);
@@ -872,7 +874,7 @@ function setMobileEntryStep(step){
   mobileEntryEls.content.scrollTop=0;
 }
 function completeMobileEntryWizard(){
-  if(!draft.tooth||draft.treatment==="bridge"&&bridgeSelectionError(selection.teeth))return;
+  if(!draft.tooth||isGroupedProsthetic()&&groupedSelectionError(selection.teeth))return;
   if(materialSelectionError()){setMobileEntryStep(3);showChartValidation(materialSelectionError());return;}
   closeMobileEntryWizard();
   saveDraft();
@@ -915,7 +917,7 @@ function renderMobileEntryWizard(){
   mobileEntryEls.back.disabled=mobileEntryStep===1;
   mobileEntryEls.next.hidden=mobileEntryStep===4;
   mobileEntryEls.done.hidden=mobileEntryStep!==4;
-  mobileEntryEls.done.disabled=Boolean(materialSelectionError())||draft.treatment==="bridge"&&Boolean(bridgeSelectionError(selection.teeth));
+  mobileEntryEls.done.disabled=Boolean(materialSelectionError())||isGroupedProsthetic()&&Boolean(groupedSelectionError(selection.teeth));
 }
 function setSplitChartView(view){
   if(!["existing","planned"].includes(view)||view===splitChartView)return;
@@ -1306,8 +1308,38 @@ function renderNumbersRow(container, list) {
 
     container.appendChild(item);
   });
+  const layer=container===els.upperNumbers||container===els.lowerNumbers?"combined":statusContext;
+  appendSpacingMarkers(container,list,"numbers",layer);
 }
-function renderToothRow(container,list,view,layer="combined"){setArchColumns(container,list);container.dataset.bridgeView=view;container.dataset.bridgeLayer=layer;container.dataset.bridgeTeeth=JSON.stringify(list);container.innerHTML=""; list.forEach(n=>{if(n===null){const spacer=document.createElement("div"); spacer.className="tooth-spacer"; container.appendChild(spacer); return} container.appendChild(buildToothElement(n,view,layer))})}
+function spacingEntriesForLayer(n,layer){
+  const status=layer==="planned"?"planned":"existing";
+  return entriesForTooth(n).filter(entry=>entry.treatment==="spacing"&&entryLayer(entry)===status);
+}
+function appendSpacingMarkers(container,list,view,layer){
+  if(view!=="front"&&view!=="occ"&&view!=="numbers")return;
+  const teeth=[...container.children];
+  const gaps=new Set();
+  list.forEach((n,index)=>{
+    const next=list[index+1];if(!n||!next)return;
+    const leftGroups=new Set(spacingEntriesForLayer(n,layer).map(entry=>entry.bridgeId).filter(Boolean));
+    const saved=spacingEntriesForLayer(next,layer).some(entry=>leftGroups.has(entry.bridgeId));
+    const preview=draft.treatment==="spacing"&&draft.layer===layer&&!spacingSelectionError(selection.teeth)&&selection.teeth.includes(n)&&selection.teeth.includes(next);
+    if(!saved&&!preview)return;
+    gaps.add(index);
+    if(view==="numbers")return;
+    const marker=document.createElement("span");marker.className=`spacing-marker${preview&&!saved?" preview":""}`;marker.setAttribute("aria-hidden","true");
+    marker.innerHTML='<i></i><i></i><i></i>';
+    teeth[index].appendChild(marker);
+  });
+  // Move each segment of the arch together: opening a gap must never
+  // shrink its teeth or push them into their other neighbours.
+  let offset=-gaps.size/2;
+  teeth.forEach((tooth,index)=>{
+    tooth.style.translate=`calc(var(--spacing-gap, 32px) * ${offset}) 0`;
+    if(gaps.has(index))offset+=1;
+  });
+}
+function renderToothRow(container,list,view,layer="combined"){setArchColumns(container,list);container.dataset.bridgeView=view;container.dataset.bridgeLayer=layer;container.dataset.bridgeTeeth=JSON.stringify(list);container.innerHTML=""; list.forEach(n=>{if(n===null){const spacer=document.createElement("div"); spacer.className="tooth-spacer"; container.appendChild(spacer); return} container.appendChild(buildToothElement(n,view,layer))});appendSpacingMarkers(container,list,view,layer)}
 function renderCombinedChart(){renderToothRow(els.upperFront,activeUpperDisplay(),"front","combined"); renderToothRow(els.upperOcc,activeUpperDisplay(),"occ","combined"); renderNumbersRow(els.upperNumbers,activeUpperDisplay()); renderNumbersRow(els.lowerNumbers,activeLowerDisplay()); renderToothRow(els.lowerOcc,activeLowerDisplay(),"occ","combined"); renderToothRow(els.lowerFront,activeLowerDisplay(),"front","combined")}
 function renderSplitChart(){renderNumbersRow(els.splitPlannedUpperNumbers,activeUpperDisplay()); renderToothRow(els.splitPlannedUpperFront,activeUpperDisplay(),"front","planned"); renderToothRow(els.splitPlannedUpperOcc,activeUpperDisplay(),"occ","planned"); renderNumbersRow(els.splitExistingUpperNumbers,activeUpperDisplay()); renderToothRow(els.splitExistingUpperFront,activeUpperDisplay(),"front","existing"); renderToothRow(els.splitExistingUpperOcc,activeUpperDisplay(),"occ","existing"); renderNumbersRow(els.splitExistingLowerNumbers,activeLowerDisplay()); renderToothRow(els.splitExistingLowerOcc,activeLowerDisplay(),"occ","existing"); renderToothRow(els.splitExistingLowerFront,activeLowerDisplay(),"front","existing"); renderNumbersRow(els.splitPlannedLowerNumbers,activeLowerDisplay()); renderToothRow(els.splitPlannedLowerOcc,activeLowerDisplay(),"occ","planned"); renderToothRow(els.splitPlannedLowerFront,activeLowerDisplay(),"front","planned")}
 // Normalize the row structure even when an older HTML shell was cached.
@@ -1332,7 +1364,7 @@ function renderChart(){ensureFourArchRows();els.combinedStage.classList.add("hid
 function renderEntryPreview(entry){const treatment=treatmentFor(entry.treatment),icon=treatment.icon||defaultTreatmentIcon(entry.treatment),color=entryColor(entry),badge=entry.status==="watch"?'<span class="review-badge summary-review-badge">R</span>':"";return `<span class="summary-treatment-icon">${treatmentIconMarkup(icon,color)}</span>${badge}`}
 function renderSelectedTeeth(){els.selectedTeeth.innerHTML=""; renderBridgeSelectionHint(); if(!selection.teeth.length){els.selectedTeeth.innerHTML='<span class="tooth-tag">No teeth selected</span>'; return} selection.teeth.forEach(n=>{const tag=document.createElement("span"); tag.className="tooth-tag"; tag.textContent=n;if(selection.multi){const remove=document.createElement("button");remove.type="button";remove.className="tooth-tag-remove";remove.textContent="−";remove.setAttribute("aria-label",`Deselect tooth ${n}`);remove.addEventListener("click",()=>{selection.teeth=selection.teeth.filter(tooth=>tooth!==n);if(draft.tooth===n)draft.tooth=selection.teeth.at(-1)||null;renderAll()});tag.appendChild(remove)}els.selectedTeeth.appendChild(tag)})}
 function renderDentitionSwitch(){els.dentitionSwitch.querySelectorAll("[data-mode]").forEach(btn=>btn.classList.toggle("active",btn.dataset.mode===chartMode)); els.dentitionHint.textContent=chartMode==="primary"?(isMobileToothModalViewport()?"Hint: Tap a faded permanent 6/7 molar to activate it. Use Deactivate permanent molar in the tooth panel to hide it again.":"Hint: Double-click baby teeth to swap with permanent successors. Double-click faded 6/7 slots to add, and double-click active 6/7 molars to hide them."):""}
-function renderSidebar(){if(!canStartCharting()){els.sidebarEmpty.style.display="grid";els.sidebarEmpty.innerHTML=`<h3>Charting unavailable</h3><p>${chartPrerequisiteMessage()}</p>`;els.editor.style.display="none";return}const has=Boolean(draft.tooth); els.sidebarEmpty.style.display="none"; els.sidebarEmpty.innerHTML=""; els.editor.style.display=""; els.editor.classList.add("show"); els.multiToggleBtn.textContent=`Batch select: ${selection.multi?"On":"Off"}`; els.multiToggleBtn.classList.toggle("batch-active",selection.multi); els.multiToggleBtn.setAttribute("aria-pressed",String(selection.multi)); els.multiToggleBtn.setAttribute("aria-disabled",String(draft.treatment==="bridge")); renderSelectedTeeth(); els.clearCurrentBtn.disabled=false; els.resetBtn.disabled=!has; els.saveBtn.disabled=!has||Boolean(materialSelectionError())||(draft.treatment==="bridge"&&Boolean(bridgeSelectionError(selection.teeth))); els.noteInput.disabled=!has; els.saveBtn.textContent=draft.treatment!=="bridge"&&selection.multi&&selection.teeth.length>1?"Apply to selected":"Done"; if(!has){els.selectedCode.textContent="--"; els.selectedName.textContent=`Select a ${chartMode} tooth to start charting`; els.noteInput.value=""; els.noteInput.placeholder="Select a tooth to add a note"; els.miniPreview.classList.add("empty"); els.miniPreview.innerHTML="🦷"; renderCategoryGrid(true); renderViewGrid(true); renderSurfaceGrid(true); renderMaterialGrid(true); renderTreatmentGrid(true); renderStatusGrid(true); els.previewBox.innerHTML="<strong>Ready</strong><br>Select any tooth or surface on the left to begin."; return} normalizeDraft(); els.selectedCode.textContent=draft.tooth; els.selectedName.textContent=selection.multi&&selection.teeth.length>1?`${currentToothName(draft.tooth)} · ${selection.teeth.length} teeth selected · ${selectionSummary()}`:`${currentToothName(draft.tooth)} · ${selectionSummary()}`; els.noteInput.disabled=false; els.noteInput.placeholder="Optional note for this tooth"; els.noteInput.value=draft.note; renderMiniPreview(); renderCategoryGrid(false); renderViewGrid(false); renderSurfaceGrid(false); renderMaterialGrid(false); renderTreatmentGrid(false); renderStatusGrid(false); renderPreview()}
+function renderSidebar(){if(!canStartCharting()){els.sidebarEmpty.style.display="grid";els.sidebarEmpty.innerHTML=`<h3>Charting unavailable</h3><p>${chartPrerequisiteMessage()}</p>`;els.editor.style.display="none";return}const has=Boolean(draft.tooth); els.sidebarEmpty.style.display="none"; els.sidebarEmpty.innerHTML=""; els.editor.style.display=""; els.editor.classList.add("show"); els.multiToggleBtn.textContent=`Batch select: ${selection.multi?"On":"Off"}`; els.multiToggleBtn.classList.toggle("batch-active",selection.multi); els.multiToggleBtn.setAttribute("aria-pressed",String(selection.multi)); els.multiToggleBtn.setAttribute("aria-disabled",String(isGroupedProsthetic())); renderSelectedTeeth(); els.clearCurrentBtn.disabled=false; els.resetBtn.disabled=!has; els.saveBtn.disabled=!has||Boolean(materialSelectionError())||(isGroupedProsthetic()&&Boolean(groupedSelectionError(selection.teeth))); els.noteInput.disabled=!has; els.saveBtn.textContent=!isGroupedProsthetic()&&selection.multi&&selection.teeth.length>1?"Apply to selected":"Done"; if(!has){els.selectedCode.textContent="--"; els.selectedName.textContent=`Select a ${chartMode} tooth to start charting`; els.noteInput.value=""; els.noteInput.placeholder="Select a tooth to add a note"; els.miniPreview.classList.add("empty"); els.miniPreview.innerHTML="🦷"; renderCategoryGrid(true); renderViewGrid(true); renderSurfaceGrid(true); renderMaterialGrid(true); renderTreatmentGrid(true); renderStatusGrid(true); els.previewBox.innerHTML="<strong>Ready</strong><br>Select any tooth or surface on the left to begin."; return} normalizeDraft(); els.selectedCode.textContent=draft.tooth; els.selectedName.textContent=selection.multi&&selection.teeth.length>1?`${currentToothName(draft.tooth)} · ${selection.teeth.length} teeth selected · ${selectionSummary()}`:`${currentToothName(draft.tooth)} · ${selectionSummary()}`; els.noteInput.disabled=false; els.noteInput.placeholder="Optional note for this tooth"; els.noteInput.value=draft.note; renderMiniPreview(); renderCategoryGrid(false); renderViewGrid(false); renderSurfaceGrid(false); renderMaterialGrid(false); renderTreatmentGrid(false); renderStatusGrid(false); renderPreview()}
 function renderCategoryGrid(disabled=false){els.categoryGrid.innerHTML=""; CATEGORIES.forEach(c=>{const b=document.createElement("button"); b.className=`chip${draft.category===c.id?" active":""}`; b.type="button"; b.textContent=c.label; b.disabled=disabled; if(!disabled) b.addEventListener("click",()=>pickCategory(c.id)); els.categoryGrid.appendChild(b)})}
 function renderViewGrid(disabled=false){const t=treatmentFor(draft.treatment); els.viewGrid.innerHTML=""; [{id:"occ",label:"Crown + inner view"},{id:"front",label:"Root view"}].forEach(v=>{const b=document.createElement("button"); b.className=`chip${draft.view===v.id?" active":""}`; b.type="button"; b.textContent=v.label; const blocked=disabled||!t.views.includes(v.id); b.disabled=blocked; if(!blocked) b.addEventListener("click",()=>pickView(v.id)); if(!t.views.includes(v.id)) b.style.opacity=".38"; els.viewGrid.appendChild(b)}); els.viewNote.textContent=disabled?"Select a tooth first.":(t.mode==="surface"?"Surface treatments color only the selected region.":(t.mode==="root"?"Root canal and root findings use the root view only.":"Whole-tooth treatments cover the whole tooth representation."))}
 function renderSurfaceGrid(disabled=false){const t=treatmentFor(draft.treatment),show=true,interactive=!disabled&&t.mode==="surface"; els.surfaceField.style.display=show?"grid":"none"; els.surfaceGrid.innerHTML=""; if(!show){els.surfaceNote.textContent=disabled?"":"";
@@ -1445,7 +1477,17 @@ function bridgeSpan(teeth){
   const positions=teeth.map(n=>arch.indexOf(n));
   return arch.slice(Math.min(...positions),Math.max(...positions)+1);
 }
-function isGroupedProsthetic(treatment=draft.treatment){return treatment==="bridge"||treatment==="partialDenture"}
+function isGroupedProsthetic(treatment=draft.treatment){return treatment==="bridge"||treatment==="partialDenture"||treatment==="spacing"}
+function spacingSelectionError(teeth){
+  const unique=[...new Set(teeth)];
+  if(unique.length!==2)return 'Select exactly two neighbouring teeth for spacing.';
+  const arch=[activeUpperDisplay(),activeLowerDisplay()].find(row=>unique.every(n=>row.includes(n)));
+  if(!arch)return 'Select two neighbouring teeth in the same arch.';
+  const positions=unique.map(n=>arch.indexOf(n)).sort((a,b)=>a-b);
+  if(positions[1]-positions[0]!==1)return 'The selected teeth must be neighbours.';
+  if(unique.some(n=>!n||isGhostPrimarySlot(n)))return 'Spacing cannot use an inactive tooth or empty chart slot.';
+  return '';
+}
 function partialDentureSelectionError(teeth){
   const unique=[...new Set(teeth)];
   if(!unique.length)return 'Select at least one replacement tooth for the partial denture.';
@@ -1456,9 +1498,14 @@ function partialDentureSelectionError(teeth){
   if(unique.some(n=>!n||isGhostPrimarySlot(n)))return 'The partial denture cannot use an inactive tooth or empty chart slot.';
   return '';
 }
-function groupedSelectionError(teeth,treatment=draft.treatment){return treatment==="bridge"?bridgeSelectionError(teeth):treatment==="partialDenture"?partialDentureSelectionError(teeth):''}
+function groupedSelectionError(teeth,treatment=draft.treatment){return treatment==="bridge"?bridgeSelectionError(teeth):treatment==="partialDenture"?partialDentureSelectionError(teeth):treatment==="spacing"?spacingSelectionError(teeth):''}
 function groupedTargets(teeth,treatment=draft.treatment){
   if(treatment==="bridge")return bridgeSpan(teeth);
+  if(treatment==="spacing"){
+    if(spacingSelectionError(teeth))return [...new Set(teeth)];
+    const arch=[activeUpperDisplay(),activeLowerDisplay()].find(row=>teeth.every(n=>row.includes(n)));
+    return [...new Set(teeth)].sort((a,b)=>arch.indexOf(a)-arch.indexOf(b));
+  }
   if(treatment!=="partialDenture"||partialDentureSelectionError(teeth))return [...new Set(teeth)];
   const arch=[activeUpperDisplay(),activeLowerDisplay()].find(row=>teeth.every(n=>row.includes(n)));
   return [...new Set(teeth)].sort((a,b)=>arch.indexOf(a)-arch.indexOf(b));
@@ -1482,7 +1529,7 @@ function renderBridgeSelectionHint(){
   hint.hidden=!isGroupedProsthetic();
   const error=groupedSelectionError(selection.teeth);
   const targets=groupedTargets(selection.teeth);
-  const message=error||(draft.treatment==="bridge"?`Bridge: ${targets.join(" · ")}. Intermediate teeth are pontics (no roots).`:`Partial denture: ${targets.join(" · ")}. These replacement teeth form one removable appliance.`);
+  const message=error||(draft.treatment==="bridge"?`Bridge: ${targets.join(" · ")}. Intermediate teeth are pontics (no roots).`:draft.treatment==="spacing"?`Spacing: ${targets.join(" · ")}. The marker will appear between these neighbouring teeth.`:`Partial denture: ${targets.join(" · ")}. These replacement teeth form one removable appliance.`);
   hint.dataset.tooltip=message;hint.setAttribute('aria-label',message);
   hint.classList.toggle("valid",!error);
 }
