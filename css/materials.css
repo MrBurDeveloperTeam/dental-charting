@@ -16,8 +16,8 @@
 #treatment-grid .chip.treatment { position:relative; min-height:48px; padding:6px; display:grid; grid-template-columns:1fr; place-items:center; overflow:visible; }
 #treatment-grid .treatment-icon { width:36px; height:36px; background:transparent; box-shadow:none; }
 #treatment-grid .treatment-icon svg { width:31px; height:31px; }
-#treatment-grid .treatment-icon:has(.bridge-treatment-svg),#treatment-grid .treatment-icon:has(.partial-denture-treatment-svg) { width:64px; }
-#treatment-grid .treatment-icon .bridge-treatment-svg,#treatment-grid .treatment-icon .partial-denture-treatment-svg { width:64px; height:31px; max-width:none; }
+#treatment-grid .treatment-icon:has(.bridge-treatment-svg),#treatment-grid .treatment-icon:has(.partial-denture-treatment-svg),#treatment-grid .treatment-icon:has(.spacing-treatment-svg) { width:64px; }
+#treatment-grid .treatment-icon .bridge-treatment-svg,#treatment-grid .treatment-icon .partial-denture-treatment-svg,#treatment-grid .treatment-icon .spacing-treatment-svg { width:64px; height:31px; max-width:none; }
 #treatment-grid .treatment-name { position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0; }
 #treatment-grid .chip.treatment::after { content:attr(data-tooltip); position:absolute; left:50%; bottom:calc(100% + 7px); transform:translate(-50%,4px); z-index:30; padding:6px 8px; border:1px solid var(--line); border-radius:6px; background:var(--panel); color:var(--ink); box-shadow:0 8px 22px rgba(15,23,42,.18); font-size:11px; font-weight:700; line-height:1; white-space:nowrap; opacity:0; visibility:hidden; pointer-events:none; transition:opacity .14s ease,transform .14s ease,visibility .14s ease; }
 #treatment-grid .chip.treatment::before { content:""; position:absolute; left:50%; bottom:calc(100% + 2px); z-index:31; width:8px; height:8px; border-right:1px solid var(--line); border-bottom:1px solid var(--line); background:var(--panel); transform:translateX(-50%) rotate(45deg); opacity:0; visibility:hidden; pointer-events:none; }

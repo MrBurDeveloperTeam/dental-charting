@@ -156,7 +156,7 @@ function applyAnatomyClip(core,n,v,entry){
 }
 function appendConditionBadges(holder,n,layer,view='front'){
   const entries=activeState()[n]?.entries||[];
-  const labels=entries.filter(entry=>treatmentFor(entry.treatment).mode==='label'&&(layer==='combined'||entryLayer(entry)===layer));
+  const labels=entries.filter(entry=>treatmentFor(entry.treatment).mode==='label'&&entry.treatment!=='spacing'&&(layer==='combined'||entryLayer(entry)===layer));
   if(!labels.length)return;
   const impacted=labels.find(entry=>entry.treatment==='impacted');
   if(impacted){
