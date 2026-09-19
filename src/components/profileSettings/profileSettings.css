@@ -12,7 +12,7 @@ body:has(.modal-backdrop.show) .profile-settings{z-index:90;pointer-events:none}
 .profile-settings-info p{display:flex;align-items:center;gap:8px;overflow:hidden;margin:12px 0 0;color:#738198;font-size:12px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}
 .profile-settings-info p svg{width:12px;height:12px;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .profile-settings-items{padding:9px 8px;border-bottom:1px solid #edf0f4}
-.profile-settings-items button{appearance:none;width:100%;min-height:62px;padding:8px 14px;display:grid;grid-template-columns:28px minmax(0,1fr) 12px;align-items:center;gap:12px;border:0;border-radius:14px;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.profile-settings-items button{appearance:none;width:100%;min-height:62px;padding:8px 14px;display:grid;grid-template-columns:minmax(0,1fr) 12px;align-items:center;gap:12px;border:0;border-radius:14px;background:transparent;color:inherit;text-align:left;cursor:pointer}
 .profile-settings-items button:hover{background:#f6f8fb}
 .profile-settings-items button:disabled,.profile-settings-menu footer button:disabled{cursor:wait;opacity:.65}
 .profile-settings-item-icon{width:28px;height:28px;display:grid;place-items:center;border-radius:10px;background:#e9f3fd;color:#20a2aa;font-style:normal}
