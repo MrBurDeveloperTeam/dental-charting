@@ -90,14 +90,15 @@ test('permanent successors in primary mode use the new anatomy',()=>{
   assert.equal(c.innerAnatomy(16).asset,c.assets['primary:16'].asset);
 });
 
-test('crown surfaces appear in root view without projecting occlusal or root-only findings',()=>{
+test('shared surfaces appear in both views without projecting occlusal or root-only findings',()=>{
   const c=setup();
-  c.treatmentFor=id=>({mode:'surface',views:id==='sealant'?['occ']:['occ','front']});
+  c.treatmentFor=id=>({mode:'surface',views:id==='sealant'?['occ']:id==='rootCaries'?['front']:['occ','front']});
   const entry={view:'occ',treatment:'caries',surfaces:['M','O','D']};
   assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'front',entry)),['M','D']);
   assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'occ',entry)),['M','O','D']);
   assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'front',{...entry,treatment:'sealant'})),[]);
-  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'occ',{...entry,view:'front'})),[]);
+  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'occ',{...entry,view:'front',surfaces:['M','D']})),['M','D']);
+  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'occ',{...entry,view:'front',treatment:'rootCaries'})),[]);
   c.draft={...entry,tooth:16};
   assert.deepEqual(Array.from(c.selectedSurfaces(16,'front')),['M','D']);
   assert.equal(c.selectedSurfaces(17,'front').size,0);
@@ -109,4 +110,42 @@ test('crown surfaces appear in root view without projecting occlusal or root-onl
     assert.equal(map.O,undefined);
     assert.equal(Object.keys(c.surfaceMap(16,'front',status,'planned')).length,0);
   }
+});
+
+
+test('root-view proximal bands are narrow and confined to the crown in every quadrant',()=>{
+  const c=setup();
+  for(const mode of ['permanent','primary']){
+    c.chartMode=mode;
+    for(const quadrant of mode==='permanent'?[1,2,3,4]:[5,6,7,8]){
+      for(let position=1;position<=(mode==='permanent'?8:5);position++){
+        const n=quadrant*10+position,w=c.toothW(n),h=c.toothH(n);
+        for(const region of c.surfaceDefs(n,'front')){
+          const values=region.path.match(/[0-9.]+/g).map(Number);
+          assert.ok(values[1]>=0&&values[3]<=h*.43+.00001,`${n} ${region.key} stays within crown`);
+          if(['M','D'].includes(region.key))assert.ok(values[2]-values[0]<=w*.17,`${n} proximal band is thin`);
+        }
+      }
+    }
+  }
+});
+
+test('permanent and primary charts swap counterparts independently and round-trip',()=>{
+  const c=setup();
+  vm.runInContext(app.slice(0,app.indexOf('const STORAGE_PATIENT_KEY')),c);
+  for(const [permanent,primary] of [[11,51],[24,64],[35,75],[42,82]]){
+    c.chartMode='permanent';
+    assert.equal(c.swapPrimarySlot(permanent),primary);
+    assert.ok(c.activeOrder().includes(primary));
+    assert.ok(c.innerAnatomy(primary).asset.includes('/primary/'));
+    c.chartMode='primary';
+    assert.ok(c.activeOrder().includes(primary));
+    assert.equal(c.swapPrimarySlot(primary),permanent);
+    assert.equal(c.swapPrimarySlot(permanent),primary);
+    c.chartMode='permanent';
+    assert.equal(c.swapPrimarySlot(primary),permanent);
+    assert.ok(c.activeOrder().includes(permanent));
+  }
+  assert.equal(c.swapPrimarySlot(16),null);
+  assert.equal(c.swapPrimarySlot(18),null);
 });
