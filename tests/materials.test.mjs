@@ -54,11 +54,11 @@ test('condition choices render before restoration choices',()=>{
  const c=setup();
  assert.deepEqual(Array.from(vm.runInContext('CATEGORIES.map(category=>category.id)',c)),['condition','restoration','procedure','prosthetic']);
 });
-test('crowns and retained roots are complementary in both views and arches',()=>{
+test('crowns retain full anatomy while retained roots remain clipped in both views and arches',()=>{
  const c=setup();for(const n of [11,24,26,31,44,46])for(const v of ['front','occ']){
  const crown={style:{},insertAdjacentHTML:()=>{}},root={style:{},insertAdjacentHTML:()=>{}};
  c.applyAnatomyClip(crown,n,v,{treatment:'crown'});c.applyAnatomyClip(root,n,v,{treatment:'retainedRoot'});
- assert.ok(crown.style.clipPath);assert.ok(root.style.clipPath);assert.notEqual(crown.style.clipPath,root.style.clipPath);
+ assert.equal(crown.style.clipPath,undefined);assert.ok(root.style.clipPath);
  const bounds=c.crownBounds(n,v);assert.ok(bounds.end-bounds.start>0);assert.ok(bounds.end-bounds.start<bounds.height);
  }
 });
