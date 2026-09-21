@@ -154,6 +154,11 @@ function applyAnatomyClip(core,n,v,entry){
     core.insertAdjacentHTML('beforeend','<svg class="surface-svg pfm-line" width="'+b.width+'" height="'+b.height+'" viewBox="0 0 '+b.width+' '+b.height+'"><path d="M3 '+y+' Q'+b.width/2+' '+(y+2)+' '+(b.width-3)+' '+y+'" fill="none" stroke="#151515" stroke-width="2.6"/></svg>');
   }
 }
+function perioPocketOverlaySVG(n,view='front'){
+  if(view!=='front')return '';
+  const b=crownBounds(n,view),w=b.width,y=b.end;
+  return `<svg class="surface-svg perio-pocket-overlay" width="${w}" height="${b.height}" viewBox="0 0 ${w} ${b.height}" role="img" aria-label="Perio Pocket"><title>Perio Pocket</title><g transform="translate(0 ${y}) scale(${w/40})"><path d="M4 -5 Q12 1 21 -3 Q28 -8 34 -5 L33 5 Q28 14 20 9 Q10 9 5 4Z" fill="#fa7d86" fill-opacity=".78" stroke="#e86572" stroke-width="1"/><path d="M27 -4 Q26 5 29 7 Q33 4 34 -6" fill="#e84f62" fill-opacity=".85"/><path d="M29 5 L38 -29 L46 -28" fill="none" stroke="#696d73" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 5 L38 -29 L46 -28" fill="none" stroke="#b8bbc0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 -3 L33 -2 M33 -10 L35 -9 M35 -17 L37 -16" stroke="#50545a" stroke-width="2"/></g></svg>`;
+}
 function appendConditionBadges(holder,n,layer,view='front'){
   const entries=activeState()[n]?.entries||[];
   const labels=entries.filter(entry=>treatmentFor(entry.treatment).mode==='label'&&entry.treatment!=='spacing'&&(layer==='combined'||entryLayer(entry)===layer));
@@ -166,7 +171,8 @@ function appendConditionBadges(holder,n,layer,view='front'){
     mark.title=`Impacted · ${statusLabel(impacted.status)}`;
     holder.querySelector('.tooth-art')?.append(mark);
   }
-  const externalLabels=view==='front'?labels.filter(entry=>entry.treatment!=='impacted'):[];
+  if(view==='front'&&labels.some(entry=>entry.treatment==='perioPocket'))holder.querySelector('.art-core')?.insertAdjacentHTML('beforeend',perioPocketOverlaySVG(n,view));
+  const externalLabels=view==='front'?labels.filter(entry=>!['impacted','perioPocket'].includes(entry.treatment)):[];
   if(!externalLabels.length)return;
   const wrap=document.createElement('div');wrap.className='condition-badges';
   for(const entry of externalLabels){const badge=document.createElement('span');badge.className=`condition-badge badge-${entry.treatment}${entry.status==='planned'?' planned':''}`;badge.textContent=treatmentFor(entry.treatment).badge||treatmentFor(entry.treatment).label;badge.title=`${treatmentFor(entry.treatment).label} · ${statusLabel(entry.status)}`;wrap.append(badge);}

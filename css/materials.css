@@ -36,6 +36,8 @@
 .condition-badge { border-radius:4px; padding:2px 4px; font:700 9px/1.2 Inter,sans-serif; background:#fde68a; color:#422006; border:1px solid #fbbf24; }
 .condition-badge.badge-m1,.condition-badge.badge-m2,.condition-badge.badge-m3 { background:#fecdd3; color:#881337; border-color:#fb7185; }
 .condition-badge.planned { border-style:solid; }
+.perio-pocket-overlay { overflow:visible; pointer-events:none; z-index:8; }
+.art-core.front .perio-pocket-overlay path[fill="none"] { opacity:1!important; stroke-width:4px!important; }
 .mini-condition-badge { position:absolute; top:8px; left:50%; z-index:7; transform:translateX(-50%); pointer-events:none; }
 .impacted-tooth-label { 
   position:absolute; 
@@ -125,3 +127,5 @@
 .teeth-row > .tooth:has(.partial-denture-overlay) { z-index:11; }
 #split-stage .teeth-row > .tooth:has(.partial-denture-overlay):hover { z-index:12; }
 .mini-bridge-tooth:has(.partial-denture-overlay) { z-index:1; }
+
+.art-core.front .perio-pocket-overlay path[fill="none"] + path[fill="none"] { stroke-width:2px!important; }
