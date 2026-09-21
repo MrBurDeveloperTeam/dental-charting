@@ -76,8 +76,8 @@
   .entries-panel>.entries-head{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important;min-height:96px!important;padding:18px 28px!important}
   .entries-panel>.entries-list{padding:18px 28px 22px!important}
   .entry-row{grid-template-columns:minmax(0,1fr)!important;gap:0!important;padding:0!important;break-inside:avoid;page-break-inside:avoid}
-  .entry-open{display:grid!important;grid-template-columns:52px minmax(0,1fr)!important;gap:12px!important;width:100%!important;padding:10px 12px!important}
-  .entry-preview{width:52px!important;height:40px!important}
+  .entry-open{display:grid!important;grid-template-columns:68px minmax(0,1fr)!important;gap:12px!important;width:100%!important;padding:10px 12px!important}
+  .entry-preview{width:68px!important;height:40px!important}
   .entry-text{display:grid!important;grid-template-columns:minmax(170px,1.15fr) minmax(180px,1fr)!important;grid-template-areas:"title meta" "note note"!important;column-gap:16px!important;row-gap:5px!important;width:100%!important;min-width:0!important;white-space:normal!important}
   .entry-title,.entry-meta,.entry-note{font-size:12px!important;line-height:1.45!important;min-width:0!important;white-space:normal!important;word-break:normal!important;overflow-wrap:break-word!important}
   .entry-remove{display:none!important}
@@ -97,7 +97,11 @@
   .chart-stage svg [fill^="url(#sg"]{display:none!important}
   .chart-stage svg [fill="#d7ae80"],.chart-stage svg [fill="#d8b28b"]{display:none!important}
   .chart-stage svg [stroke^="url(#gg"]{stroke:#c6beb2!important;opacity:.32!important}
-  .chart-stage .surface-region{stroke-width:1.1!important}
+  /* Interactive selection outlines and SVG mask borders are not PDF content. */
+  .chart-stage .surface-region{display:none!important}
+  .chart-stage .bridge-tooth-overlay .prosthetic-outline{display:none!important}
+  .chart-stage .spacing-marker{filter:none!important}
+  .chart-stage .spacing-preview{display:none!important}
   .print-patient-card,.print-note-card{display:block}
   .print-note-card{background:#fff!important}
 

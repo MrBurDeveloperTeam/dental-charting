@@ -1177,7 +1177,7 @@ function wholeStatusOverlaySVG(n, v, treatment, status, entry = draft, colorTrea
 
     return `
       <svg
-        class="surface-svg prosthetic-tooth-overlay${planned ? " planned-prosthetic-overlay" : ""}"
+        class="surface-svg prosthetic-tooth-overlay${treatment === "bridge" ? " bridge-tooth-overlay" : ""}${planned ? " planned-prosthetic-overlay" : ""}"
         width="${dims.width}"
         height="${dims.height}"
         viewBox="0 0 ${dims.width} ${dims.height}"
@@ -1197,7 +1197,7 @@ function wholeStatusOverlaySVG(n, v, treatment, status, entry = draft, colorTrea
           </pattern>
         </defs>
         <g clip-path="url(#${regionId})">${paths}</g>
-        <rect x="-2" y="-2" width="${dims.width + 4}" height="${dims.height + 4}" fill="${review ? `url(#${dashPatternId})` : stroke}" mask="url(#${outlineId})"></rect>
+        <rect class="prosthetic-outline" x="-2" y="-2" width="${dims.width + 4}" height="${dims.height + 4}" fill="${review ? `url(#${dashPatternId})` : stroke}" mask="url(#${outlineId})"></rect>
       </svg>
     `;
   }
@@ -1360,14 +1360,14 @@ function appendSpacingMarkers(container,list,view,layer){
     gaps.add(index);
     if(view==="numbers")return;
     const marker=document.createElement("span");marker.className=`spacing-marker${preview&&!saved?" spacing-preview":""}`;marker.setAttribute("aria-hidden","true");
-    marker.innerHTML='<i></i><i></i>';
+    marker.innerHTML='<svg viewBox="0 0 8 22" width="8" height="22" aria-hidden="true"><path d="M2 3V19 M6 3V19" fill="none" stroke="#55a8e8" stroke-width="1.5" stroke-linecap="round"/></svg>';
     teeth[index].appendChild(marker);
   });
   // Move each segment of the arch together: opening a gap must never
   // shrink its teeth or push them into their other neighbours.
   let offset=-gaps.size/2;
   teeth.forEach((tooth,index)=>{
-    tooth.style.translate=`calc(var(--spacing-gap, 8px) * ${offset}) 0`;
+    tooth.style.translate=`calc(var(--spacing-gap, 9px) * ${offset}) 0`;
     if(gaps.has(index))offset+=1;
   });
 }
@@ -1641,6 +1641,13 @@ function renderBridgeConnectors(){
 }
 window.addEventListener("resize",scheduleBridgeConnectors);
 window.addEventListener("beforeprint",renderBridgeConnectors);
+// Print media can change geometry after beforeprint in browser PDF previews.
+window.matchMedia('print').addEventListener('change',()=>{
+  positionSpacingMarkers();
+  scheduleBridgeConnectors();
+});
+const spacingLayoutObserver=new ResizeObserver(()=>scheduleBridgeConnectors());
+document.querySelectorAll('#split-stage .teeth-row').forEach(row=>spacingLayoutObserver.observe(row));
 window.addEventListener("afterprint",scheduleBridgeConnectors);
 
 // Keep desktop selection controls first inside the form scroller; restore original
