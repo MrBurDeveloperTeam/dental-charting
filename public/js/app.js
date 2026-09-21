@@ -107,7 +107,7 @@ document.getElementById("delete-entry-close")?.addEventListener("click",closeDel
 document.getElementById("delete-entry-cancel")?.addEventListener("click",closeDeleteEntryModal);
 document.getElementById("delete-entry-confirm")?.addEventListener("click",()=>{const action=pendingDeleteAction;closeDeleteEntryModal();action?.()});
 deleteEntryModal?.addEventListener("click",e=>{if(e.target===deleteEntryModal)closeDeleteEntryModal()});
-document.addEventListener("click",e=>{const button=e.target.closest?.(".entry-remove");if(!button)return;const rows=[...document.querySelectorAll(".entry-row")],index=rows.indexOf(button.closest(".entry-row")),entry=flatEntries()[index];if(!entry)return;e.preventDefault();e.stopPropagation();openDeleteEntryModal(`Delete the entry for tooth ${entry.tooth}? This cannot be undone.`,()=>removeEntry(entry.tooth,entry.id))},true);
+document.addEventListener("click",e=>{const button=e.target.closest?.(".entry-remove");if(!button)return;const rows=[...document.querySelectorAll(".entry-row")],index=rows.indexOf(button.closest(".entry-row")),entry=flatEntries().find(item=>item.id===button.closest(".entry-row")?.dataset.entryId);if(!entry)return;e.preventDefault();e.stopPropagation();openDeleteEntryModal(`Delete the entry for tooth ${entry.tooth}? This cannot be undone.`,()=>removeEntry(entry.tooth,entry.id))},true);
 els.noteInput.addEventListener("input",e=>{draft.note=e.target.value;renderSidebar()}); els.saveBtn.addEventListener("click",saveDraft); els.resetBtn.addEventListener("click",resetDraft); els.downloadPdfBtn.addEventListener("click",downloadPdf); els.multiToggleBtn.addEventListener("click",toggleMultiMode); if(els.patientModal&&els.patientForm){els.patientTrigger.addEventListener("click",openPatientModal); els.patientCloseBtn.addEventListener("click",closePatientModal); els.patientCancelBtn.addEventListener("click",closePatientModal); els.patientClearBtn.addEventListener("click",clearPatientForm); els.patientModal.addEventListener("click",e=>{if(e.target===els.patientModal) closePatientModal()}); els.patientForm.addEventListener("submit",savePatientFromForm)} els.dateTrigger.addEventListener("click",openDateModal); els.dateCloseBtn.addEventListener("click",closeDateModal); els.dateCancelBtn.addEventListener("click",closeDateModal); els.dateTodayBtn.addEventListener("click",setVisitToday); els.dateModal.addEventListener("click",e=>{if(e.target===els.dateModal) closeDateModal()}); els.dateForm.addEventListener("submit",saveVisitFromForm);
 
 const finishVisitModal=document.getElementById("finish-visit-modal");
@@ -126,7 +126,7 @@ savedEntriesToggle?.addEventListener("click",()=>{
   savedEntriesToggle.title=collapsed?"Open Saved Entries":"Minimize Saved Entries";
 });
 els.entriesList.addEventListener("mouseover",e=>{const entry=e.target.closest?.(".entry-open");if(entry&&!entry.title)entry.title="Click to edit this saved entry"});
-document.getElementById("entries-delete-selected")?.addEventListener("click",()=>{const ids=[...selectedEntryIds];if(!ids.length)return;openDeleteEntryModal(`Delete ${ids.length} selected entr${ids.length===1?"y":"ies"}? Any selected bridge is deleted as a whole span. This cannot be undone.`,()=>removeSelectedEntries(ids))});
+document.getElementById("entries-delete-selected")?.addEventListener("click",()=>{const ids=[...selectedEntryIds];if(!ids.length)return;openDeleteEntryModal(`Delete ${savedEntryGroups(flatEntries().filter(entry=>ids.includes(entry.id))).length} selected entries? Grouped treatments are deleted together. This cannot be undone.`,()=>removeSelectedEntries(ids))});
 treatmentManagerEls.openBtn.addEventListener("click",openMaterialManager); treatmentManagerEls.closeBtn.addEventListener("click",closeMaterialManager); treatmentManagerEls.cancelBtn.addEventListener("click",closeMaterialManager); treatmentManagerEls.saveBtn.addEventListener("click",saveMaterialManager); treatmentManagerEls.addForm.addEventListener("submit",addMaterial);    treatmentManagerEls.modal.addEventListener("click",e=>{if(e.target===treatmentManagerEls.modal) closeMaterialManager()});
 mobileToothEls.prev.addEventListener("click",()=>navigateMobileTooth(-1)); mobileToothEls.next.addEventListener("click",()=>navigateMobileTooth(1)); mobileToothEls.optionalMolar.addEventListener("click",toggleMobileOptionalMolar); mobileToothEls.close.addEventListener("click",closeMobileToothModal); mobileToothEls.bottomClose.addEventListener("click",closeMobileToothModal); mobileToothEls.done.addEventListener("click",finishMobileToothSelection); mobileToothEls.modal.addEventListener("click",e=>{if(e.target===mobileToothEls.modal) closeMobileToothModal()});
 mobileEntryEls.trigger.addEventListener("click",openMobileEntryWizard); mobileEntryEls.close.addEventListener("click",closeMobileEntryWizard); mobileEntryEls.back.addEventListener("click",()=>moveMobileEntryStep(-1)); mobileEntryEls.next.addEventListener("click",()=>moveMobileEntryStep(1)); mobileEntryEls.done.addEventListener("click",completeMobileEntryWizard); mobileEntryEls.modal.addEventListener("click",e=>{if(e.target===mobileEntryEls.modal)closeMobileEntryWizard()});
@@ -1460,20 +1460,32 @@ function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=
 function renderPreview(){const t=treatmentFor(draft.treatment),surfaceText=t.mode==="surface"?draft.surfaces.join(""):(t.mode==="root"?"Root":"Whole tooth"),status=(STATUSES.find(i=>i.id===draft.status)?.label||"Legacy review"),targetText=selection.multi&&selection.teeth.length>1?`${selection.teeth.length} teeth`: `Tooth ${draft.tooth}`; els.previewBox.innerHTML=`<strong>${t.label}</strong><br>${targetText} · ${draft.view==="occ"?"Crown + inner view":"Root view"} · ${surfaceText}<br>Status: ${status}`}
 const renderSingleToothMiniPreview=renderMiniPreview;
 renderMiniPreview=function(){if(draft.treatment==="partialDenture"){els.miniPreview.classList.remove("empty");renderPartialDentureMiniPreview();return}renderSingleToothMiniPreview()};
-function createEntryRow(entry){
-  const row=document.createElement("div");row.className="entry-row";
-  const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.className="entry-checkbox";checkbox.checked=selectedEntryIds.has(entry.id);checkbox.setAttribute("aria-label",`Select entry for tooth ${entry.tooth}`);checkbox.addEventListener("change",()=>{if(checkbox.checked)selectedEntryIds.add(entry.id);else selectedEntryIds.delete(entry.id);renderEntries()});
-  const open=document.createElement("button");open.type="button";open.className="entry-open";open.innerHTML=`<div class="entry-preview">${renderEntryPreview(entry)}</div><div class="entry-text"><div class="entry-title">Tooth ${entry.tooth} · ${escapeChartText(treatmentFor(entry.treatment).label)}${entry.material?` · ${escapeChartText(materialName(entry.material))}`:""}</div><div class="entry-meta">${statusLabel(entry.status)} · ${entrySurfaceLabel(entry)}</div><div class="entry-note">${entry.note?`Note: ${escapeChartText(entry.note)}`:"Note: —"}</div></div>`;open.setAttribute("aria-label",`Edit saved entry for tooth ${entry.tooth}`);open.addEventListener("click",()=>openEntry(entry.tooth,entry.id));
-  const remove=document.createElement("button");remove.type="button";remove.className="entry-remove";remove.innerHTML='<span class="entry-remove-text">Remove</span><svg class="entry-remove-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z" fill="currentColor"/></svg>';remove.setAttribute("aria-label",`Remove saved entry for tooth ${entry.tooth}`);remove.addEventListener("click",()=>{if(window.confirm(`Remove the entry for tooth ${entry.tooth}?`))removeEntry(entry.tooth,entry.id)});
+function savedEntryGroups(items){
+  const groups=[],byKey=new Map();
+  for(const entry of items){
+    const key=entry.bridgeId&&['bridge','spacing','partialDenture'].includes(entry.treatment)?JSON.stringify([entry.bridgeId,entry.treatment,entry.status,entry.layer]):null;
+    if(key&&byKey.has(key)){byKey.get(key).push(entry);continue;}
+    const members=[entry];groups.push(members);if(key)byKey.set(key,members);
+  }
+  return groups;
+}
+function createEntryRow(entry,members=[entry]){
+  const toothLabel=[...new Set(members.map(item=>item.tooth))].sort((a,b)=>a-b).join(', ');
+  const notes=[...new Set(members.map(item=>item.note).filter(Boolean))].join('; ');
+  const row=document.createElement("div");row.className="entry-row";row.dataset.entryId=entry.id;
+  const checkbox=document.createElement("input");checkbox.type="checkbox";checkbox.className="entry-checkbox";checkbox.checked=members.every(item=>selectedEntryIds.has(item.id));checkbox.indeterminate=!checkbox.checked&&members.some(item=>selectedEntryIds.has(item.id));checkbox.setAttribute("aria-label",`Select entry for tooth ${toothLabel}`);checkbox.addEventListener("change",()=>{members.forEach(item=>{if(checkbox.checked)selectedEntryIds.add(item.id);else selectedEntryIds.delete(item.id)});renderEntries()});
+  const open=document.createElement("button");open.type="button";open.className="entry-open";open.innerHTML=`<div class="entry-preview">${renderEntryPreview(entry)}</div><div class="entry-text"><div class="entry-title">Tooth ${toothLabel} · ${escapeChartText(treatmentFor(entry.treatment).label)}${entry.material?` · ${escapeChartText(materialName(entry.material))}`:""}</div><div class="entry-meta">${statusLabel(entry.status)} · ${entrySurfaceLabel(entry)}</div><div class="entry-note">${notes?`Note: ${escapeChartText(notes)}`:"Note: —"}</div></div>`;open.setAttribute("aria-label",`Edit saved entry for tooth ${toothLabel}`);open.addEventListener("click",()=>openEntry(entry.tooth,entry.id));
+  const remove=document.createElement("button");remove.type="button";remove.className="entry-remove";remove.innerHTML='<span class="entry-remove-text">Remove</span><svg class="entry-remove-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2Zm-3 6h12l-1 12H7L6 9Zm3 2v7h2v-7H9Zm4 0v7h2v-7h-2Z" fill="currentColor"/></svg>';remove.setAttribute("aria-label",`Remove saved entry for tooth ${toothLabel}`);remove.addEventListener("click",()=>{if(window.confirm(`Remove the entry for tooth ${toothLabel}?`))removeEntry(entry.tooth,entry.id)});
   row.append(checkbox,open,remove);return row;
 }
 function renderEntries(){
   const items=flatEntries(),validIds=new Set(items.map(item=>item.id));
   [...selectedEntryIds].forEach(id=>{if(!validIds.has(id))selectedEntryIds.delete(id)});
-  els.entriesCount.textContent=`${items.length} item${items.length===1?"":"s"}`;
+  const groups=savedEntryGroups(items),selectedCount=groups.filter(members=>members.some(item=>selectedEntryIds.has(item.id))).length;
+  els.entriesCount.textContent=`${groups.length} item${groups.length===1?"":"s"}`;
   const selectAll=document.getElementById("entries-select-all"),deleteSelected=document.getElementById("entries-delete-selected");
   if(selectAll){selectAll.checked=items.length>0&&selectedEntryIds.size===items.length;selectAll.indeterminate=selectedEntryIds.size>0&&selectedEntryIds.size<items.length;selectAll.disabled=!items.length}
-  if(deleteSelected){deleteSelected.disabled=!selectedEntryIds.size;deleteSelected.textContent=selectedEntryIds.size?`Delete selected (${selectedEntryIds.size})`:"Delete selected"}
+  if(deleteSelected){deleteSelected.disabled=!selectedEntryIds.size;deleteSelected.textContent=selectedEntryIds.size?`Delete selected (${selectedCount})`:"Delete selected"}
   els.entriesList.innerHTML="";
   if(!items.length){
     const message=chartEntriesLoadState==="loading"
@@ -1484,10 +1496,10 @@ function renderEntries(){
     els.entriesList.innerHTML=`<div class="entry-empty" role="status">${message}</div>`;return
   }
   [{id:"existing",label:"Existing"},{id:"planned",label:"Planning"},{id:"watch",label:"Review"}].forEach(group=>{
-    const entries=items.filter(entry=>entry.status===group.id);if(!entries.length)return;
+    const entries=groups.filter(members=>members[0].status===group.id);if(!entries.length)return;
     const section=document.createElement("section");section.className=`entries-status-section entries-status-${group.id}`;
     const heading=document.createElement("h4");heading.className="entries-status-heading";heading.innerHTML=`<span>${group.label}</span><small>${entries.length}</small>`;
-    section.appendChild(heading);entries.forEach(entry=>section.appendChild(createEntryRow(entry)));els.entriesList.appendChild(section);
+    section.appendChild(heading);entries.forEach(members=>section.appendChild(createEntryRow(members[0],members)));els.entriesList.appendChild(section);
   });
 }
 function renderAll(){syncDateField("dob"); syncDateField("visit"); updateChartPrerequisiteState(); renderDentitionSwitch(); renderPatientHeader(); renderVisitHeader(); renderPrintSections(); renderChart(); renderEntries(); renderSidebar(); renderMobileToothModal(); renderMobileEntryWizard()}

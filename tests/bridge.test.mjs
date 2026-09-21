@@ -167,3 +167,15 @@ test('spacing markers center between rendered tooth edges at different widths an
    assert.ok(Math.abs(parseFloat(marker.style.left)-60)<.001);
  }
 });
+
+test('saved summary groups treatment spans and keeps overlapping spacing pairs separate',()=>{
+ const {context:c}=setup();const fn=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='savedEntryGroups');vm.runInContext(fn.getText(ast),c);
+ const items=[
+ ...[36,37,38].map(tooth=>({tooth,treatment:'bridge',bridgeId:'b',status:'existing'})),
+ ...[25,26].map(tooth=>({tooth,treatment:'spacing',bridgeId:'s1',status:'existing'})),
+ ...[26,27].map(tooth=>({tooth,treatment:'spacing',bridgeId:'s2',status:'existing'})),
+ ...[44,45].map(tooth=>({tooth,treatment:'partialDenture',bridgeId:'p',status:'planned'})),
+ {tooth:11,treatment:'caries'},{tooth:12,treatment:'caries'}];
+ const groups=c.savedEntryGroups(items);assert.deepEqual(Array.from(groups,g=>g.length),[3,2,2,2,1,1]);
+ assert.equal(c.savedEntryGroups([...items,{tooth:36,treatment:'bridge',bridgeId:'b',status:'planned'}]).length,7);
+});
