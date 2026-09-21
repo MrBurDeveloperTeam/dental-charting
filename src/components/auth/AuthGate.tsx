@@ -34,6 +34,16 @@ export function AuthGate({ children, authenticatedChrome }: { children: ReactNod
       }
 
       const data = await response.json();
+      if (data?.loggedIn === true) {
+      const url = new URL(window.location.href);
+        url.searchParams.delete("sso_token");
+
+        window.history.replaceState(
+          window.history.state,
+          "",
+          url.pathname + url.search + url.hash
+        );
+      }
       setAuthState(data?.loggedIn === true ? "authenticated" : "unauthenticated");
     } catch {
       setAuthState("error");
