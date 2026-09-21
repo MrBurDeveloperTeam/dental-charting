@@ -16,13 +16,13 @@ function setup() {
     isGhostPrimarySlot:()=>false, activeState:()=>state,
     flatEntries:()=>Object.values(state).flatMap(t=>t.entries),
     selection:{multi:false,teeth:[24]}, draft:{tooth:24,treatment:'composite',category:'restoration',view:'occ',status:'existing',layer:'existing',surfaces:[],note:''},
-    editingEntry:null, chartMode:'permanent', crypto:{randomUUID:()=> 'test-bridge'}, uid:()=>String(Math.random()),
+    editingEntry:null, chartMode:'permanent', crypto:{randomUUID:()=> String(Math.random())}, uid:()=>String(Math.random()),
     materialForTreatment:e=>e.material||null,materialSelectionError:()=>"",showChartValidation:message=>events.push({type:"validation",message}),canStartCharting:()=>true, normalizeDraft:()=>{}, renderAll:()=>{},
     treatmentFor:id=>({category:['bridge','partialDenture'].includes(id)?'prosthetic':id==='spacing'?'condition':'restoration'}),
     document:{dispatchEvent:e=>events.push(e)},CustomEvent:class {constructor(type,options){this.type=type;this.detail=options.detail}},
     window:{alert:message=>events.push({type:'alert',message})},els:{noteInput:{value:''}},selectedEntryIds:new Set()
   });
-  const names=['bridgeSelectionError','bridgeSpan','isGroupedProsthetic','spacingSelectionError','partialDentureSelectionError','groupedSelectionError','groupedTargets','pickTreatment','toggleMultiMode','saveDraft','removeSelectedEntries'];
+  const names=['bridgeSelectionError','bridgeSpan','isGroupedProsthetic','spacingPairs','spacingSelectionError','partialDentureSelectionError','groupedSelectionError','groupedTargets','pickTreatment','toggleMultiMode','saveDraft','removeSelectedEntries'];
   for(const statement of ast.statements)if(ts.isFunctionDeclaration(statement)&&names.includes(statement.name?.text))vm.runInContext(statement.getText(ast),context);
   return {context,state,events};
 }
@@ -87,7 +87,7 @@ test('partial denture rejects mixed arches and non-consecutive replacement teeth
  assert.notEqual(c.partialDentureSelectionError([14,16]),'');
  assert.notEqual(c.partialDentureSelectionError([14,44]),'');
 });
-test('spacing requires exactly two neighbouring teeth in one arch',()=>{
+test('spacing rejects isolated and non-neighbouring teeth',()=>{
  const {context:c}=setup();
  assert.equal(c.spacingSelectionError([11,21]),'');
  assert.equal(c.spacingSelectionError([24,25]),'');
@@ -115,7 +115,7 @@ for(const view of ['front','occ','numbers'])test(`spacing opens cumulative gaps 
  vm.runInContext(fn.getText(ast),c);
  const children=list.map(()=>({style:{},markers:[],appendChild(marker){this.markers.push(marker)}}));
  c.appendSpacingMarkers({children},list,view,'existing');
- assert.deepEqual(children.map(t=>t.style.translate),[-1,0,1,1,1].map(n=>`calc(var(--spacing-gap, 18px) * ${n}) 0`));
+ assert.deepEqual(children.map(t=>t.style.translate),[-1,0,1,1,1].map(n=>`calc(var(--spacing-gap, 8px) * ${n}) 0`));
  assert.deepEqual(children.map(t=>t.markers.length),view==='numbers'?[0,0,0,0,0]:[1,1,0,0,0]);
  assert.ok(children.every(t=>t.style.scale===undefined));
  // A draft gap works before saving, and disappears when the draft is cleared.
@@ -123,8 +123,47 @@ for(const view of ['front','occ','numbers'])test(`spacing opens cumulative gaps 
  c.draft.treatment='spacing';c.selection.teeth=[17,16];
  const preview=list.map(()=>({style:{},appendChild(){}}));
  c.appendSpacingMarkers({children:preview},list,view,'existing');
- assert.deepEqual(preview.map(t=>t.style.translate),[-.5,-.5,.5,.5,.5].map(n=>`calc(var(--spacing-gap, 18px) * ${n}) 0`));
+ assert.deepEqual(preview.map(t=>t.style.translate),[-.5,-.5,.5,.5,.5].map(n=>`calc(var(--spacing-gap, 8px) * ${n}) 0`));
  c.draft.treatment='composite';
  c.appendSpacingMarkers({children:preview},list,view,'existing');
- assert.ok(preview.every(t=>t.style.translate==='calc(var(--spacing-gap, 18px) * 0) 0'));
+ assert.ok(preview.every(t=>t.style.translate==='calc(var(--spacing-gap, 8px) * 0) 0'));
+});
+
+ test('spacing batch saves independent overlapping gaps',()=>{
+ const {context:c,state}=setup();c.pickTreatment('spacing');c.selection.teeth=[25,26,27];c.saveDraft();
+ assert.equal(state[26].entries.length,2);
+ assert.equal(state[25].entries[0].bridgeId,state[26].entries[0].bridgeId);
+ assert.equal(state[27].entries[0].bridgeId,state[26].entries[1].bridgeId);
+ assert.notEqual(state[26].entries[0].bridgeId,state[26].entries[1].bridgeId);
+ });
+ test('spacing batch can exclude the gap between separate pairs',()=>{
+ const {context:c,state}=setup();c.pickTreatment('spacing');c.selection.teeth=[25,26,27,28];c.selection.spacingExcluded=['26-27'];c.saveDraft();
+ assert.equal(state[26].entries.length,1);assert.equal(state[27].entries.length,1);
+ assert.notEqual(state[26].entries[0].bridgeId,state[27].entries[0].bridgeId);
+ });
+
+test('editing one spacing pair preserves another pair sharing the tooth',()=>{
+ const {context:c,state}=setup();c.pickTreatment('spacing');
+ state[25].entries=[{id:'a25',tooth:25,treatment:'spacing',bridgeId:'a'}];
+ state[26].entries=[{id:'a26',tooth:26,treatment:'spacing',bridgeId:'a'},{id:'b26',tooth:26,treatment:'spacing',bridgeId:'b'}];
+ state[27].entries=[{id:'b27',tooth:27,treatment:'spacing',bridgeId:'b'}];
+ c.editingEntry={tooth:25,id:'a25',bridgeId:'a'};c.selection.teeth=[25,26];c.saveDraft();
+ assert.equal(state[26].entries.length,2);assert.ok(state[26].entries.some(e=>e.bridgeId==='b'));
+ assert.equal(state[27].entries[0].bridgeId,'b');assert.ok(!state[25].entries.some(e=>e.bridgeId==='a'));
+});
+test('spacing cannot save when all gap buttons are disabled',()=>{
+ const {context:c,state}=setup();c.pickTreatment('spacing');c.selection.teeth=[25,26];c.selection.spacingExcluded=['25-26'];
+ assert.notEqual(c.spacingSelectionError(c.selection.teeth),'');c.saveDraft();assert.equal(state[25].entries.length,0);
+});
+
+test('spacing markers center between rendered tooth edges at different widths and zoom levels',()=>{
+ const {context:c}=setup();
+ const fn=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='positionSpacingMarkers');vm.runInContext(fn.getText(ast),c);
+ for(const scale of [1,.6,1.5]){
+   const leftArt={getBoundingClientRect:()=>({right:140*scale,width:40*scale})};
+   const rightArt={getBoundingClientRect:()=>({left:160*scale,width:70*scale})};
+   const left={offsetWidth:60,getBoundingClientRect:()=>({left:90*scale,width:60*scale}),querySelector:()=>leftArt,nextElementSibling:{querySelector:()=>rightArt}};
+   const marker={parentElement:left,style:{}};c.document.querySelectorAll=()=>[marker];c.positionSpacingMarkers();
+   assert.ok(Math.abs(parseFloat(marker.style.left)-60)<.001);
+ }
 });

@@ -147,7 +147,7 @@ function anatomySVG(n,v,entry){
 function applyAnatomyClip(core,n,v,entry){
   if(!entry||!core)return;
   const b=crownBounds(n,v),start=b.start/b.height*100,end=b.end/b.height*100;
-  if(entry.treatment==='crown'||isPontic(entry,n))core.style.clipPath='inset('+start+'% 0 '+(100-end)+'% 0)';
+  if(isPontic(entry,n))core.style.clipPath='inset('+start+'% 0 '+(100-end)+'% 0)';
   if(entry.treatment==='retainedRoot')core.style.clipPath=b.start>0?'inset(0 0 '+(100-start)+'% 0)':'inset('+end+'% 0 0 0)';
   if(materialRecord(entry.material)?.code==='pfm'&&['crown','bridge','veneer'].includes(entry.treatment)){
     const y=b.start>0?b.start+2:b.end-3;
