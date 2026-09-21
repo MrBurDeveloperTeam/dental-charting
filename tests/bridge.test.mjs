@@ -115,7 +115,7 @@ for(const view of ['front','occ','numbers'])test(`spacing opens cumulative gaps 
  vm.runInContext(fn.getText(ast),c);
  const children=list.map(()=>({style:{},markers:[],appendChild(marker){this.markers.push(marker)}}));
  c.appendSpacingMarkers({children},list,view,'existing');
- assert.deepEqual(children.map(t=>t.style.translate),[-1,0,1,1,1].map(n=>`calc(var(--spacing-gap, 8px) * ${n}) 0`));
+ assert.deepEqual(children.map(t=>t.style.translate),[-1,0,1,1,1].map(n=>`calc(var(--spacing-gap, 9px) * ${n}) 0`));
  assert.deepEqual(children.map(t=>t.markers.length),view==='numbers'?[0,0,0,0,0]:[1,1,0,0,0]);
  assert.ok(children.every(t=>t.style.scale===undefined));
  // A draft gap works before saving, and disappears when the draft is cleared.
@@ -123,10 +123,10 @@ for(const view of ['front','occ','numbers'])test(`spacing opens cumulative gaps 
  c.draft.treatment='spacing';c.selection.teeth=[17,16];
  const preview=list.map(()=>({style:{},appendChild(){}}));
  c.appendSpacingMarkers({children:preview},list,view,'existing');
- assert.deepEqual(preview.map(t=>t.style.translate),[-.5,-.5,.5,.5,.5].map(n=>`calc(var(--spacing-gap, 8px) * ${n}) 0`));
+ assert.deepEqual(preview.map(t=>t.style.translate),[-.5,-.5,.5,.5,.5].map(n=>`calc(var(--spacing-gap, 9px) * ${n}) 0`));
  c.draft.treatment='composite';
  c.appendSpacingMarkers({children:preview},list,view,'existing');
- assert.ok(preview.every(t=>t.style.translate==='calc(var(--spacing-gap, 8px) * 0) 0'));
+ assert.ok(preview.every(t=>t.style.translate==='calc(var(--spacing-gap, 9px) * 0) 0'));
 });
 
  test('spacing batch saves independent overlapping gaps',()=>{

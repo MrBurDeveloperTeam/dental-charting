@@ -1489,3 +1489,9 @@ button.number:focus-visible {
   #split-stage .number {font-size:7px}
   #split-stage .arch-label-text,#split-stage .split-status-label {font-size:7px}
 }
+
+/* Reserve enough space for multi-tooth icons in every saved-entry row. */
+@media screen {
+  .entries-panel .entry-open { grid-template-columns:68px minmax(0,1fr); }
+  .entries-panel .entry-preview { width:68px; min-width:68px; height:40px; }
+}
