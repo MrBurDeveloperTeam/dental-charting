@@ -38,6 +38,7 @@ Object.assign(TREATMENTS, {
   crack:{label:'Crack',category:'condition',mode:'surface',views:['occ','front']},
   retainedRoot:{label:'Retained root',category:'condition',mode:'whole',views:['occ','front']},
   spacing:{label:'Spacing',category:'condition',mode:'label',views:['front'],icon:'spacing'},
+  perioPocket:{label:'Perio Pocket',category:'condition',mode:'label',views:['occ','front'],icon:'perioPocket',badge:'PP'},
   m1:{label:'M1',category:'condition',mode:'label',views:['occ','front'],badge:'m1'},
   m2:{label:'M2',category:'condition',mode:'label',views:['occ','front'],badge:'m2'},
   m3:{label:'M3',category:'condition',mode:'label',views:['occ','front'],badge:'m3'},
@@ -705,6 +706,7 @@ function treatmentHint(id){
     sealant:"occlusal seal",
     caries:"carious spot",
     rootCaries:"root lesion",
+    perioPocket:"periodontal pocket",
     fracture:"crack / fracture",
     missing:"missing tooth",
     rootCanal:"root canal",
@@ -724,6 +726,7 @@ function treatmentHelp(id){
     sealant:"Marks occlusal sealing only.",
     caries:"Marks the exact carious area.",
     rootCaries:"Use on root view for cervical/root caries.",
+    perioPocket:"Shows a gum pocket and periodontal probe on the selected tooth in root view.",
     fracture:"Marks the fractured area or surface.",
     missing:"Whole-tooth finding.",
     rootCanal:"Shows canal lines on root view only.",
@@ -739,6 +742,7 @@ function treatmentIconHTML(id){
 }
 function treatmentIconMarkup(icon,color){
   const svg=body=>`<svg viewBox="0 0 28 28" width="22" height="22" aria-hidden="true">${body}</svg>`;
+  if(icon==="perioPocket")return svg(`<g stroke="#123961" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20 Q2 15 6 15 H18 Q22 15 22 20 Q19 19 17 22 H7 Q5 19 2 20Z" fill="#ff919b" stroke-width=".9"/><path d="M4 10 C2 3 7 2 10 4 Q12 5.3 14 4 C19 1.5 22 5 20 11 L18 17 C17 22 17 25 15 25 Q13.8 25 13 20 Q12 15 11 20 Q10 25 8.5 25 C6.5 25 6 20 5.5 17Z" fill="#fffaf2" stroke-width="1.7"/><path d="M7 7 Q5.5 8 6.5 11" fill="none" stroke="#e5e6f0" stroke-width="1.7"/><path d="M18.4 16 L17.8 20" fill="none" stroke="#ed6575" stroke-width="2.3"/><path d="M18.6 18 L22 5.5 Q22.3 4.4 23.3 4.6 L26 5.2 Q27.4 5.5 26.9 6.6 Q26.7 7.2 25.9 7 L23.5 6.5 L19.8 18.3 Q19.3 19.4 18.6 18Z" fill="#dce3ea" stroke-width="1.1"/><path d="M20.5 11.5 L21.7 11.9 M19.9 13.7 L21.1 14.1" fill="none" stroke="#81909d" stroke-width="1.1"/></g>`);
   const tooth='<path d="M5 8 Q7 4 11 5 Q14 8 17 5 Q21 4 23 8 Q22 14 20 17 L18 25 Q16 27 15 21 Q14 17 13 21 Q12 27 10 25 L8 17 Q6 14 5 8Z" fill="#fffaf2" stroke="#20324d" stroke-width="1.7" stroke-linejoin="round"/>';
   if(icon==="canal")return svg(`${tooth}<path d="M9 7 Q14 11.5 19 7 Q18 12 17 17 L16.7 24 M9 7 Q10 12 11 17 L11.3 24" fill="none" stroke="#ef5b58" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>`);
   if(icon==="crown")return svg(`${tooth}<path d="M5.4 8 Q7 4.3 11 5 Q14 8 17 5 Q21 4.3 22.6 8 L21 14 Q17.5 16 14 15.5 Q10.5 16 7 14Z" fill="${color}" fill-opacity=".82" stroke="${color}" stroke-width="1.1"/>`);
@@ -1439,7 +1443,7 @@ function renderPartialDentureMiniPreview(){
   els.miniPreview.innerHTML=`<div class="mini-art mini-bridge-preview"><div class="mini-bridge-row" style="--bridge-count:${targets.length};--bridge-scale:${scale}">${targets.map(n=>{const entry={...draft,treatment:'partialDenture',bridgeRole:'pontic'};const modeClass=`front ${isUpper(n)?'upper':'lower'}`;return `<div class="mini-bridge-tooth" data-tooth="${n}"><div class="art-core ${modeClass}">${anatomySVG(n,'front',entry)}${wholeStatusOverlaySVG(n,'front','partialDenture',draft.status==='planned'?'planned':'existing',entry)}</div></div>`}).join('')}</div></div>`;
   els.miniPreview.querySelectorAll('.mini-bridge-tooth').forEach((node,index)=>applyAnatomyClip(node.querySelector('.art-core'),targets[index],'front',{...draft,treatment:'partialDenture',bridgeRole:'pontic'}));
 }
-function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=treatmentFor(draft.treatment),whole=t.mode==="whole",missing=draft.treatment==="missing"; if(draft.treatment==="bridge"){renderBridgeMiniPreview();return} if(missing){els.miniPreview.innerHTML=missingSVG(draft.tooth,draft.view); return} const baseSVG=anatomySVG(draft.tooth,draft.view,draft); let html=baseSVG; if(whole) html+=wholeStatusOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status==="planned"?"planned":draft.status==="watch"?"watch":"existing"); if(t.mode==="root") html+=rctOverlayHTML(draft.tooth); if(t.mode==="surface"){const map={}; draft.surfaces.forEach(s=>map[s]={...draft}); html+=renderSurfaceOverlay(draft.tooth,draft.view,{complete:draft.status==="existing"?map:{},planned:draft.status==="planned"?map:{},review:draft.status==="watch"?map:{},selected:new Set(),previewColor:null,preview:false,clipKey:"draft-mini"})} const modeClass=draft.view==="front"?`front ${isUpper(draft.tooth)?"upper":"lower"}`:"occ"; const reviewBadge=draft.status==="watch"?reviewBadgeHTML(draft.tooth,draft.view):""; const conditionBadge=t.mode==="label"?conditionBadgeHTML(draft,'mini-condition-badge'):""; els.miniPreview.innerHTML=`<div class="mini-art ${modeClass}"><div class="art-core ${modeClass}" style="transform:${miniPreviewTransform(draft.tooth,draft.view)}">${html}</div>${reviewBadge}${conditionBadge}</div>`; applyAnatomyClip(els.miniPreview.querySelector(".art-core"),draft.tooth,draft.view,draft)}
+function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=treatmentFor(draft.treatment),whole=t.mode==="whole",missing=draft.treatment==="missing"; if(draft.treatment==="bridge"){renderBridgeMiniPreview();return} if(missing){els.miniPreview.innerHTML=missingSVG(draft.tooth,draft.view); return} const baseSVG=anatomySVG(draft.tooth,draft.view,draft); let html=baseSVG; if(draft.treatment==="perioPocket")html+=perioPocketOverlaySVG(draft.tooth,draft.view); if(whole) html+=wholeStatusOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status==="planned"?"planned":draft.status==="watch"?"watch":"existing"); if(t.mode==="root") html+=rctOverlayHTML(draft.tooth); if(t.mode==="surface"){const map={}; draft.surfaces.forEach(s=>map[s]={...draft}); html+=renderSurfaceOverlay(draft.tooth,draft.view,{complete:draft.status==="existing"?map:{},planned:draft.status==="planned"?map:{},review:draft.status==="watch"?map:{},selected:new Set(),previewColor:null,preview:false,clipKey:"draft-mini"})} const modeClass=draft.view==="front"?`front ${isUpper(draft.tooth)?"upper":"lower"}`:"occ"; const reviewBadge=draft.status==="watch"?reviewBadgeHTML(draft.tooth,draft.view):""; const conditionBadge=t.mode==="label"&&!(draft.treatment==="perioPocket"&&draft.view==="front")?conditionBadgeHTML(draft,'mini-condition-badge'):""; els.miniPreview.innerHTML=`<div class="mini-art ${modeClass}"><div class="art-core ${modeClass}" style="transform:${miniPreviewTransform(draft.tooth,draft.view)}">${html}</div>${reviewBadge}${conditionBadge}</div>`; applyAnatomyClip(els.miniPreview.querySelector(".art-core"),draft.tooth,draft.view,draft)}
 function renderPreview(){const t=treatmentFor(draft.treatment),surfaceText=t.mode==="surface"?draft.surfaces.join(""):(t.mode==="root"?"Root":"Whole tooth"),status=(STATUSES.find(i=>i.id===draft.status)?.label||"Legacy review"),targetText=selection.multi&&selection.teeth.length>1?`${selection.teeth.length} teeth`: `Tooth ${draft.tooth}`; els.previewBox.innerHTML=`<strong>${t.label}</strong><br>${targetText} · ${draft.view==="occ"?"Crown + inner view":"Root view"} · ${surfaceText}<br>Status: ${status}`}
 const renderSingleToothMiniPreview=renderMiniPreview;
 renderMiniPreview=function(){if(draft.treatment==="partialDenture"){els.miniPreview.classList.remove("empty");renderPartialDentureMiniPreview();return}renderSingleToothMiniPreview()};
