@@ -6,6 +6,7 @@ import "@fontsource/inter/latin-600.css";
 import "@fontsource/inter/latin-700.css";
 import "@fontsource/inter/latin-800.css";
 import App from "./App";
+import { captureWorkspaceFromUrl } from "./services/workspaceContext";
 import { dentalPatients } from "./services/dentalPatients";
 import { dentalCharts } from "./services/dentalCharts";
 import { dentalMaterials } from "./services/dentalMaterials";
@@ -18,6 +19,7 @@ declare global {
   }
 }
 
+captureWorkspaceFromUrl();
 window.dentalPatients = dentalPatients;
 window.dentalCharts = dentalCharts;
 window.dentalMaterials = dentalMaterials;

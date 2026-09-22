@@ -1,4 +1,5 @@
 import { getSupabaseClient } from "../lib/supabaseClient";
+import { getWorkspaceSelection } from "./workspaceContext";
 
 type PatientInput = {
   name: unknown;
@@ -87,7 +88,7 @@ type ClinicSession = { userId: string; clinicId: string; expiresAt: number };
 let clinicSession: ClinicSession | null = null;
 let sessionPromise: Promise<ClinicSession> | null = null;
 
-async function establishClinicSession() {
+async function establishClinicSession(selection: ReturnType<typeof getWorkspaceSelection>) {
   const supabase = getSupabaseClient();
   const response = await fetch(exchangeEndpoint, {
     method: "GET",
@@ -112,33 +113,44 @@ async function establishClinicSession() {
   const userId = sessionData.user?.id;
   if (!userId) throw new Error("No authenticated Supabase user was returned.");
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("clinic_id")
-    .eq("user_id", userId)
-    .maybeSingle();
-  if (profileError) throw profileError;
-  if (!profile?.clinic_id) throw new Error("No clinic is assigned to this account.");
+  const contextResponse = await fetch(exchangeEndpoint.replace(/sso\/exchange$/, 'company/workspace-context'), {
+    method: 'GET', credentials: 'include',
+    headers: { Accept: 'application/json', Authorization: 'Bearer ' + exchange.access_token, ...selection.headers },
+  });
+  const context = await contextResponse.json().catch(() => null);
+  if (!contextResponse.ok || !context?.ok) throw new Error(context?.error || 'Unable to resolve the selected workspace.');
+  if (context.actorUserId !== userId || context.workspaceType !== selection.type ||
+      (selection.owner && context.workspaceUserId !== selection.owner)) {
+    throw new Error('The returned workspace does not match your selection. Reopen Dental Charting from Snabbb.');
+  }
+  if (!context.clinicId) throw new Error('No clinic is assigned to the selected workspace.');
 
   const lifetimeSeconds = Number(exchange.expires_in) || 3600;
   return {
     userId,
-    clinicId: profile.clinic_id as string,
+    clinicId: context.clinicId as string,
     expiresAt: Date.now() + Math.max(60, lifetimeSeconds - 60) * 1000,
   };
 }
 
+let sessionWorkspaceKey: string | null = null;
 export async function getClinicSession() {
+  const selection = getWorkspaceSelection();
+  if (sessionWorkspaceKey !== selection.key) {
+    sessionWorkspaceKey = selection.key;
+    clinicSession = null;
+    sessionPromise = null;
+  }
   if (clinicSession && clinicSession.expiresAt > Date.now()) return clinicSession;
   if (!sessionPromise) {
-    sessionPromise = establishClinicSession()
-      .then((session) => {
-        clinicSession = session;
-        return session;
-      })
-      .finally(() => {
-        sessionPromise = null;
-      });
+    const pending = establishClinicSession(selection).then((session) => {
+      if (getWorkspaceSelection().key !== selection.key) throw new Error('Workspace changed. Please reload Dental Charting.');
+      clinicSession = session;
+      return session;
+    }).finally(() => {
+      if (sessionPromise === pending) sessionPromise = null;
+    });
+    sessionPromise = pending;
   }
   return sessionPromise;
 }
