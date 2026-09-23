@@ -8,9 +8,10 @@ type ProfileUser = {
   partnerId?: string;
   email?: string;
   name?: string;
+  accountType?: "admin" | "user";
 };
 
-type Destination = "reward" | "channel" | "support" | "settings";
+type Destination = "reward" | "channel" | "dashboard" | "settings";
 
 function readUser(payload: unknown): ProfileUser {
   const data = payload as Record<string, any> | null;
@@ -21,12 +22,15 @@ function readUser(payload: unknown): ProfileUser {
     metadata.first_name ?? profileUser.first_name ?? user.first_name,
     metadata.last_name ?? profileUser.last_name ?? user.last_name,
   ].filter(Boolean).join(" ").trim();
+  const accountType = profileUser.account_type ?? user.account_type
+    ?? metadata.account_type ?? data?.account_type ?? data?.data?.account_type;
   return {
     id: profileUser.user_id ?? profileUser.id ?? user.id ?? user.user_id ?? user.supabase_user_id,
     partnerId: String(user.partner_id?.[0] ?? user.partner_id ?? profileUser.partner_id?.[0] ?? profileUser.partner_id ?? "") || undefined,
     email: user.email ?? profileUser.email,
     name: firstAndLastName || metadata.full_name || metadata.name
       || profileUser.full_name || profileUser.name || user.full_name || user.name,
+    accountType: accountType === "admin" ? "admin" : "user",
   };
 }
 
@@ -51,7 +55,7 @@ function Icon({ type }: { type: Destination | "logout" }) {
   const paths = {
     reward: <><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M16 15h2"/></>,
     channel: <><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m9 9 6 3-6 3Z"/></>,
-    support: <><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m6.4 6.4 3.5 3.5m4.2 4.2 3.5 3.5m0-11.2-3.5 3.5m-4.2 4.2-3.5 3.5"/></>,
+    dashboard: <><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="m6.4 6.4 3.5 3.5m4.2 4.2 3.5 3.5m0-11.2-3.5 3.5m-4.2 4.2-3.5 3.5"/></>,
     settings: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3V2.8h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z"/></>,
     logout: <><path d="M10 5H5v14h5M14 8l4 4-4 4M8 12h10"/></>,
   };
@@ -146,11 +150,9 @@ export function ProfileSettings() {
     if (busy) return;
     setBusy(destination);
     try {
-      if (destination === "support") {
-        const response = await fetch(`${SNABBB_APP_URL}/api/ticketing/sso`, { method: "POST", credentials: "include", headers: { Accept: "application/json" } });
-        const result = await response.json().catch(() => null);
-        if (!response.ok || !result?.redirectUrl) throw new Error();
-        window.location.assign(result.redirectUrl);
+      if (destination === "dashboard") {
+        const dashboardPath = user.accountType === "admin" ? "/admin/dashboard" : "/user/dashboard";
+        window.location.assign(`${SNABBB_APP_URL}${dashboardPath}`);
         return;
       }
       const app = destination === "reward" ? "reward" : destination === "channel" ? "e-learning" : "snabbb";
@@ -179,7 +181,11 @@ export function ProfileSettings() {
   const items: Array<{ type: Destination; title: string; subtitle: string }> = [
     { type: "reward", title: "Snabbb Credit", subtitle: credits },
     { type: "channel", title: "My Channel", subtitle: "Manage your channel" },
-    { type: "support", title: "Support Tickets", subtitle: "Create and track your support tickets" },
+    {
+      type: "dashboard",
+      title: user.accountType === "admin" ? "Admin Dashboard" : "User Dashboard",
+      subtitle: user.accountType === "admin" ? "Manage all support tickets" : "Create and track support tickets",
+    },
     { type: "settings", title: "Account Settings", subtitle: "Account & preferences" },
   ];
 
