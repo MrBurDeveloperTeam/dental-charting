@@ -183,7 +183,7 @@ export function ProfileSettings() {
     { type: "channel", title: "My Channel", subtitle: "Manage your channel" },
     {
       type: "dashboard",
-      title: user.accountType === "admin" ? "Admin Dashboard" : "User Dashboard",
+      title: user.accountType === "admin" ? "Support Tickets" : "Support Tickets",
       subtitle: user.accountType === "admin" ? "Manage all support tickets" : "Create and track support tickets",
     },
     { type: "settings", title: "Account Settings", subtitle: "Account & preferences" },
