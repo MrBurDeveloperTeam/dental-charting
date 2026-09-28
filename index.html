@@ -6,13 +6,13 @@
 <title>Dental Charting</title>
 <link rel="icon" type="image/png" sizes="32x32" href="./assets/images/favicon_charting.png">
 <link rel="stylesheet" href="./css/base.css?v=17">
-<link rel="stylesheet" href="./css/chart.css?v=22">
+<link rel="stylesheet" href="./css/chart.css?v=24">
 <link rel="stylesheet" href="./css/editor.css?v=6">
 <link rel="stylesheet" href="./css/dialogs.css?v=27">
-<link rel="stylesheet" href="./css/layout.css?v=76">
+<link rel="stylesheet" href="./css/layout.css?v=79">
 <link rel="stylesheet" href="./css/print.css?v=12">
 <link rel="stylesheet" href="./css/materials.css?v=17">
-<link rel="stylesheet" href="./css/patient-records.css?v=11">
+<link rel="stylesheet" href="./css/patient-records.css?v=12">
 </head>
 <body class="saved-entries-collapsed auth-session-gated">
 <div class="page">
@@ -105,9 +105,15 @@
         <div>
           <h2>Clinical Chart</h2>
           <p>Mouth view showing the root profile and crown + inner surface for every tooth.</p>
-          <p class="primary-chart-hint"><strong>Primary dentition:</strong> <span class="primary-hint-desktop">Double-click a primary tooth to swap it with its permanent successor. Double-click a faded 6/7 position to add the molar, or an active 6/7 molar to hide it.</span><span class="primary-hint-mobile">Tap a faded permanent 6/7 molar to activate it. In the tooth panel, tap Deactivate permanent molar to hide it again.</span></p>
+          <p class="primary-chart-hint"><strong>Hint:</strong> <span class="primary-hint-desktop">Double-click a tooth to switch between its primary and permanent version. Double-click a faded 6/7 position to add the molar, or an active 6/7 molar to hide it.</span><span class="primary-hint-mobile">Use the tooth panel to switch between primary and permanent teeth. Tap a faded 6/7 molar to activate it.</span></p>
         </div>
         <div class="chart-head-controls">
+          <div class="chart-image-export">
+            <button class="btn secondary chart-image-download-btn" type="button" id="download-chart-image-btn">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 18v2h14v-2"/></svg>
+              <span id="download-chart-image-label">Download Chart Image</span>
+            </button>
+          </div>
           <!-- <div class="chart-view-key" aria-label="Chart view guide">
             <span><i class="view-key-icon root"></i>Root profile</span>
             <span><i class="view-key-icon crown"></i>Crown + inner surface</span>
@@ -491,7 +497,7 @@
 <script defer src="./js/tooth-silhouettes.js"></script>
 <script defer src="./js/inner-anatomy.js"></script>
 <script defer src="./js/materials.js?v=7"></script>
-<script defer src="./js/app.js?v=86"></script>
+<script defer src="./js/app.js?v=91"></script>
 <script defer src="./js/supabaseSync.js?v=11"></script>
 </body>
 </html>

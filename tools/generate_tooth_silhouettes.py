@@ -36,8 +36,6 @@ def display_size(number, view):
             # Keep these in sync with the overrides in public/js/app.js.
             if number == 13:
                 width = 38
-            elif number == 12:
-                width = 46
             height = (102 if upper else 106) if kind in ("molar", "wisdom") else (98 if upper else 96) if kind == "premolar" else (108 if upper else 110) if kind == "canine" else (100 if upper else 102)
         return width, height
     if primary:
