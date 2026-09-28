@@ -186,5 +186,14 @@ export default function App() {
     ? createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)
     : null;
 
-  return bypassAuth ? <>{profileSettings}{app}</> : <AuthGate authenticatedChrome={profileSettings}>{app}</AuthGate>;
+  return bypassAuth
+    ? <>{profileSettings}{app}</>
+    : (
+        <AuthGate
+          authenticatedChrome={profileSettings}
+          unauthenticatedFallback={<DentalChartingLandingPage />}
+        >
+          {app}
+        </AuthGate>
+      );
 }

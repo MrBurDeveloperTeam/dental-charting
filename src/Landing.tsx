@@ -15,7 +15,7 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
-import "./dental-charting-landing.css";
+import "./Landing.css";
 
 type DentalChartingLandingPageProps = {
   onGetStarted?: () => void;
