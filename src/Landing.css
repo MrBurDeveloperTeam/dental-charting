@@ -749,6 +749,14 @@
   color: var(--dental-teal);
 }
 
+.dental-chart-preview-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 23px;
+  box-shadow: 0 30px 65px rgba(31, 99, 101, 0.16);
+}
+
 @media (max-width: 1000px) {
   .dental-nav {
     padding: 0 4vw;

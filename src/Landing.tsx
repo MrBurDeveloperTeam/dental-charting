@@ -241,83 +241,13 @@ export function DentalChartingLandingPage({
             </span>
           </div>
         </div>
-
-        <div className="dental-hero-preview">
-          <div className="dental-chart-preview">
-            <div className="dental-preview-header">
-              <div>
-                <small>Clinical chart</small>
-                <h3>Patient overview</h3>
-              </div>
-
-              <span>Planning</span>
+            <div className="dental-hero-preview">
+                <img
+                    className="dental-chart-preview-image"
+                    src="/assets/images/landing_image.png"
+                    alt="Dental chart planning and treatment interface"
+                />
             </div>
-
-            <div className="dental-chart-toolbar">
-              <span className="active">Existing</span>
-              <span>Planning</span>
-              <span>Crown</span>
-              <span>Root</span>
-            </div>
-
-            <div className="dental-teeth-grid">
-              {[
-                "18",
-                "17",
-                "16",
-                "15",
-                "14",
-                "13",
-                "12",
-                "11",
-                "21",
-                "22",
-                "23",
-                "24",
-                "25",
-                "26",
-                "27",
-                "28",
-              ].map((tooth, index) => (
-                <div
-                  className={`dental-tooth ${
-                    index === 2 || index === 11 ? "highlight" : ""
-                  }`}
-                  key={tooth}
-                >
-                  <span>{tooth}</span>
-                  <i />
-                </div>
-              ))}
-            </div>
-
-            <div className="dental-preview-footer">
-              <span>
-                <Eye size={14} />
-                Crown and root profiles
-              </span>
-
-              <span>
-                <ClipboardPlus size={14} />
-                12 entries
-              </span>
-            </div>
-          </div>
-
-          <div className="dental-floating-card treatment-card">
-            <ClipboardPlus size={18} />
-
-            <div>
-              <strong>Treatment recorded</strong>
-              <span>Tooth 16 · Crown surface</span>
-            </div>
-          </div>
-
-          <div className="dental-floating-card visit-card">
-            <CheckCircle2 size={18} />
-            <span>Visit updated</span>
-          </div>
-        </div>
       </section>
 
       <section className="dental-stat-strip">
