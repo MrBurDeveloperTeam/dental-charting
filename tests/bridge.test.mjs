@@ -22,7 +22,7 @@ function setup() {
     document:{dispatchEvent:e=>events.push(e)},CustomEvent:class {constructor(type,options){this.type=type;this.detail=options.detail}},
     window:{alert:message=>events.push({type:'alert',message})},els:{noteInput:{value:''}},selectedEntryIds:new Set()
   });
-  const names=['bridgeSelectionError','bridgeSpan','isGroupedProsthetic','spacingPairs','spacingSelectionError','partialDentureSelectionError','groupedSelectionError','groupedTargets','pickTreatment','toggleMultiMode','saveDraft','removeSelectedEntries'];
+  const names=['bridgeSelectionError','bridgeSpan','isGroupedProsthetic','spacingPairs','spacingSelectionError','partialDentureSelectionError','groupedSelectionError','groupedTargets','surfaceSelectionError','pickTreatment','toggleMultiMode','saveDraft','removeSelectedEntries'];
   for(const statement of ast.statements)if(ts.isFunctionDeclaration(statement)&&names.includes(statement.name?.text))vm.runInContext(statement.getText(ast),context);
   return {context,state,events};
 }
