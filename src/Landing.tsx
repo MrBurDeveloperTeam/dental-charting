@@ -72,6 +72,30 @@ const faqs = [
   },
 ];
 
+const patients = [
+  {
+    name: "Alicia Tan",
+    date: "28 Sep 2026",
+    dentist: "Dr. Lim",
+    entries: "12 entries",
+    status: "Updated",
+  },
+  {
+    name: "Daniel Wong",
+    date: "27 Sep 2026",
+    dentist: "Dr. Kumar",
+    entries: "8 entries",
+    status: "Planning",
+  },
+  {
+    name: "Mei Ling",
+    date: "26 Sep 2026",
+    dentist: "Dr. Tan",
+    entries: "5 entries",
+    status: "Updated",
+  },
+];
+
 export function DentalChartingLandingPage({
   onGetStarted,
   onLogin,
