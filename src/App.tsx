@@ -122,7 +122,6 @@ export default function App() {
 
   const app = (
     <>
-      <PatientModal />
       {view === "records" ? <PatientRecordsPage onOpenRecord={openRecord} /> : <DentalChartPage />}
       {view === "review" && selectedRecord && document.getElementById("record-edit-chart-root") && createPortal(
         <button className="record-edit-chart-button" type="button" onClick={() => editRecord(selectedRecord)}>
@@ -199,14 +198,19 @@ export default function App() {
     ? createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)
     : null;
 
-  return bypassAuth
-    ? <>{profileSettings}{app}</>
-    : (
-        <AuthGate
-          authenticatedChrome={profileSettings}
-          unauthenticatedFallback={<DentalChartingLandingPage />}
-        >
-          {app}
-        </AuthGate>
-      );
+  // Legacy scripts bind these form elements once at startup, before auth resolves.
+  // Keep them mounted while the auth gate controls their visibility.
+  return (
+    <>
+      <PatientModal />
+      {bypassAuth ? <>{profileSettings}{app}</> : (
+          <AuthGate
+            authenticatedChrome={profileSettings}
+            unauthenticatedFallback={<DentalChartingLandingPage />}
+          >
+            {app}
+          </AuthGate>
+        )}
+    </>
+  );
 }

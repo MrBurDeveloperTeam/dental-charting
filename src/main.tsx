@@ -12,6 +12,7 @@ import { dentalPatients } from "./services/dentalPatients";
 import { dentalCharts } from "./services/dentalCharts";
 import { dentalMaterials } from "./services/dentalMaterials";
 import { startActivityTracking } from "./services/activityLog";
+import { loadLegacyChartScripts } from "./legacy/loadLegacyChartScripts";
 
 declare global {
   interface Window {
@@ -34,4 +35,8 @@ const rootElement = document.getElementById("react-root");
 if (!rootElement) throw new Error("Missing #react-root migration mount point");
 flushSync(() => {
   createRoot(rootElement).render(<App />);
+});
+// Classic scripts share globals and must bind after React mounts the patient form.
+void loadLegacyChartScripts().catch((error: unknown) => {
+  console.error("Unable to initialize the dental chart", error);
 });
