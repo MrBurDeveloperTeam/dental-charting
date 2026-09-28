@@ -27,6 +27,13 @@
 .chart-view-key::before{content:"View guide:";font-size:9px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#1e4d8c}
 .chart-view-key span{display:inline-flex;align-items:center;gap:6px;color:var(--muted);font-size:10px;font-weight:700;white-space:nowrap}
 .chart-head-controls{display:grid;gap:0;width:min(320px,100%);justify-items:stretch;flex:0 1 320px}
+.chart-image-export{display:flex;align-items:center;justify-content:flex-end}
+.btn.secondary.chart-image-download-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:38px;padding-inline:15px;border-color:rgba(26,120,232,.55);color:var(--primary-dark);line-height:1;white-space:nowrap}
+.btn.secondary.chart-image-download-btn:hover{border-color:var(--primary);background:var(--active-bg);color:var(--primary-dark)}
+.btn.secondary.chart-image-download-btn:disabled{cursor:wait;opacity:.65}
+.chart-image-download-btn svg{display:block;flex:0 0 16px;width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.chart-image-download-btn span{display:block;line-height:1}
+@media (max-width:600px){.chart-image-export{width:100%;justify-content:stretch}.chart-image-download-btn{flex:1}}
 .mobile-entry-trigger,.mobile-entry-hint{display:none}
 .chart-layer-switch{display:none}
 .chart-layer-btn{height:30px;min-height:30px;max-height:30px;padding:4px 10px;border:0;border-radius:5px;background:transparent;color:var(--muted);font:inherit;font-size:10px;font-weight:850;line-height:1;letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
@@ -184,8 +191,14 @@
 .art-core.front svg ellipse[fill^="url(#sg"]{opacity:.68!important}
 .art-core.occ svg{filter:drop-shadow(1px 4px 3px rgba(0,0,0,.42))}
 .surface-svg{position:absolute;inset:0}
-.surface-region{stroke-width:1;transition:fill .14s ease,stroke .14s ease,fill-opacity .14s ease}
-.surface-region:hover{stroke:#42a5f5;stroke-width:2.25;filter:none;fill:#42a5f5!important;fill-opacity:.34}
+.surface-region{pointer-events:none;stroke-width:1;transition:fill .14s ease,stroke .14s ease,fill-opacity .14s ease}
+/*
+ * DIRECT TOOTH-SURFACE HOVER DISABLED
+ * Surface selection is currently available only from the editor's surface pad.
+ * Restore the rule below if direct selection on the tooth artwork is enabled again.
+ *
+ * .surface-region:hover{stroke:#42a5f5;stroke-width:2.25;filter:none;fill:#42a5f5!important;fill-opacity:.34}
+ */
 .surface-region.selected{stroke:#1a78e8;stroke-width:2.5;filter:none;fill-opacity:.48}
 .status-ring,.plan-ring{position:absolute;inset:-3px;pointer-events:none}
 .status-ring{border-radius:14px;border:2px solid var(--ring-color)}
