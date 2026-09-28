@@ -684,94 +684,6 @@
   color: var(--dental-navy);
 }
 
-.dental-records-section {
-  max-width: 1280px;
-}
-
-.dental-records-panel {
-  padding: 22px;
-  border: 1px solid var(--dental-line);
-  border-radius: 22px;
-  background: var(--dental-white);
-  box-shadow: 0 18px 45px rgba(31, 99, 101, 0.08);
-}
-
-.dental-records-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 25px;
-  margin-bottom: 18px;
-}
-
-.dental-records-toolbar small {
-  color: #8a9d9f;
-  font-size: 10px;
-}
-
-.dental-records-toolbar h3 {
-  margin-top: 4px;
-  color: var(--dental-navy);
-  font-family: "Manrope", sans-serif;
-  font-size: 19px;
-}
-
-.dental-records-search {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  min-width: 180px;
-  padding: 10px 13px;
-  border: 1px solid var(--dental-line);
-  border-radius: 9px;
-  color: #8a9d9f;
-  font-size: 11px;
-}
-
-.dental-records-table {
-  overflow-x: auto;
-}
-
-.dental-records-row {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr 1fr 0.8fr 0.8fr;
-  gap: 15px;
-  align-items: center;
-  min-width: 650px;
-  padding: 16px 12px;
-  border-top: 1px solid var(--dental-line);
-  color: var(--dental-muted);
-  font-size: 12px;
-}
-
-.dental-records-row strong {
-  color: var(--dental-navy);
-  font-size: 13px;
-}
-
-.dental-records-row span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.dental-records-row b {
-  width: max-content;
-  padding: 5px 9px;
-  border-radius: 999px;
-  color: var(--dental-teal-dark);
-  background: var(--dental-teal-light);
-  font-size: 10px;
-}
-
-.dental-records-heading {
-  border-top: 0;
-  color: #8a9d9f;
-  font-size: 10px;
-  font-weight: 800;
-  text-transform: uppercase;
-}
-
 .dental-faq {
   max-width: 900px;
   padding-top: 65px;
@@ -1026,15 +938,6 @@
 
   .dental-workflow {
     gap: 45px;
-  }
-
-  .dental-records-toolbar {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .dental-records-search {
-    width: 100%;
   }
 
   .dental-final-cta {

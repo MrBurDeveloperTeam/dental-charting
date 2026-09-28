@@ -148,10 +148,6 @@ export function DentalChartingLandingPage({
             How It Works
           </a>
 
-          <a href="#records" onClick={closeMenu}>
-            Patient Records
-          </a>
-
           <a href="#faq" onClick={closeMenu}>
             FAQ
           </a>
@@ -476,43 +472,6 @@ export function DentalChartingLandingPage({
                 <strong>Record the detail</strong>
                 Capture the surface, root profile, or treatment entry.
               </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="records" className="dental-section dental-records-section">
-        <div className="dental-section-heading">
-          <div className="dental-section-label">Patient records</div>
-
-          <h2>Every visit, easy to find.</h2>
-
-          <p>
-            Review recent chart visits and see the information your team needs
-            before opening a patient record.
-          </p>
-        </div>
-
-        <div className="dental-records-panel">
-          <div className="dental-records-toolbar">
-            <div>
-              <small>Recent chart visits</small>
-              <h3>Patient Records</h3>
-            </div>
-
-            <div className="dental-records-search">
-              <Search size={16} />
-              Search patient
-            </div>
-          </div>
-
-          <div className="dental-records-table">
-            <div className="dental-records-row dental-records-heading">
-              <span>Patient</span>
-              <span>Visit date</span>
-              <span>Dentist</span>
-              <span>Entries</span>
-              <span>Status</span>
             </div>
           </div>
         </div>
