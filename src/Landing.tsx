@@ -9,9 +9,7 @@ import {
   Eye,
   Layers3,
   Menu,
-  Moon,
   Search,
-  Sun,
   UsersRound,
   X,
 } from "lucide-react";
@@ -102,7 +100,6 @@ export function DentalChartingLandingPage({
 }: DentalChartingLandingPageProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [darkMode, setDarkMode] = useState(false);
 
   const handleLogin = () => {
     if (onLogin) {
@@ -127,7 +124,7 @@ export function DentalChartingLandingPage({
   };
 
   return (
-    <main className={`dental-landing ${darkMode ? "is-dark" : ""}`}>
+    <main className="dental-landing">
       <nav className="dental-nav">
         <a className="dental-brand" href="#top" onClick={closeMenu}>
           <span className="dental-brand-mark">
@@ -176,14 +173,6 @@ export function DentalChartingLandingPage({
         </div>
 
         <div className="dental-nav-actions">
-          <button
-            className="dental-theme-toggle"
-            onClick={() => setDarkMode((current) => !current)}
-            aria-label="Toggle light and dark mode"
-          >
-            {darkMode ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
-
           <button className="dental-login" onClick={handleLogin}>
             Log In
           </button>

@@ -38,15 +38,6 @@
   text-decoration: none;
 }
 
-.dental-landing.is-dark {
-  --dental-navy: #e7fffc;
-  --dental-muted: #a8c1c0;
-  --dental-line: #214947;
-  --dental-background: #071b1b;
-  --dental-white: #0d2928;
-  --dental-teal-pale: #103b39;
-}
-
 .dental-nav {
   position: sticky;
   top: 0;
@@ -59,10 +50,6 @@
   border-bottom: 1px solid var(--dental-line);
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(18px);
-}
-
-.is-dark .dental-nav {
-  background: rgba(7, 27, 27, 0.92);
 }
 
 .dental-brand {
@@ -111,7 +98,6 @@
   gap: 18px;
 }
 
-.dental-theme-toggle,
 .dental-login,
 .dental-nav-cta,
 .dental-primary-button,
@@ -123,23 +109,6 @@
   border-radius: 13px;
   font-weight: 800;
   transition: 0.2s ease;
-}
-
-.dental-theme-toggle {
-  display: grid;
-  width: 36px;
-  height: 36px;
-  place-items: center;
-  padding: 0;
-  border: 1px solid var(--dental-line);
-  border-radius: 50%;
-  color: var(--dental-teal-dark);
-  background: transparent;
-}
-
-.dental-theme-toggle:hover {
-  color: white;
-  background: var(--dental-teal);
 }
 
 .dental-login {
@@ -289,10 +258,6 @@
   border-radius: 23px;
   background: white;
   box-shadow: 0 30px 65px rgba(31, 99, 101, 0.16);
-}
-
-.is-dark .dental-chart-preview {
-  background: var(--dental-white);
 }
 
 .dental-preview-header {
