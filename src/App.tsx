@@ -141,7 +141,16 @@ export default function App() {
       )}
       {view === "review" && selectedRecord && document.getElementById("record-review-summary-root") && createPortal(
         <section className="record-review-panel" aria-label="Patient referral details">
-          <div className="record-review-toolbar"><button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button><button className="record-review-download" type="button" onClick={() => document.getElementById("download-pdf-btn")?.click()}><svg className="record-review-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5" /></svg> Download PDF</button></div>
+          <div className="record-review-toolbar">
+            <button type="button" onClick={() => setView("records")}><span aria-hidden="true">←</span> Back to Patient Records</button>
+            <div className="record-review-actions">
+              <button className="record-review-chart-download" type="button" onClick={() => document.getElementById("download-chart-image-btn")?.click()}>
+                <svg className="record-review-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M7.5 10.5 12 15l4.5-4.5M5 20h14" /></svg>
+                Download Chart Image
+              </button>
+              <button className="record-review-download" type="button" onClick={() => document.getElementById("download-pdf-btn")?.click()}><svg className="record-review-action-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h8l4 4v14H6zM14 3v5h5M12 11v6M9.5 14.5 12 17l2.5-2.5" /></svg> Download PDF</button>
+            </div>
+          </div>
           <div className="record-review-summary">
             <div className="record-review-identity">
               <h2>{String(selectedRecord.patient.name || "Unknown patient")}</h2>

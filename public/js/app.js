@@ -68,7 +68,7 @@ const patient=loadPatient();
 const visit=loadVisit();
 let chartMode=loadChartMode();
 let splitChartView="existing";
-const els={upperFront:document.getElementById("upper-front"),upperNumbers:document.getElementById("upper-numbers"),upperOcc:document.getElementById("upper-occ"),lowerOcc:document.getElementById("lower-occ"),lowerNumbers:document.getElementById("lower-numbers"),lowerFront:document.getElementById("lower-front"),combinedStage:document.getElementById("combined-stage"),splitStage:document.getElementById("split-stage"),chartViewToggle:document.getElementById("chart-view-toggle"),splitPlannedUpperFront:document.getElementById("split-planned-upper-front"),splitPlannedUpperOcc:document.getElementById("split-planned-upper-occ"),splitPlannedUpperNumbers:document.getElementById("split-planned-upper-numbers"),splitExistingUpperFront:document.getElementById("split-existing-upper-front"),splitExistingUpperOcc:document.getElementById("split-existing-upper-occ"),splitExistingUpperNumbers:document.getElementById("split-existing-upper-numbers"),splitExistingLowerNumbers:document.getElementById("split-existing-lower-numbers"),splitExistingLowerOcc:document.getElementById("split-existing-lower-occ"),splitExistingLowerFront:document.getElementById("split-existing-lower-front"),splitPlannedLowerNumbers:document.getElementById("split-planned-lower-numbers"),splitPlannedLowerOcc:document.getElementById("split-planned-lower-occ"),splitPlannedLowerFront:document.getElementById("split-planned-lower-front"),entriesList:document.getElementById("entries-list"),entriesCount:document.getElementById("entries-count"),printPatientGrid:document.getElementById("print-patient-grid"),printNoteBody:document.getElementById("print-note-body"),patientTrigger:document.getElementById("patient-trigger"),patientNameDisplay:document.getElementById("patient-name-display"),patientSubDisplay:document.getElementById("patient-sub-display"),dentitionSwitch:document.getElementById("dentition-switch"),dentitionHint:document.getElementById("dentition-hint"),patientModal:document.getElementById("patient-modal"),patientForm:document.getElementById("patient-form"),patientCloseBtn:document.getElementById("patient-close-btn"),patientCancelBtn:document.getElementById("patient-cancel-btn"),patientClearBtn:document.getElementById("patient-clear-btn"),patientDobText:document.getElementById("patient-dob-text"),patientDobTrigger:document.getElementById("patient-dob-trigger"),dateTrigger:document.getElementById("date-trigger"),visitDateDisplay:document.getElementById("visit-date-display"),visitDateSubDisplay:document.getElementById("visit-date-sub-display"),dateModal:document.getElementById("date-modal"),dateForm:document.getElementById("date-form"),dateCloseBtn:document.getElementById("date-close-btn"),dateCancelBtn:document.getElementById("date-cancel-btn"),dateTodayBtn:document.getElementById("date-today-btn"),visitDateText:document.getElementById("visit-date-text"),visitDateTrigger:document.getElementById("visit-date-trigger"),datePopover:document.getElementById("date-popover"),datePrevBtn:document.getElementById("date-prev-btn"),dateNextBtn:document.getElementById("date-next-btn"),dateTitleBtn:document.getElementById("date-title-btn"),dateView:document.getElementById("date-view"),dateClearBtn:document.getElementById("date-clear-btn"),datePopoverTodayBtn:document.getElementById("date-popover-today-btn"),datePopoverCloseBtn:document.getElementById("date-popover-close-btn"),sidebarEmpty:document.getElementById("sidebar-empty"),editor:document.getElementById("editor"),selectedCode:document.getElementById("selected-code"),selectedName:document.getElementById("selected-name"),miniPreview:document.getElementById("mini-preview"),multiToggleBtn:document.getElementById("multi-toggle-btn"),selectedTeeth:document.getElementById("selected-teeth"),categoryGrid:(document.getElementById("category-grid")||document.createElement("div")),viewGrid:(document.getElementById("view-grid")||document.createElement("div")),viewNote:(document.getElementById("view-note")||document.createElement("div")),surfaceField:document.getElementById("surface-field"),surfaceGrid:document.getElementById("surface-grid"),surfaceNote:document.getElementById("surface-note"),treatmentGrid:document.getElementById("treatment-grid"),statusGrid:document.getElementById("status-grid"),noteInput:document.getElementById("note-input"),previewBox:document.getElementById("preview-box"),saveBtn:document.getElementById("save-btn"),resetBtn:document.getElementById("reset-btn"),clearCurrentBtn:document.getElementById("clear-current-btn"),downloadPdfBtn:document.getElementById("download-pdf-btn")};
+const els={upperFront:document.getElementById("upper-front"),upperNumbers:document.getElementById("upper-numbers"),upperOcc:document.getElementById("upper-occ"),lowerOcc:document.getElementById("lower-occ"),lowerNumbers:document.getElementById("lower-numbers"),lowerFront:document.getElementById("lower-front"),combinedStage:document.getElementById("combined-stage"),splitStage:document.getElementById("split-stage"),chartViewToggle:document.getElementById("chart-view-toggle"),downloadChartImageBtn:document.getElementById("download-chart-image-btn"),downloadChartImageLabel:document.getElementById("download-chart-image-label"),splitPlannedUpperFront:document.getElementById("split-planned-upper-front"),splitPlannedUpperOcc:document.getElementById("split-planned-upper-occ"),splitPlannedUpperNumbers:document.getElementById("split-planned-upper-numbers"),splitExistingUpperFront:document.getElementById("split-existing-upper-front"),splitExistingUpperOcc:document.getElementById("split-existing-upper-occ"),splitExistingUpperNumbers:document.getElementById("split-existing-upper-numbers"),splitExistingLowerNumbers:document.getElementById("split-existing-lower-numbers"),splitExistingLowerOcc:document.getElementById("split-existing-lower-occ"),splitExistingLowerFront:document.getElementById("split-existing-lower-front"),splitPlannedLowerNumbers:document.getElementById("split-planned-lower-numbers"),splitPlannedLowerOcc:document.getElementById("split-planned-lower-occ"),splitPlannedLowerFront:document.getElementById("split-planned-lower-front"),entriesList:document.getElementById("entries-list"),entriesCount:document.getElementById("entries-count"),printPatientGrid:document.getElementById("print-patient-grid"),printNoteBody:document.getElementById("print-note-body"),patientTrigger:document.getElementById("patient-trigger"),patientNameDisplay:document.getElementById("patient-name-display"),patientSubDisplay:document.getElementById("patient-sub-display"),dentitionSwitch:document.getElementById("dentition-switch"),dentitionHint:document.getElementById("dentition-hint"),patientModal:document.getElementById("patient-modal"),patientForm:document.getElementById("patient-form"),patientCloseBtn:document.getElementById("patient-close-btn"),patientCancelBtn:document.getElementById("patient-cancel-btn"),patientClearBtn:document.getElementById("patient-clear-btn"),patientDobText:document.getElementById("patient-dob-text"),patientDobTrigger:document.getElementById("patient-dob-trigger"),dateTrigger:document.getElementById("date-trigger"),visitDateDisplay:document.getElementById("visit-date-display"),visitDateSubDisplay:document.getElementById("visit-date-sub-display"),dateModal:document.getElementById("date-modal"),dateForm:document.getElementById("date-form"),dateCloseBtn:document.getElementById("date-close-btn"),dateCancelBtn:document.getElementById("date-cancel-btn"),dateTodayBtn:document.getElementById("date-today-btn"),visitDateText:document.getElementById("visit-date-text"),visitDateTrigger:document.getElementById("visit-date-trigger"),datePopover:document.getElementById("date-popover"),datePrevBtn:document.getElementById("date-prev-btn"),dateNextBtn:document.getElementById("date-next-btn"),dateTitleBtn:document.getElementById("date-title-btn"),dateView:document.getElementById("date-view"),dateClearBtn:document.getElementById("date-clear-btn"),datePopoverTodayBtn:document.getElementById("date-popover-today-btn"),datePopoverCloseBtn:document.getElementById("date-popover-close-btn"),sidebarEmpty:document.getElementById("sidebar-empty"),editor:document.getElementById("editor"),selectedCode:document.getElementById("selected-code"),selectedName:document.getElementById("selected-name"),miniPreview:document.getElementById("mini-preview"),multiToggleBtn:document.getElementById("multi-toggle-btn"),selectedTeeth:document.getElementById("selected-teeth"),categoryGrid:(document.getElementById("category-grid")||document.createElement("div")),viewGrid:(document.getElementById("view-grid")||document.createElement("div")),viewNote:(document.getElementById("view-note")||document.createElement("div")),surfaceField:document.getElementById("surface-field"),surfaceGrid:document.getElementById("surface-grid"),surfaceNote:document.getElementById("surface-note"),treatmentGrid:document.getElementById("treatment-grid"),statusGrid:document.getElementById("status-grid"),noteInput:document.getElementById("note-input"),previewBox:document.getElementById("preview-box"),saveBtn:document.getElementById("save-btn"),resetBtn:document.getElementById("reset-btn"),clearCurrentBtn:document.getElementById("clear-current-btn"),downloadPdfBtn:document.getElementById("download-pdf-btn")};
 const mobileToothEls = {
   modal: document.getElementById("mobile-tooth-modal"),
   title: document.getElementById("mobile-tooth-modal-title"),
@@ -108,7 +108,7 @@ document.getElementById("delete-entry-cancel")?.addEventListener("click",closeDe
 document.getElementById("delete-entry-confirm")?.addEventListener("click",()=>{const action=pendingDeleteAction;closeDeleteEntryModal();action?.()});
 deleteEntryModal?.addEventListener("click",e=>{if(e.target===deleteEntryModal)closeDeleteEntryModal()});
 document.addEventListener("click",e=>{const button=e.target.closest?.(".entry-remove");if(!button)return;const rows=[...document.querySelectorAll(".entry-row")],index=rows.indexOf(button.closest(".entry-row")),entry=flatEntries().find(item=>item.id===button.closest(".entry-row")?.dataset.entryId);if(!entry)return;e.preventDefault();e.stopPropagation();openDeleteEntryModal(`Delete the entry for tooth ${entry.tooth}? This cannot be undone.`,()=>removeEntry(entry.tooth,entry.id))},true);
-els.noteInput.addEventListener("input",e=>{draft.note=e.target.value;renderSidebar()}); els.saveBtn.addEventListener("click",saveDraft); els.resetBtn.addEventListener("click",resetDraft); els.downloadPdfBtn.addEventListener("click",downloadPdf); els.multiToggleBtn.addEventListener("click",toggleMultiMode); if(els.patientModal&&els.patientForm){els.patientTrigger.addEventListener("click",openPatientModal); els.patientCloseBtn.addEventListener("click",closePatientModal); els.patientCancelBtn.addEventListener("click",closePatientModal); els.patientClearBtn.addEventListener("click",clearPatientForm); els.patientModal.addEventListener("click",e=>{if(e.target===els.patientModal) closePatientModal()}); els.patientForm.addEventListener("submit",savePatientFromForm)} els.dateTrigger.addEventListener("click",openDateModal); els.dateCloseBtn.addEventListener("click",closeDateModal); els.dateCancelBtn.addEventListener("click",closeDateModal); els.dateTodayBtn.addEventListener("click",setVisitToday); els.dateModal.addEventListener("click",e=>{if(e.target===els.dateModal) closeDateModal()}); els.dateForm.addEventListener("submit",saveVisitFromForm);
+els.noteInput.addEventListener("input",e=>{draft.note=e.target.value;renderSidebar()}); els.saveBtn.addEventListener("click",saveDraft); els.resetBtn.addEventListener("click",resetDraft); els.downloadPdfBtn.addEventListener("click",downloadPdf); els.downloadChartImageBtn?.addEventListener("click",downloadChartImage); els.multiToggleBtn.addEventListener("click",toggleMultiMode); if(els.patientModal&&els.patientForm){els.patientTrigger.addEventListener("click",openPatientModal); els.patientCloseBtn.addEventListener("click",closePatientModal); els.patientCancelBtn.addEventListener("click",closePatientModal); els.patientClearBtn.addEventListener("click",clearPatientForm); els.patientModal.addEventListener("click",e=>{if(e.target===els.patientModal) closePatientModal()}); els.patientForm.addEventListener("submit",savePatientFromForm)} els.dateTrigger.addEventListener("click",openDateModal); els.dateCloseBtn.addEventListener("click",closeDateModal); els.dateCancelBtn.addEventListener("click",closeDateModal); els.dateTodayBtn.addEventListener("click",setVisitToday); els.dateModal.addEventListener("click",e=>{if(e.target===els.dateModal) closeDateModal()}); els.dateForm.addEventListener("submit",saveVisitFromForm);
 
 const finishVisitModal=document.getElementById("finish-visit-modal");
 document.getElementById("finish-visit-btn")?.addEventListener("click",()=>{finishVisitModal.classList.add("show");finishVisitModal.setAttribute("aria-hidden","false")});
@@ -188,11 +188,10 @@ function toothW(n){
     if(t==="canine") return 28;
     return u?(c?34:30):(c?24:26);
   }
-  // Photo-specific calibration for the narrow upper-right canine/lateral PNGs.
+  // Photo-specific calibration for the narrow upper-right canine PNG.
   // Increase these values to make the root views wider; the overlay generator
   // uses the matching values in tools/generate_tooth_silhouettes.py.
   if(n===13)return 38;
-  if(n===12)return 46;
   if(t==="wisdom")return u?52:48;
   if(t==="molar")return u?56:52;
   if(t==="premolar")return u?40:36;
@@ -283,7 +282,7 @@ function togglePrimaryTooth(n,v){
   if(draft.tooth===n){
     draft.tooth=next;
     draft.view=v;
-    draft.surfaces=defaultSurfaceFor(next,v);
+    draft.surfaces=[];
     normalizeDraft();
   }
   renderAll();
@@ -310,7 +309,7 @@ function deactivatePrimaryOptionalTooth(n){
     els.noteInput.value="";
     if(draft.tooth){
       draft.view="occ";
-      draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view);
+      draft.surfaces=[];
       normalizeDraft();
     }else{
       draft.surfaces=[];
@@ -791,15 +790,15 @@ function statusLabel(status){return STATUSES.find(s=>s.id===status)?.label||stat
 function entrySurfaceLabel(entry){const mode=treatmentFor(entry.treatment).mode; if(mode==="surface") return entry.surfaces.join("/"); if(mode==="root") return "Root"; if(mode==="label")return "Tooth annotation"; return "Whole tooth"}
 function toothTooltipText(n){if(isGhostPrimarySlot(n)) return "Double-click to add this permanent molar"; const items=entriesForTooth(n); if(!items.length) return ""; return items.map(entry=>{const treatment=treatmentFor(entry.treatment); const details=[]; details.push(treatment.label); details.push(statusLabel(entry.status)); if(treatment.mode!=="whole"){details.push(entry.view==="occ"?"Crown + inner":"Root"); details.push(entrySurfaceLabel(entry))} if(entry.note) details.push(`Note: ${entry.note}`); return details.join(" · ")}).join("\n")}
 function tooltipOnLeft(n){const order=isUpper(n)?activeUpper():activeLower(); return order.indexOf(n)>=Math.max(0,order.length-4)}
-function normalizeDraft(){if(!draft.tooth)return; const avail=Object.entries(TREATMENTS).filter(([,t])=>t.category===draft.category); if(!avail.find(([id])=>id===draft.treatment)) draft.treatment=avail[0][0]; const t=treatmentFor(draft.treatment); if(t.category==="condition")draft.material=null; if(!t.views.includes(draft.view)) draft.view=t.views[0]; if(t.mode==="surface"){const allowed=new Set(availableSurfaceCodes(draft.tooth,draft.view)); draft.surfaces=draft.surfaces.filter(s=>allowed.has(s)); if(!draft.surfaces.length) draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view)} else draft.surfaces=[]}
-function openTooth(n,v,surface=null,preserve=false,statusContext="existing"){if(!canStartCharting())return; if(!editingEntry?.bridgeId)editingEntry=null; draft.tooth=n; draft.view=v; draft.layer=statusContext; if(!preserve&&draft.treatment!=="bridge"){draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.status=statusContext; draft.note=""; els.noteInput.value=""} else {draft.status=statusContext} draft.surfaces=surface?[surface]:defaultSurfaceFor(n,v); if(selection.multi){if(!selection.teeth.includes(n)) selection.teeth.push(n)} else selection.teeth=[n]; normalizeDraft(); renderAll()}
+function normalizeDraft(){if(!draft.tooth)return; const avail=Object.entries(TREATMENTS).filter(([,t])=>t.category===draft.category); if(!avail.find(([id])=>id===draft.treatment)) draft.treatment=avail[0][0]; const t=treatmentFor(draft.treatment); if(t.category==="condition")draft.material=null; if(!t.views.includes(draft.view)) draft.view=t.views[0]; if(t.mode==="surface"){const allowed=new Set(availableSurfaceCodes(draft.tooth,draft.view)); draft.surfaces=draft.surfaces.filter(s=>allowed.has(s))} else draft.surfaces=[]}
+function openTooth(n,v,surface=null,preserve=false,statusContext="existing"){if(!canStartCharting())return; if(!editingEntry?.bridgeId)editingEntry=null; draft.tooth=n; draft.view=v; draft.layer=statusContext; if(!preserve&&draft.treatment!=="bridge"){draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.status=statusContext; draft.note=""; els.noteInput.value=""} else {draft.status=statusContext} draft.surfaces=surface?[surface]:[]; if(selection.multi){if(!selection.teeth.includes(n)) selection.teeth.push(n)} else selection.teeth=[n]; normalizeDraft(); renderAll()}
 function resetDraft(){
   if(!draft.tooth)return;
   const selectedTeeth=selection.multi&&selection.teeth.length?[...selection.teeth]:[draft.tooth];
   const selectedSet=new Set(selectedTeeth);
   const entryIds=flatEntries().filter(entry=>selectedSet.has(entry.tooth)).map(entry=>entry.id);
   if(entryIds.length)removeSelectedEntries(entryIds);
-  editingEntry=null; draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.view="occ"; draft.status="existing"; draft.layer="existing"; draft.surfaces=defaultSurfaceFor(draft.tooth,draft.view); draft.note=""; els.noteInput.value=""; normalizeDraft(); renderAll()
+  editingEntry=null; draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.view="occ"; draft.status="existing"; draft.layer="existing"; draft.surfaces=[]; draft.note=""; els.noteInput.value=""; normalizeDraft(); renderAll()
 }
 function clearCurrentTooth(){const selectedTargets=selection.multi&&selection.teeth.length?selection.teeth:(draft.tooth?[draft.tooth]:[]);
   const targets=isGroupedProsthetic()?groupedTargets(selectedTargets):selectedTargets; if(!targets.length)return; targets.forEach(n=>activeState()[n].entries=[]); draft.note=""; els.noteInput.value=""; renderAll()}
@@ -840,6 +839,115 @@ function downloadPdf(){
   if(summaryHeading)summaryHeading.textContent="Summary";
   window.addEventListener("afterprint",()=>{document.title=previousTitle;if(summaryHeading)summaryHeading.textContent=previousHeading||"Saved Entries"},{once:true});
   window.print();
+}
+function chartImageFileName(){
+  const patientName=(patient.fullName||"patient").trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"patient";
+  const visitDate=visit.date||isoToday();
+  return `dental-chart-${patientName}-${visitDate}.png`;
+}
+function blobAsDataUrl(blob){
+  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob)});
+}
+async function inlineChartImageAssets(stage){
+  const images=[...stage.querySelectorAll("image[href]")];
+  const dataUrls=new Map();
+  const originals=[];
+  for(const image of images){
+    const href=image.getAttribute("href");
+    if(!href||href.startsWith("data:"))continue;
+    const absoluteUrl=new URL(href,document.baseURI).href;
+    let dataUrl=dataUrls.get(absoluteUrl);
+    if(!dataUrl){
+      const response=await fetch(absoluteUrl);
+      if(!response.ok)throw new Error(`Unable to load chart image: ${absoluteUrl}`);
+      dataUrl=await blobAsDataUrl(await response.blob());
+      dataUrls.set(absoluteUrl,dataUrl);
+    }
+    originals.push({image,href});
+    image.setAttribute("href",dataUrl);
+  }
+  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+  return ()=>originals.forEach(({image,href})=>image.setAttribute("href",href));
+}
+function matchChartImageArchGaps(stage){
+  // The desktop PNG renderer compresses the upper root/crown gap when it
+  // applies the nested tooth transforms. Use the existing space above the
+  // upper roots; do not move crowns, numbers, or section boundaries.
+  if(stage.ownerDocument.defaultView.innerWidth<1101)return;
+  for(const row of stage.querySelectorAll(".upper-root-row")){
+    const currentTop=parseFloat(stage.ownerDocument.defaultView.getComputedStyle(row).top)||0;
+    row.style.position="relative";
+    row.style.top=`${currentTop-24}px`;
+  }
+}
+async function downloadChartImage(){
+  if(!els.splitStage||typeof window.html2canvas!=="function"){
+    window.alert("Chart image export is not available yet. Please refresh and try again.");
+    return;
+  }
+  const fileName=chartImageFileName();
+  const originalLabel=els.downloadChartImageLabel?.textContent||"Download Chart Image";
+  let restoreImageAssets=()=>{};
+  els.downloadChartImageBtn.disabled=true;
+  if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent="Preparing image…";
+  try{
+    await document.fonts?.ready;
+    const stage=els.splitStage;
+    restoreImageAssets=await inlineChartImageAssets(stage);
+    const width=Math.ceil(stage.scrollWidth);
+    const height=Math.ceil(stage.scrollHeight);
+    const scale=Math.min(3,Math.max(2,window.devicePixelRatio||1));
+    const canvas=await window.html2canvas(stage,{
+      backgroundColor:getComputedStyle(stage).backgroundColor||"#1b2c3d",
+      scale,
+      useCORS:true,
+      logging:false,
+      onclone:(_document,clonedStage)=>matchChartImageArchGaps(clonedStage),
+      width,
+      height,
+      windowWidth:Math.max(document.documentElement.clientWidth,width),
+      windowHeight:Math.max(document.documentElement.clientHeight,height),
+      scrollX:0,
+      scrollY:-window.scrollY
+    });
+    const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
+    if(!blob)throw new Error("The chart image could not be created.");
+    let fileHandle=null;
+    // Build the complete PNG before opening the native picker. Opening it first can
+    // leave a temporary zero-byte/partial file that Windows Photos tries to read.
+    if(typeof window.showSaveFilePicker==="function"){
+      try{
+        fileHandle=await window.showSaveFilePicker({
+          suggestedName:fileName,
+          types:[{description:"PNG image",accept:{"image/png":[".png"]}}]
+        });
+      }catch(error){
+        if(error?.name==="AbortError")return;
+        console.warn("Native save picker unavailable; using browser download instead.",error);
+      }
+    }
+    if(fileHandle){
+      const writable=await fileHandle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+    }else{
+      const url=URL.createObjectURL(blob);
+      const link=document.createElement("a");
+      link.href=url;
+      link.download=fileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),1000);
+    }
+  }catch(error){
+    console.error("Chart image export failed",error);
+    window.alert("The chart image could not be downloaded. Please try again.");
+  }finally{
+    restoreImageAssets();
+    els.downloadChartImageBtn.disabled=false;
+    if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent=originalLabel;
+  }
 }
 function pickCategory(c){if(editingEntry?.bridgeId&&c!=="prosthetic")editingEntry=null;draft.category=c; normalizeDraft(); renderAll()}
 function pickView(v){draft.view=v; normalizeDraft(); renderAll()}
@@ -971,7 +1079,7 @@ function toggleMobileOptionalMolar(){
     primaryOptionalActive.add(n);
     selection.teeth=[n];
     draft.view="occ";
-    draft.surfaces=defaultSurfaceFor(n,"occ");
+    draft.surfaces=[];
     normalizeDraft();
   }
   mobileToothModalOpen=true;
@@ -1293,7 +1401,14 @@ function surfaceOverlaySVG(n,v,preview=false){
   return renderSurfaceOverlay(n,v,{complete,planned,review,selected,previewColor,preview,clipKey:preview?"draft":"chart"});
 }
 function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=(layer==="planned"?wholePlanned:wholeExisting)?.treatment==="missing",selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; if(!isPrimaryTooth(n)&&n%10>=1&&n%10<=5)holder.classList.add("mobile-inner-tooth"); if([53,52,51,61,62,63,83,82,81,71,72,73].includes(n))holder.classList.add("mobile-primary-inner-tooth"); const tooltip=toothTooltipText(n); if(tooltip){holder.classList.add("has-tooltip"); holder.dataset.tooltip=tooltip; if(tooltipOnLeft(n)) holder.classList.add("tooltip-left")} const art=document.createElement("div"); art.className="tooth-art"; const core=document.createElement("div"); core.className=`art-core ${v==="front"?`front ${isUpper(n)?"upper":"lower"}`:"occ"}`; if(missing){core.innerHTML=missingSVG(n,v)} else {const split=layer!=="combined"; const fill="#F5F2EC"; const anatomyEntry=wholePlanned||wholeExisting||wholeReview; const baseSVG=anatomySVG(n,v,anatomyEntry); core.innerHTML=baseSVG; if(!ghost){if(wholeExisting) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeExisting.treatment,"existing",wholeExisting)); if((split||!wholeExisting)&&wholePlanned) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholePlanned.treatment,"planned",wholePlanned)); if((split||!wholeExisting&&!wholePlanned)&&wholeReview) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeReview.treatment,"watch",wholeReview)); if(selection.multi&&selection.teeth.includes(n)&&draft.treatment==="veneer"&&layer==="combined") core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,draft.treatment,"preview")); if(layer==="combined") core.insertAdjacentHTML("beforeend",surfaceOverlaySVG(n,v)); else if(layer==="existing") core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{complete:surfaceMap(n,v,"existing"),review:surfaceMap(n,v,"watch","existing"),selected:selectedSurfaces(n,v),previewColor:null,preview:false,clipKey:`existing-${n}-${v}`})); else core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{planned:surfaceMap(n,v,"planned"),review:surfaceMap(n,v,"watch","planned"),selected:selectedSurfaces(n,v),previewColor:null,preview:false,clipKey:`planned-${n}-${v}`})); if(v==="front"&&((layer==="planned"&&(rootPlanned||rootReview))||(layer==="existing"&&(rootExisting||rootReview))||(layer==="combined"&&(rootExisting||rootReview)))) core.insertAdjacentHTML("beforeend",rctOverlayHTML(n))}} if(layer!=="combined"){const dims=v==="front"?{width:toothW(n),height:toothH(n)}:crownDims(n);core.style.zoom=String(.82*toothW(n)/dims.width);}
-applyAnatomyClip(core,n,v,wholePlanned||wholeExisting||wholeReview); if(n===53||n===63){core.style.scale="1.12";} art.appendChild(core); if(layer==="combined"){if(!ghost&&wholeExisting&&!missing&&!isVeneer(wholeExisting.treatment)&&!hideWholeRing(wholeExisting.treatment)) art.insertAdjacentHTML("beforeend",`<div class="status-ring" style="--ring-color:${COLORS[wholeExisting.treatment]}"></div>`); if(!ghost&&((wholePlanned||(rootPlanned&&!wholeExisting))&&!(wholePlanned&&isVeneer(wholePlanned.treatment)))){const t=wholePlanned?wholePlanned.treatment:rootPlanned.treatment; if(!hideWholeRing(t)) art.insertAdjacentHTML("beforeend",`<div class="plan-ring" style="--ring-color:${COLORS[t]}"></div>`)} if(!ghost&&v==="front"&&latestWatch(n,"existing")) art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} else if(!ghost&&v==="front"&&watch){art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} holder.appendChild(art); if(!ghost)appendConditionBadges(holder,n,layer,v); if(ghost){holder.addEventListener("click",e=>{if(!isMobileToothModalViewport())return;e.preventDefault();e.stopPropagation();activatePrimaryOptionalTooth(n)});holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); activatePrimaryOptionalTooth(n)}); return holder} holder.addEventListener("click",()=>handleToothClick(n,v,statusContext)); if(chartMode==="primary"&&isPrimaryOptionalMolar(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); deactivatePrimaryOptionalTooth(n)}); else if(swapPrimaryToothNumber(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); togglePrimaryTooth(n,v)}); art.querySelectorAll("[data-surface]").forEach(el=>el.addEventListener("click",e=>{e.stopPropagation();openTooth(n,v,el.dataset.surface,selection.multi&&selection.teeth.length>0,statusContext)})); return holder}
+applyAnatomyClip(core,n,v,wholePlanned||wholeExisting||wholeReview); if(n===53||n===63){core.style.scale="1.12";} art.appendChild(core); if(layer==="combined"){if(!ghost&&wholeExisting&&!missing&&!isVeneer(wholeExisting.treatment)&&!hideWholeRing(wholeExisting.treatment)) art.insertAdjacentHTML("beforeend",`<div class="status-ring" style="--ring-color:${COLORS[wholeExisting.treatment]}"></div>`); if(!ghost&&((wholePlanned||(rootPlanned&&!wholeExisting))&&!(wholePlanned&&isVeneer(wholePlanned.treatment)))){const t=wholePlanned?wholePlanned.treatment:rootPlanned.treatment; if(!hideWholeRing(t)) art.insertAdjacentHTML("beforeend",`<div class="plan-ring" style="--ring-color:${COLORS[t]}"></div>`)} if(!ghost&&v==="front"&&latestWatch(n,"existing")) art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} else if(!ghost&&v==="front"&&watch){art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} holder.appendChild(art); if(!ghost)appendConditionBadges(holder,n,layer,v); if(ghost){holder.addEventListener("click",e=>{if(!isMobileToothModalViewport())return;e.preventDefault();e.stopPropagation();activatePrimaryOptionalTooth(n)});holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); activatePrimaryOptionalTooth(n)}); return holder} holder.addEventListener("click",()=>handleToothClick(n,v,statusContext)); if(chartMode==="primary"&&isPrimaryOptionalMolar(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); deactivatePrimaryOptionalTooth(n)}); else if(swapPrimaryToothNumber(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); togglePrimaryTooth(n,v)});
+/*
+ * DIRECT TOOTH-SURFACE CLICK DISABLED
+ * Users now select surfaces only with the editor surface pad.
+ * Restore this listener to re-enable clicking regions on the tooth artwork:
+ * art.querySelectorAll("[data-surface]").forEach(el=>el.addEventListener("click",e=>{e.stopPropagation();openTooth(n,v,el.dataset.surface,selection.multi&&selection.teeth.length>0,statusContext)}));
+ */
+return holder}
 function setArchColumns(container,list){if(!container.id.startsWith("split-"))return;container.style.gridTemplateColumns=list.map(n=>`calc(${.82*(n===null?28:toothW(n)-4)}px * var(--arch-column-scale, 1))`).join(" ")}
 function renderNumbersRow(container, list) {
   setArchColumns(container, list);

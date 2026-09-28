@@ -860,6 +860,7 @@ input[type="reset"],
 }
 @media screen and (min-width:1101px){
   .layout{grid-template-rows:max-content 1fr}
+  .layout>.chart-head{flex-wrap:nowrap}
   .layout>.sidebar>.editor{display:flex;flex-direction:column;height:auto;gap:18px}
   .layout>.sidebar .editor-fields{display:flex;flex-direction:column;overflow:visible;padding:0;gap:18px}
   .layout>.sidebar .field{min-width:0;width:100%}
@@ -1151,17 +1152,20 @@ input[type="reset"],
 
 @media screen and (min-width: 1101px) {
   #split-stage {
-    --inner-view-offset: -10px;
+    /* PNG + live chart: increase this value to add more space between
+       the upper root view and upper crown view. */
+    --upper-inner-view-offset: 12px;
+    --lower-inner-view-offset: -5px;
   }
 
-  /* Upper inner view: move upward toward the roots. */
+  /* Keep a clear visible gap between the upper root and crown views. */
   #split-stage .upper-crown-row {
-    top: calc(-1 * var(--inner-view-offset));
+    top: var(--upper-inner-view-offset);
   }
 
-  /* Lower inner view: move downward toward the roots. */
+  /* Lower inner view uses the mirrored measured offset. */
   #split-stage .lower-crown-row {
-    top: var(--inner-view-offset);
+    top: var(--lower-inner-view-offset);
   }
 }
 
@@ -1191,11 +1195,7 @@ input[type="reset"],
     row-gap: 0;
   }
 
-  /* Fine adjustment between crown and root */
-  #split-stage .lower-crown-row {
-    position: relative;
-    top:-5px;
-  }
+  #split-stage .lower-crown-row {position:relative}
 
   /* Horizontal spacing, including numbers to keep alignment */
   #split-stage .lower-grid .teeth-row {
