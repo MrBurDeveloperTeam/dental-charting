@@ -241,13 +241,14 @@ export function DentalChartingLandingPage({
             </span>
           </div>
         </div>
-            <div className="dental-hero-preview">
-                <img
-                    className="dental-chart-preview-image"
-                    src="/assets/images/landing_image.png"
-                    alt="Dental chart planning and treatment interface"
-                />
-            </div>
+
+        <div className="dental-hero-preview">
+          <img
+            className="dental-chart-preview-image"
+            src="/assets/images/landing_image.png"
+            alt="Dental chart planning and treatment interface"
+          />
+        </div>
       </section>
 
       <section className="dental-stat-strip">
