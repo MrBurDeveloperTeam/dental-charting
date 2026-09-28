@@ -1631,6 +1631,7 @@ function resetChartSession(){
   els.noteInput.value="";localStorage.removeItem(STORAGE_PATIENT_KEY);localStorage.removeItem(STORAGE_VISIT_KEY);renderAll();
 }
 document.addEventListener("dental-chart:new-session",resetChartSession);
+document.addEventListener("dental-chart:auth-ready",renderAll);
 
 
 // Validate physical adjacency, including the FDI numbering change at the midline.
