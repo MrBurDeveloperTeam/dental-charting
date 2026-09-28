@@ -119,12 +119,23 @@ export function AuthGate({
   const [authState, setAuthState] = useState<AuthState>("checking");
 
   useLayoutEffect(() => {
+    const isAuthenticated = authState === "authenticated";
     document.body.classList.toggle(
       "auth-session-gated",
-      authState !== "authenticated",
+      !isAuthenticated,
     );
 
+    // The legacy chart performs layout-dependent rendering while the auth gate
+    // keeps .page at display:none. Render it again after the page is visible so
+    // tooth SVGs and editor controls are measured at their real dimensions.
+    const renderFrame = isAuthenticated
+      ? window.requestAnimationFrame(() => {
+          document.dispatchEvent(new CustomEvent("dental-chart:auth-ready"));
+        })
+      : null;
+
     return () => {
+      if (renderFrame !== null) window.cancelAnimationFrame(renderFrame);
       document.body.classList.remove("auth-session-gated");
     };
   }, [authState]);
