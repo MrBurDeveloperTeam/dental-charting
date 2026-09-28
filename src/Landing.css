@@ -15,7 +15,7 @@
   overflow: hidden;
   color: var(--dental-navy);
   background: var(--dental-background);
-  font-family: "DM Sans", sans-serif;
+  font-family: "Open Sans", sans-serif;
 }
 
 @keyframes dental-rise-in {
@@ -103,7 +103,7 @@
   align-items: center;
   gap: 10px;
   color: var(--dental-navy);
-  font-family: "Manrope", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 18px;
   font-weight: 800;
 }
@@ -248,7 +248,7 @@
   max-width: 650px;
   margin: 0;
   color: var(--dental-navy);
-  font-family: "Manrope", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: clamp(48px, 5.5vw, 78px);
   letter-spacing: -0.075em;
   line-height: 0.99;
@@ -326,7 +326,7 @@
 .dental-preview-header h3 {
   margin: 5px 0 0;
   color: var(--dental-navy);
-  font-family: "Manrope", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 19px;
 }
 
@@ -474,7 +474,7 @@
 
 .dental-stat-strip strong {
   color: var(--dental-teal-dark);
-  font-family: "Manrope", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 25px;
 }
 
@@ -501,7 +501,7 @@
 .dental-final-cta h2 {
   margin: 11px 0 13px;
   color: var(--dental-navy);
-  font-family: "Manrope", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: clamp(32px, 4vw, 48px);
   letter-spacing: -0.06em;
   line-height: 1.08;
@@ -550,7 +550,7 @@
 .dental-feature-card h3 {
   margin: 0 0 10px;
   color: var(--dental-navy);
-  font-family: "Manrope", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 17px;
 }
 
@@ -598,7 +598,7 @@
 .dental-workflow-header h3 {
   margin: 5px 0 0;
   color: var(--dental-navy);
-  font-family: "Manrope", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-size: 18px;
 }
 
@@ -684,7 +684,7 @@
 
 .dental-workflow-steps > div > span {
   color: var(--dental-teal);
-  font-family: "Manrope", sans-serif;
+  font-family: "Open Sans", sans-serif;
   font-weight: 800;
 }
 
