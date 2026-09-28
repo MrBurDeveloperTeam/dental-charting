@@ -186,5 +186,27 @@ export default function App() {
     ? createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)
     : null;
 
-  return bypassAuth ? <>{profileSettings}{app}</> : <AuthGate authenticatedChrome={profileSettings}>{app}</AuthGate>;
+  // return bypassAuth ? <>{profileSettings}{app}</> : <AuthGate authenticatedChrome={profileSettings}>{app}</AuthGate>;
+  return bypassAuth ? (
+  <>
+    {profileSettings}
+    {app}
+  </>
+) : (
+  <AuthGate
+    authenticatedChrome={profileSettings}
+    unauthenticatedFallback={
+      <DentalChartingLandingPage
+        onLogin={() => {
+          window.location.assign("https://app.snabbb.com/login");
+        }}
+        onGetStarted={() => {
+          window.location.assign("https://app.snabbb.com/signup");
+        }}
+      />
+    }
+  >
+    {app}
+  </AuthGate>
+);
 }
