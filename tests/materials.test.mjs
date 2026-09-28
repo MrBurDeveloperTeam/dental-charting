@@ -45,6 +45,16 @@ test('all four restorations require a material; conditions can save null',()=>{
  }
  for(const treatment of ['caries','fracture','crack','extraction','retainedRoot','kiv']){c.draft={treatment,material:null};assert.equal(c.materialSelectionError(),'');}
 });
+test('surface treatments require a selected surface before saving',()=>{
+ const c=setup();
+ for(const treatment of ['caries','crack','fracture','filling']){
+  c.draft={treatment,surfaces:[]};assert.match(c.surfaceSelectionError(),/Select at least one surface/);
+  c.draft.surfaces=['M'];assert.equal(c.surfaceSelectionError(),'');
+ }
+ for(const treatment of ['missing','extraction','rootCanal','crown','impacted']){
+  c.draft={treatment,surfaces:[]};assert.equal(c.surfaceSelectionError(),'');
+ }
+});
 test('material field visibility follows the treatment group',()=>{
  const c=setup();
  for(const treatment of ['caries','fracture','crack','retainedRoot','m1','m2','m3','impacted','kiv'])assert.equal(c.shouldShowMaterialField(treatment),false);
