@@ -7,6 +7,7 @@ import { AuthGate } from "./components/auth/AuthGate";
 import { ProfileSettings } from "./components/profileSettings/ProfileSettings";
 import "./components/profileSettings/profileSettings.css";
 import { getLatestPatientRecord, listPatientRecords, type PatientRecord } from "./services/patientRecords";
+import { DentalChartingLandingPage } from "./Landing";
 import { pagePathForView, setActivePage } from "./services/activityLog";
 
 export default function App() {
@@ -198,5 +199,14 @@ export default function App() {
     ? createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)
     : null;
 
-  return bypassAuth ? <>{profileSettings}{app}</> : <AuthGate authenticatedChrome={profileSettings}>{app}</AuthGate>;
+  return bypassAuth
+    ? <>{profileSettings}{app}</>
+    : (
+        <AuthGate
+          authenticatedChrome={profileSettings}
+          unauthenticatedFallback={<DentalChartingLandingPage />}
+        >
+          {app}
+        </AuthGate>
+      );
 }
