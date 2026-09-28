@@ -1,16 +1,132 @@
-import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+// import { useCallback, useEffect, useLayoutEffect, useState, type ReactNode } from "react";
+
+// const SNABBB_APP_URL = "https://app.snabbb.com";
+// const VERIFY_URL = `${SNABBB_APP_URL}/api/verify-token`;
+
+// type AuthState = "checking" | "authenticated" | "unauthenticated" | "error";
+
+// export function AuthGate({ children, authenticatedChrome }: { children: ReactNode; authenticatedChrome?: ReactNode }) {
+//   const [authState, setAuthState] = useState<AuthState>("checking");
+
+//   useLayoutEffect(() => {
+//     document.body.classList.toggle("auth-session-gated", authState !== "authenticated");
+//     return () => document.body.classList.remove("auth-session-gated");
+//   }, [authState]);
+
+//   const verifySession = useCallback(async () => {
+//     setAuthState("checking");
+
+//     try {
+//       const response = await fetch(VERIFY_URL, {
+//         method: "GET",
+//         credentials: "include",
+//         headers: { Accept: "application/json" },
+//       });
+
+//       if (response.status === 401 || response.status === 403) {
+//         setAuthState("unauthenticated");
+//         return;
+//       }
+
+//       if (!response.ok) {
+//         setAuthState("error");
+//         return;
+//       }
+
+//       const data = await response.json();
+//       if (data?.loggedIn === true) {
+//       const url = new URL(window.location.href);
+//         url.searchParams.delete("sso_token");
+
+//         window.history.replaceState(
+//           window.history.state,
+//           "",
+//           url.pathname + url.search + url.hash
+//         );
+//       }
+//       setAuthState(data?.loggedIn === true ? "authenticated" : "unauthenticated");
+//     } catch {
+//       setAuthState("error");
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     void verifySession();
+//   }, [verifySession]);
+
+//   const isChecking = authState === "checking";
+//   const isError = authState === "error";
+
+//   return (
+//     <>
+//       {children}
+//       {authState === "authenticated" && authenticatedChrome}
+//       {authState !== "authenticated" && (
+//         <main className="auth-gate" aria-busy={isChecking}>
+//           <section className="auth-gate-dialog" role={isChecking ? "status" : "alertdialog"} aria-modal={!isChecking}>
+//             <div className="auth-gate-icon" aria-hidden="true">{isChecking ? "…" : "🔒"}</div>
+//             <h1>{isChecking ? "Checking your session" : isError ? "Unable to verify your session" : "Login required"}</h1>
+//             <p>
+//               {isChecking
+//                 ? "Please wait while we confirm your Snabbb account."
+//                 : isError
+//                   ? "We could not connect to Snabbb to verify your login. Please try again."
+//                   : "You are not logged in. Please log in to the main Snabbb app to access Dental Charting."}
+//             </p>
+//             {!isChecking && (
+//               <div className="auth-gate-actions">
+//                 {isError && <button className="btn secondary" type="button" onClick={() => void verifySession()}>Retry</button>}
+//                 <button className="btn primary" type="button" onClick={() => { window.location.href = `${SNABBB_APP_URL}/login`; }}>
+//                   Go to Snabbb Login
+//                 </button>
+//               </div>
+//             )}
+//           </section>
+//         </main>
+//       )}
+//     </>
+//   );
+// }
+
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 const SNABBB_APP_URL = "https://app.snabbb.com";
 const VERIFY_URL = `${SNABBB_APP_URL}/api/verify-token`;
 
-type AuthState = "checking" | "authenticated" | "unauthenticated" | "error";
+type AuthState =
+  | "checking"
+  | "authenticated"
+  | "unauthenticated"
+  | "error";
 
-export function AuthGate({ children, authenticatedChrome }: { children: ReactNode; authenticatedChrome?: ReactNode }) {
+type AuthGateProps = {
+  children: ReactNode;
+  authenticatedChrome?: ReactNode;
+  unauthenticatedFallback?: ReactNode;
+};
+
+export function AuthGate({
+  children,
+  authenticatedChrome,
+  unauthenticatedFallback,
+}: AuthGateProps) {
   const [authState, setAuthState] = useState<AuthState>("checking");
 
   useLayoutEffect(() => {
-    document.body.classList.toggle("auth-session-gated", authState !== "authenticated");
-    return () => document.body.classList.remove("auth-session-gated");
+    document.body.classList.toggle(
+      "auth-session-gated",
+      authState !== "authenticated",
+    );
+
+    return () => {
+      document.body.classList.remove("auth-session-gated");
+    };
   }, [authState]);
 
   const verifySession = useCallback(async () => {
@@ -20,7 +136,9 @@ export function AuthGate({ children, authenticatedChrome }: { children: ReactNod
       const response = await fetch(VERIFY_URL, {
         method: "GET",
         credentials: "include",
-        headers: { Accept: "application/json" },
+        headers: {
+          Accept: "application/json",
+        },
       });
 
       if (response.status === 401 || response.status === 403) {
@@ -34,17 +152,23 @@ export function AuthGate({ children, authenticatedChrome }: { children: ReactNod
       }
 
       const data = await response.json();
+
       if (data?.loggedIn === true) {
-      const url = new URL(window.location.href);
+        const url = new URL(window.location.href);
         url.searchParams.delete("sso_token");
 
         window.history.replaceState(
           window.history.state,
           "",
-          url.pathname + url.search + url.hash
+          url.pathname + url.search + url.hash,
         );
       }
-      setAuthState(data?.loggedIn === true ? "authenticated" : "unauthenticated");
+
+      setAuthState(
+        data?.loggedIn === true
+          ? "authenticated"
+          : "unauthenticated",
+      );
     } catch {
       setAuthState("error");
     }
@@ -54,36 +178,88 @@ export function AuthGate({ children, authenticatedChrome }: { children: ReactNod
     void verifySession();
   }, [verifySession]);
 
-  const isChecking = authState === "checking";
-  const isError = authState === "error";
+  if (authState === "checking") {
+    return (
+      <main className="auth-gate" aria-busy="true">
+        <section className="auth-gate-dialog" role="status">
+          <div className="auth-gate-icon">…</div>
+          <h1>Checking your session</h1>
+          <p>
+            Please wait while we confirm your Snabbb account.
+          </p>
+        </section>
+      </main>
+    );
+  }
+
+  if (authState === "authenticated") {
+    return (
+      <>
+        {children}
+        {authenticatedChrome}
+      </>
+    );
+  }
+
+  if (authState === "unauthenticated") {
+    return (
+      <>
+        {unauthenticatedFallback}
+
+        {!unauthenticatedFallback && (
+          <main className="auth-gate">
+            <section className="auth-gate-dialog" role="alertdialog">
+              <div className="auth-gate-icon">🔒</div>
+              <h1>Login required</h1>
+              <p>
+                You are not logged in. Please log in to the main Snabbb app.
+              </p>
+
+              <button
+                className="btn primary"
+                type="button"
+                onClick={() => {
+                  window.location.assign(`${SNABBB_APP_URL}/login`);
+                }}
+              >
+                Go to Snabbb Login
+              </button>
+            </section>
+          </main>
+        )}
+      </>
+    );
+  }
 
   return (
-    <>
-      {children}
-      {authState === "authenticated" && authenticatedChrome}
-      {authState !== "authenticated" && (
-        <main className="auth-gate" aria-busy={isChecking}>
-          <section className="auth-gate-dialog" role={isChecking ? "status" : "alertdialog"} aria-modal={!isChecking}>
-            <div className="auth-gate-icon" aria-hidden="true">{isChecking ? "…" : "🔒"}</div>
-            <h1>{isChecking ? "Checking your session" : isError ? "Unable to verify your session" : "Login required"}</h1>
-            <p>
-              {isChecking
-                ? "Please wait while we confirm your Snabbb account."
-                : isError
-                  ? "We could not connect to Snabbb to verify your login. Please try again."
-                  : "You are not logged in. Please log in to the main Snabbb app to access Dental Charting."}
-            </p>
-            {!isChecking && (
-              <div className="auth-gate-actions">
-                {isError && <button className="btn secondary" type="button" onClick={() => void verifySession()}>Retry</button>}
-                <button className="btn primary" type="button" onClick={() => { window.location.href = `${SNABBB_APP_URL}/login`; }}>
-                  Go to Snabbb Login
-                </button>
-              </div>
-            )}
-          </section>
-        </main>
-      )}
-    </>
+    <main className="auth-gate">
+      <section className="auth-gate-dialog" role="alertdialog">
+        <div className="auth-gate-icon">⚠️</div>
+        <h1>Unable to verify your session</h1>
+        <p>
+          We could not connect to Snabbb to verify your login.
+        </p>
+
+        <div className="auth-gate-actions">
+          <button
+            className="btn secondary"
+            type="button"
+            onClick={() => void verifySession()}
+          >
+            Retry
+          </button>
+
+          <button
+            className="btn primary"
+            type="button"
+            onClick={() => {
+              window.location.assign(`${SNABBB_APP_URL}/login`);
+            }}
+          >
+            Go to Snabbb Login
+          </button>
+        </div>
+      </section>
+    </main>
   );
 }
