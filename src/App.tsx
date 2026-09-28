@@ -7,6 +7,7 @@ import { AuthGate } from "./components/auth/AuthGate";
 import { ProfileSettings } from "./components/profileSettings/ProfileSettings";
 import "./components/profileSettings/profileSettings.css";
 import { getLatestPatientRecord, listPatientRecords, type PatientRecord } from "./services/patientRecords";
+import { pagePathForView, setActivePage } from "./services/activityLog";
 
 export default function App() {
   const [view, setView] = useState<"chart" | "records" | "review" | "edit">("chart");
@@ -31,6 +32,9 @@ export default function App() {
     recordsNav?.addEventListener("click", showRecords);
     return () => { chartNav?.removeEventListener("click", showChart); recordsNav?.removeEventListener("click", showRecords); };
   }, []);
+
+  // Activity tracker: time spent on each screen (chart / records / review / edit).
+  useEffect(() => { setActivePage(pagePathForView(view)); }, [view]);
 
   useEffect(() => {
     document.body.classList.toggle("patient-records-view", view === "records");

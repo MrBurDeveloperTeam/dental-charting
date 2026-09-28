@@ -11,6 +11,7 @@ import { captureWorkspaceFromUrl } from "./services/workspaceContext";
 import { dentalPatients } from "./services/dentalPatients";
 import { dentalCharts } from "./services/dentalCharts";
 import { dentalMaterials } from "./services/dentalMaterials";
+import { startActivityTracking } from "./services/activityLog";
 
 declare global {
   interface Window {
@@ -26,6 +27,8 @@ window.dentalPatients = dentalPatients;
 window.dentalCharts = dentalCharts;
 window.dentalMaterials = dentalMaterials;
 window.html2canvas = html2canvas;
+// Must run after the window.dental* services above exist — it wraps them.
+startActivityTracking();
 
 const rootElement = document.getElementById("react-root");
 if (!rootElement) throw new Error("Missing #react-root migration mount point");
