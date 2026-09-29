@@ -601,12 +601,15 @@ function innerSurfaceDefs(n){
       {key:rightKey,path:`M${w*.96},${y(.5)} C${w*.95},${y(.12)} ${w*.8},${y(.06)} ${w*.66},${y(.5)} C${w*.8},${y(.94)} ${w*.95},${y(.88)} ${w*.96},${y(.5)} Z`,cx:w*.82,cy:y(.5)}
     ];
     if(anterior){
-      result.push({key:"I",path:`M${w*.5},${y(.04)} C${w*.28},${y(.05)} ${w*.22},${y(.25)} ${w*.36},${y(.52)} L${w*.64},${y(.52)} C${w*.78},${y(.25)} ${w*.72},${y(.05)} ${w*.5},${y(.04)} Z`,cx:w*.5,cy:y(.25)});
-      result.push({key:"L",path:`M${w*.36},${y(.48)} L${w*.64},${y(.48)} C${w*.78},${y(.75)} ${w*.72},${y(.95)} ${w*.5},${y(.96)} C${w*.28},${y(.95)} ${w*.22},${y(.75)} ${w*.36},${y(.48)} Z`,cx:w*.5,cy:y(.75)});
+      const swapLowerAnteriorLI=[31,33,43].includes(n);
+      const nearKey=swapLowerAnteriorLI?"L":"I",farKey=swapLowerAnteriorLI?"I":"L";
+      result.push({key:nearKey,path:`M${w*.5},${y(.04)} C${w*.28},${y(.05)} ${w*.22},${y(.25)} ${w*.36},${y(.52)} L${w*.64},${y(.52)} C${w*.78},${y(.25)} ${w*.72},${y(.05)} ${w*.5},${y(.04)} Z`,cx:w*.5,cy:y(.25)});
+      result.push({key:farKey,path:`M${w*.36},${y(.48)} L${w*.64},${y(.48)} C${w*.78},${y(.75)} ${w*.72},${y(.95)} ${w*.5},${y(.96)} C${w*.28},${y(.95)} ${w*.22},${y(.75)} ${w*.36},${y(.48)} Z`,cx:w*.5,cy:y(.75)});
     }else{
-      result.push({key:"B",path:`M${w*.5},${y(.04)} C${w*.28},${y(.05)} ${w*.22},${y(.24)} ${w*.36},${y(.4)} L${w*.64},${y(.4)} C${w*.78},${y(.24)} ${w*.72},${y(.05)} ${w*.5},${y(.04)} Z`,cx:w*.5,cy:y(.22)});
+      const nearKey=upper?"B":"L",farKey=upper?"L":"B";
+      result.push({key:nearKey,path:`M${w*.5},${y(.04)} C${w*.28},${y(.05)} ${w*.22},${y(.24)} ${w*.36},${y(.4)} L${w*.64},${y(.4)} C${w*.78},${y(.24)} ${w*.72},${y(.05)} ${w*.5},${y(.04)} Z`,cx:w*.5,cy:y(.22)});
       result.push({key:"O",path:`M${w*.35},${y(.36)} C${w*.42},${y(.24)} ${w*.58},${y(.24)} ${w*.65},${y(.36)} C${w*.74},${y(.46)} ${w*.74},${y(.58)} ${w*.65},${y(.7)} C${w*.58},${y(.78)} ${w*.42},${y(.78)} ${w*.35},${y(.7)} C${w*.26},${y(.58)} ${w*.26},${y(.46)} ${w*.35},${y(.36)} Z`,cx:w*.5,cy:y(.52)});
-      result.push({key:"L",path:`M${w*.36},${y(.62)} L${w*.64},${y(.62)} C${w*.78},${y(.76)} ${w*.72},${y(.95)} ${w*.5},${y(.96)} C${w*.28},${y(.95)} ${w*.22},${y(.76)} ${w*.36},${y(.62)} Z`,cx:w*.5,cy:y(.82)});
+      result.push({key:farKey,path:`M${w*.36},${y(.62)} L${w*.64},${y(.62)} C${w*.78},${y(.76)} ${w*.72},${y(.95)} ${w*.5},${y(.96)} C${w*.28},${y(.95)} ${w*.22},${y(.76)} ${w*.36},${y(.62)} Z`,cx:w*.5,cy:y(.82)});
     }
     return result;
   }
@@ -617,9 +620,9 @@ function innerSurfaceDefs(n){
     result.push(rect("L",.24,upper?edge:top,.76,upper?bottom:edge));
   }else{
     const rim=upper?.12:.87,inner=upper?.34:.64;
-    result.push(rect("B",.24,upper?top:rim,.76,upper?rim:bottom));
+    result.push(rect(upper?"B":"L",.24,upper?top:rim,.76,upper?rim:bottom));
     result.push(rect("O",.24,upper?rim:inner,.76,upper?inner:rim));
-    result.push(rect("L",.24,upper?inner:top,.76,upper?bottom:inner));
+    result.push(rect(upper?"L":"B",.24,upper?inner:top,.76,upper?bottom:inner));
   }
   return result;
 }

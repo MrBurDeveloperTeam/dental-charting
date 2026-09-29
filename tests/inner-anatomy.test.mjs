@@ -47,6 +47,37 @@ test('mesial selection faces the midline on all four quadrants',()=>{
     assert.equal(m.cx>d.cx,[1,4,5,8].includes(Math.floor(n/10)));
   }
 });
+test('lower crown buccal and lingual regions match their visual sides without changing upper or root views',()=>{
+  for(const [mode,teeth] of [['permanent',[34,35,36,37,38,44,45,46,47,48]],['primary',[74,75,84,85]]]){
+    const c=setup(mode);
+    for(const n of teeth){
+      const crown=c.innerSurfaceDefs(n),buccal=crown.find(r=>r.key==='B'),lingual=crown.find(r=>r.key==='L');
+      assert.ok(buccal.cy>lingual.cy,`${n} lower crown maps buccal to the far visual side`);
+      const root=c.surfaceDefs(n,'front'),rootBuccal=root.find(r=>r.key==='B'),rootLingual=root.find(r=>r.key==='L');
+      assert.ok(rootBuccal.cy<rootLingual.cy,`${n} root mapping remains unchanged`);
+    }
+  }
+  const c=setup();
+  for(const n of [14,15,16,17,18,24,25,26,27,28]){
+    const crown=c.innerSurfaceDefs(n),buccal=crown.find(r=>r.key==='B'),lingual=crown.find(r=>r.key==='L');
+    assert.ok(buccal.cy<lingual.cy,`${n} upper crown mapping remains unchanged`);
+  }
+});
+test('lower teeth 31, 33 and 43 map lingual and incisal correctly while preserving other surfaces',()=>{
+  const c=setup();
+  const regions32=c.innerSurfaceDefs(32);
+  for(const n of [31,33,43]){
+    const regions=c.innerSurfaceDefs(n);
+    assert.equal(Math.sign(regions.find(r=>r.key==='I').cy-regions.find(r=>r.key==='L').cy),
+      Math.sign(regions32.find(r=>r.key==='I').cy-regions32.find(r=>r.key==='L').cy),`${n} follows tooth 32's L/I orientation`);
+  }
+  const regions31=c.innerSurfaceDefs(31);
+  assert.ok(regions31.find(r=>r.key==='M').cx<regions31.find(r=>r.key==='D').cx);
+  for(const n of [31,33,43]){
+    const root=c.surfaceDefs(n,'front');
+    assert.ok(root.find(r=>r.key==='L').cy>root.find(r=>r.key==='F').cy,`${n} root mapping remains unchanged`);
+  }
+});
 test('right-side permanent root views map mesial and distal to their anatomical sides',()=>{
   const c=setup('permanent');
   for(const n of [18,17,16,15,14,13,12,11,48,47,46,45,44,43,42,41]){
