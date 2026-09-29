@@ -778,6 +778,9 @@ function entriesByStatus(n,s,layer=null){return entriesForTooth(n).filter(e=>e.s
 function latestWhole(n,s,layer=null){const m=entriesByStatus(n,s,layer).filter(e=>treatmentFor(e.treatment).mode==="whole"); return m.length?m[m.length-1]:null}
 function latestRoot(n,s,layer=null){const m=entriesByStatus(n,s,layer).filter(e=>treatmentFor(e.treatment).mode==="root"); return m.length?m[m.length-1]:null}
 function latestWatch(n,layer=null){const m=entriesByStatus(n,"watch",layer); return m.length?m[m.length-1]:null}
+// A missing tooth is a physical condition, not a chart-layer-specific treatment.
+// Keep one saved entry, but show it in both Existing and Planning.
+function isToothMissing(n){return entriesForTooth(n).some(entry=>entry.treatment==="missing")}
 function reviewBadgeHTML(n,v){if(v!=="front") return ""; return `<div class="review-badge${isUpper(n)?"":" bottom"}">R</div>`}
 // Shared surfaces appear in both views, without duplicating entries.
 function visibleEntrySurfaces(n,v,entry){
@@ -878,15 +881,55 @@ async function inlineChartImageAssets(stage){
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   return ()=>originals.forEach(({image,href})=>image.setAttribute("href",href));
 }
-function matchChartImageArchGaps(stage){
-  // The desktop PNG renderer compresses the upper root/crown gap when it
-  // applies the nested tooth transforms. Use the existing space above the
-  // upper roots; do not move crowns, numbers, or section boundaries.
-  if(stage.ownerDocument.defaultView.innerWidth<1101)return;
-  for(const row of stage.querySelectorAll(".upper-root-row")){
-    const currentTop=parseFloat(stage.ownerDocument.defaultView.getComputedStyle(row).top)||0;
-    row.style.position="relative";
-    row.style.top=`${currentTop-24}px`;
+function prepareChartImageClone(stage){
+  const view=stage.ownerDocument.defaultView;
+  // Compensate for the canvas painter's nested upper-tooth transform offset.
+  if(view.innerWidth>=1101)for(const row of stage.querySelectorAll('.upper-root-row')){
+    row.style.top=`${(parseFloat(view.getComputedStyle(row).top)||0)-24}px`;
+    row.style.position='relative';
+  }
+  // Freeze SVG styling before html2canvas serializes each SVG as an image.
+  // This also resolves custom properties used by clasp and treatment artwork.
+  for(const element of stage.querySelectorAll('svg,svg *')){
+    const computed=view.getComputedStyle(element);
+    const properties=['color','fill','fill-opacity','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','font-family','font-size','font-weight','text-anchor','paint-order'];
+    const values=properties.map(property=>[property,computed.getPropertyValue(property)]);
+    for(const [property,value] of values)element.style.setProperty(property,value);
+  }
+  // SVG-as-image rendering clips overflow at its viewport. Include the clasps
+  // extending onto adjacent teeth without moving or scaling their artwork.
+  for(const svg of stage.querySelectorAll('svg.partial-denture-overlay')){
+    const box=svg.viewBox.baseVal,pad=24;
+    const width=box.width,height=box.height;
+    svg.setAttribute('viewBox',`${box.x-pad} ${box.y-pad} ${width+pad*2} ${height+pad*2}`);
+    svg.setAttribute('width',width+pad*2);svg.setAttribute('height',height+pad*2);
+    Object.assign(svg.style,{width:`${width+pad*2}px`,height:`${height+pad*2}px`,left:`${-pad}px`,top:`${-pad}px`,maxWidth:'none'});
+  }
+  // html2canvas supports overflow clipping but ignores CSS clip-path. Preserve
+  // the exact inset in local tooth coordinates, including flipped upper teeth.
+  for(const element of stage.querySelectorAll('[style]')){
+    const style=view.getComputedStyle(element);
+    const match=style.clipPath.match(/^inset\(([^)]+)\)$/);
+    if(!match)continue;
+    const values=match[1].trim().split(/\s+/);
+    const [top,right=top,bottom=top,left=right]=values;
+    const width=element.clientWidth,height=element.clientHeight;
+    const pixels=(value,size)=>parseFloat(value)*(value.endsWith('%')?size/100:1);
+    const t=pixels(top,height),r=pixels(right,width),b=pixels(bottom,height),l=pixels(left,width);
+    const crop=stage.ownerDocument.createElement('div'),content=stage.ownerDocument.createElement('div');
+    crop.style.cssText=`position:absolute;top:${t}px;left:${l}px;width:${Math.max(0,width-l-r)}px;height:${Math.max(0,height-t-b)}px;overflow:hidden;`;
+    content.style.cssText=`position:absolute;top:${-t}px;left:${-l}px;width:${width}px;height:${height}px;`;
+    // Keep descendant selector-dependent styles after inserting crop wrappers.
+    for(const child of element.querySelectorAll('*')){
+      const computed=view.getComputedStyle(child);
+      const properties=['position','top','right','bottom','left','width','height','transform','transform-origin','display'];
+      const values=properties.map(property=>[property,computed.getPropertyValue(property)]);
+      for(const [property,value] of values)child.style.setProperty(property,value);
+    }
+    content.append(...element.childNodes);crop.append(content);element.append(crop);
+    element.style.width=`${width}px`;element.style.height=`${height}px`;
+    element.style.clipPath='none';
+    if(style.position==='static')element.style.position='relative';
   }
 }
 async function downloadChartImage(){
@@ -907,17 +950,11 @@ async function downloadChartImage(){
     const height=Math.ceil(stage.scrollHeight);
     const scale=Math.min(3,Math.max(2,window.devicePixelRatio||1));
     const canvas=await window.html2canvas(stage,{
-      backgroundColor:getComputedStyle(stage).backgroundColor||"#1b2c3d",
-      scale,
-      useCORS:true,
-      logging:false,
-      onclone:(_document,clonedStage)=>matchChartImageArchGaps(clonedStage),
-      width,
-      height,
-      windowWidth:Math.max(document.documentElement.clientWidth,width),
-      windowHeight:Math.max(document.documentElement.clientHeight,height),
-      scrollX:0,
-      scrollY:-window.scrollY
+      backgroundColor:getComputedStyle(stage).backgroundColor,
+      scale,useCORS:true,logging:false,width,height,
+      windowWidth:window.innerWidth,windowHeight:window.innerHeight,
+      scrollX:window.scrollX,scrollY:window.scrollY,
+      onclone:(_document,clonedStage)=>prepareChartImageClone(clonedStage)
     });
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
     if(!blob)throw new Error("The chart image could not be created.");
@@ -1410,7 +1447,7 @@ function surfaceOverlaySVG(n,v,preview=false){
   const previewColor=preview?entryColor(draft):null;
   return renderSurfaceOverlay(n,v,{complete,planned,review,selected,previewColor,preview,clipKey:preview?"draft":"chart"});
 }
-function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=(layer==="planned"?wholePlanned:wholeExisting)?.treatment==="missing",selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; if(!isPrimaryTooth(n)&&n%10>=1&&n%10<=5)holder.classList.add("mobile-inner-tooth"); if([53,52,51,61,62,63,83,82,81,71,72,73].includes(n))holder.classList.add("mobile-primary-inner-tooth"); /* Tooth hover messages disabled; retain tooltip setup for reuse.
+function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=isToothMissing(n),selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; if(!isPrimaryTooth(n)&&n%10>=1&&n%10<=5)holder.classList.add("mobile-inner-tooth"); if([53,52,51,61,62,63,83,82,81,71,72,73].includes(n))holder.classList.add("mobile-primary-inner-tooth"); /* Tooth hover messages disabled; retain tooltip setup for reuse.
 const tooltip=toothTooltipText(n); if(tooltip){holder.classList.add("has-tooltip"); holder.dataset.tooltip=tooltip; if(tooltipOnLeft(n)) holder.classList.add("tooltip-left")}
 */ const art=document.createElement("div"); art.className="tooth-art"; const core=document.createElement("div"); core.className=`art-core ${v==="front"?`front ${isUpper(n)?"upper":"lower"}`:"occ"}`; if(missing){core.innerHTML=missingSVG(n,v)} else {const split=layer!=="combined"; const fill="#F5F2EC"; const anatomyEntry=wholePlanned||wholeExisting||wholeReview; const baseSVG=anatomySVG(n,v,anatomyEntry); core.innerHTML=baseSVG; if(!ghost){if(wholeExisting) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeExisting.treatment,"existing",wholeExisting)); if((split||!wholeExisting)&&wholePlanned) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholePlanned.treatment,"planned",wholePlanned)); if((split||!wholeExisting&&!wholePlanned)&&wholeReview) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeReview.treatment,"watch",wholeReview)); if(selection.multi&&selection.teeth.includes(n)&&draft.treatment==="veneer"&&layer==="combined") core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,draft.treatment,"preview")); if(layer==="combined") core.insertAdjacentHTML("beforeend",surfaceOverlaySVG(n,v)); else if(layer==="existing") core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{complete:surfaceMap(n,v,"existing"),review:surfaceMap(n,v,"watch","existing"),selected:selectedSurfaces(n,v),previewColor:null,preview:false,clipKey:`existing-${n}-${v}`})); else core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{planned:surfaceMap(n,v,"planned"),review:surfaceMap(n,v,"watch","planned"),selected:selectedSurfaces(n,v),previewColor:null,preview:false,clipKey:`planned-${n}-${v}`})); if(v==="front"&&((layer==="planned"&&(rootPlanned||rootReview))||(layer==="existing"&&(rootExisting||rootReview))||(layer==="combined"&&(rootExisting||rootReview)))) core.insertAdjacentHTML("beforeend",rctOverlayHTML(n))}} if(layer!=="combined"){const dims=v==="front"?{width:toothW(n),height:toothH(n)}:crownDims(n);core.style.zoom=String(.82*toothW(n)/dims.width);}
 applyAnatomyClip(core,n,v,wholePlanned||wholeExisting||wholeReview); if(n===53||n===63){core.style.scale="1.12";} art.appendChild(core); if(layer==="combined"){if(!ghost&&wholeExisting&&!missing&&!isVeneer(wholeExisting.treatment)&&!hideWholeRing(wholeExisting.treatment)) art.insertAdjacentHTML("beforeend",`<div class="status-ring" style="--ring-color:${COLORS[wholeExisting.treatment]}"></div>`); if(!ghost&&((wholePlanned||(rootPlanned&&!wholeExisting))&&!(wholePlanned&&isVeneer(wholePlanned.treatment)))){const t=wholePlanned?wholePlanned.treatment:rootPlanned.treatment; if(!hideWholeRing(t)) art.insertAdjacentHTML("beforeend",`<div class="plan-ring" style="--ring-color:${COLORS[t]}"></div>`)} if(!ghost&&v==="front"&&latestWatch(n,"existing")) art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} else if(!ghost&&v==="front"&&watch){art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} holder.appendChild(art); if(!ghost)appendConditionBadges(holder,n,layer,v); if(ghost){holder.addEventListener("click",e=>{if(!isMobileToothModalViewport())return;e.preventDefault();e.stopPropagation();activatePrimaryOptionalTooth(n)});holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); activatePrimaryOptionalTooth(n)}); return holder} holder.addEventListener("click",()=>handleToothClick(n,v,statusContext)); if(chartMode==="primary"&&isPrimaryOptionalMolar(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); deactivatePrimaryOptionalTooth(n)}); else if(swapPrimaryToothNumber(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); togglePrimaryTooth(n,v)});
