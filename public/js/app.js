@@ -878,15 +878,55 @@ async function inlineChartImageAssets(stage){
   await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
   return ()=>originals.forEach(({image,href})=>image.setAttribute("href",href));
 }
-function matchChartImageArchGaps(stage){
-  // The desktop PNG renderer compresses the upper root/crown gap when it
-  // applies the nested tooth transforms. Use the existing space above the
-  // upper roots; do not move crowns, numbers, or section boundaries.
-  if(stage.ownerDocument.defaultView.innerWidth<1101)return;
-  for(const row of stage.querySelectorAll(".upper-root-row")){
-    const currentTop=parseFloat(stage.ownerDocument.defaultView.getComputedStyle(row).top)||0;
-    row.style.position="relative";
-    row.style.top=`${currentTop-24}px`;
+function prepareChartImageClone(stage){
+  const view=stage.ownerDocument.defaultView;
+  // Compensate for the canvas painter's nested upper-tooth transform offset.
+  if(view.innerWidth>=1101)for(const row of stage.querySelectorAll('.upper-root-row')){
+    row.style.top=`${(parseFloat(view.getComputedStyle(row).top)||0)-24}px`;
+    row.style.position='relative';
+  }
+  // Freeze SVG styling before html2canvas serializes each SVG as an image.
+  // This also resolves custom properties used by clasp and treatment artwork.
+  for(const element of stage.querySelectorAll('svg,svg *')){
+    const computed=view.getComputedStyle(element);
+    const properties=['color','fill','fill-opacity','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','font-family','font-size','font-weight','text-anchor','paint-order'];
+    const values=properties.map(property=>[property,computed.getPropertyValue(property)]);
+    for(const [property,value] of values)element.style.setProperty(property,value);
+  }
+  // SVG-as-image rendering clips overflow at its viewport. Include the clasps
+  // extending onto adjacent teeth without moving or scaling their artwork.
+  for(const svg of stage.querySelectorAll('svg.partial-denture-overlay')){
+    const box=svg.viewBox.baseVal,pad=24;
+    const width=box.width,height=box.height;
+    svg.setAttribute('viewBox',`${box.x-pad} ${box.y-pad} ${width+pad*2} ${height+pad*2}`);
+    svg.setAttribute('width',width+pad*2);svg.setAttribute('height',height+pad*2);
+    Object.assign(svg.style,{width:`${width+pad*2}px`,height:`${height+pad*2}px`,left:`${-pad}px`,top:`${-pad}px`,maxWidth:'none'});
+  }
+  // html2canvas supports overflow clipping but ignores CSS clip-path. Preserve
+  // the exact inset in local tooth coordinates, including flipped upper teeth.
+  for(const element of stage.querySelectorAll('[style]')){
+    const style=view.getComputedStyle(element);
+    const match=style.clipPath.match(/^inset\(([^)]+)\)$/);
+    if(!match)continue;
+    const values=match[1].trim().split(/\s+/);
+    const [top,right=top,bottom=top,left=right]=values;
+    const width=element.clientWidth,height=element.clientHeight;
+    const pixels=(value,size)=>parseFloat(value)*(value.endsWith('%')?size/100:1);
+    const t=pixels(top,height),r=pixels(right,width),b=pixels(bottom,height),l=pixels(left,width);
+    const crop=stage.ownerDocument.createElement('div'),content=stage.ownerDocument.createElement('div');
+    crop.style.cssText=`position:absolute;top:${t}px;left:${l}px;width:${Math.max(0,width-l-r)}px;height:${Math.max(0,height-t-b)}px;overflow:hidden;`;
+    content.style.cssText=`position:absolute;top:${-t}px;left:${-l}px;width:${width}px;height:${height}px;`;
+    // Keep descendant selector-dependent styles after inserting crop wrappers.
+    for(const child of element.querySelectorAll('*')){
+      const computed=view.getComputedStyle(child);
+      const properties=['position','top','right','bottom','left','width','height','transform','transform-origin','display'];
+      const values=properties.map(property=>[property,computed.getPropertyValue(property)]);
+      for(const [property,value] of values)child.style.setProperty(property,value);
+    }
+    content.append(...element.childNodes);crop.append(content);element.append(crop);
+    element.style.width=`${width}px`;element.style.height=`${height}px`;
+    element.style.clipPath='none';
+    if(style.position==='static')element.style.position='relative';
   }
 }
 async function downloadChartImage(){
@@ -907,17 +947,11 @@ async function downloadChartImage(){
     const height=Math.ceil(stage.scrollHeight);
     const scale=Math.min(3,Math.max(2,window.devicePixelRatio||1));
     const canvas=await window.html2canvas(stage,{
-      backgroundColor:getComputedStyle(stage).backgroundColor||"#1b2c3d",
-      scale,
-      useCORS:true,
-      logging:false,
-      onclone:(_document,clonedStage)=>matchChartImageArchGaps(clonedStage),
-      width,
-      height,
-      windowWidth:Math.max(document.documentElement.clientWidth,width),
-      windowHeight:Math.max(document.documentElement.clientHeight,height),
-      scrollX:0,
-      scrollY:-window.scrollY
+      backgroundColor:getComputedStyle(stage).backgroundColor,
+      scale,useCORS:true,logging:false,width,height,
+      windowWidth:window.innerWidth,windowHeight:window.innerHeight,
+      scrollX:window.scrollX,scrollY:window.scrollY,
+      onclone:(_document,clonedStage)=>prepareChartImageClone(clonedStage)
     });
     const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
     if(!blob)throw new Error("The chart image could not be created.");
