@@ -5,6 +5,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 const app=readFileSync(new URL('../public/js/app.js',import.meta.url),'utf8');
 const materials=readFileSync(new URL('../public/js/materials.js',import.meta.url),'utf8');
+const materialsCss=readFileSync(new URL('../css/materials.css',import.meta.url),'utf8');
 function declarations(source){return ts.createSourceFile('source.js',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS).statements.filter(ts.isFunctionDeclaration).map(n=>n.getText()).join('\n');}
 function setup(){
  const c=vm.createContext({lowerCrownFilterSequence:0,wholeStatusOverlaySerial:0,chartMode:'permanent',draft:{treatment:'filling',material:null},document:{addEventListener:()=>{}},selection:{teeth:[24,27]},flatEntries:()=>[]});
@@ -55,6 +56,15 @@ test('surface treatments require a selected surface before saving',()=>{
   c.draft={treatment,surfaces:[]};assert.equal(c.surfaceSelectionError(),'');
  }
 });
+test('missing condition applies to both chart layers from one saved entry',()=>{
+ const c=setup();
+ for(const status of ['existing','planned','watch']){
+  c.activeState=()=>({24:{entries:[{treatment:'missing',status,layer:status==='planned'?'planned':'existing'}]}});
+  assert.equal(c.isToothMissing(24),true);
+ }
+ c.activeState=()=>({24:{entries:[{treatment:'caries',status:'existing',surfaces:['M']}]}});
+ assert.equal(c.isToothMissing(24),false);
+});
 test('material field visibility follows the treatment group',()=>{
  const c=setup();
  for(const treatment of ['caries','fracture','crack','retainedRoot','m1','m2','m3','impacted','kiv'])assert.equal(c.shouldShowMaterialField(treatment),false);
@@ -77,6 +87,13 @@ test('implant overlay keeps crown geometry without inheriting the crown color',(
  const c=setup();
  assert.match(c.wholeStatusOverlaySVG(24,'front','implant','existing',{treatment:'implant',material:null}),/#0f9fa8/);
  assert.match(c.wholeStatusOverlaySVG(24,'front','implant','existing',{treatment:'implant',material:'gold'}),/#d4a72c/);
+});
+test('extraction cross keeps its strong red color in root and crown views',()=>{
+ const c=setup();
+ const root=c.extractionCrossSVG(28,'front'),crown=c.extractionCrossSVG(28,'occ');
+ assert.match(root,/stroke="#ef4444"/);
+ assert.match(crown,/stroke="#ef4444"/);
+ assert.match(materialsCss,/\.art-core:is\(\.occ,\.front\) \.extraction-cross path\[fill="none"\] \{ stroke:#ef4444!important; opacity:1!important; \}/);
 });
 test('root canal overlay draws root-only lines clipped to each tooth',()=>{
  const c=setup();
