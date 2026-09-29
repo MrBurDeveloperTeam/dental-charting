@@ -154,25 +154,37 @@ function applyAnatomyClip(core,n,v,entry){
     core.insertAdjacentHTML('beforeend','<svg class="surface-svg pfm-line" width="'+b.width+'" height="'+b.height+'" viewBox="0 0 '+b.width+' '+b.height+'"><path d="M3 '+y+' Q'+b.width/2+' '+(y+2)+' '+(b.width-3)+' '+y+'" fill="none" stroke="#151515" stroke-width="2.6"/></svg>');
   }
 }
+// Root artwork uses crown-up coordinates; the art-core flips the upper arch as a unit.
+// A shallow concavity at the CEJ represents cervical wear without a gingival band.
+function abrasionOverlaySVG(n,view='front'){
+  if(view!=='front')return '';
+  // Move the entire notch crownward; upper artwork flips this into a downward
+  // screen shift, while lower artwork moves upward. Keep other CEJ helpers intact.
+  const b=crownBounds(n,view),w=b.width,y=b.end-8;
+  return `<svg class="surface-svg abrasion-overlay" width="${w}" height="${b.height}" viewBox="0 0 ${w} ${b.height}" role="img" aria-label="Abrasion: cervical tooth wear"><title>Abrasion: cervical tooth wear</title><g transform="translate(0 ${y}) scale(${w/40})"><path d="M6 -3 C10 -6 14 1 20 0 C25 -1 29 -4 33 -1 C29 1 27 6 20 7 C13 9 8 6 6 -3Z" fill="#d87532" fill-opacity="1" stroke="#98451f" stroke-width="1"/><path d="M6.5 -2.5 C11 -5 14 2 20 1 C25 0 29 -3 32 -1" fill="none" stroke="#783719" stroke-width="1.5" stroke-linecap="round"/><path d="M8 2 C12 8 20 9 27 3" fill="none" stroke="#ffe6bb" stroke-width="1.1" stroke-linecap="round"/><path d="M11 2 Q17 5 23 2" fill="none" stroke="#efaa65" stroke-width=".7"/></g></svg>`;
+}
 function perioPocketOverlaySVG(n,view='front'){
   if(view!=='front')return '';
-  const b=crownBounds(n,view),w=b.width,y=b.end;
-  return `<svg class="surface-svg perio-pocket-overlay" width="${w}" height="${b.height}" viewBox="0 0 ${w} ${b.height}" role="img" aria-label="Perio Pocket"><title>Perio Pocket</title><g transform="translate(0 ${y}) scale(${w/40})"><path d="M4 -5 Q12 1 21 -3 Q28 -8 34 -5 L33 5 Q28 14 20 9 Q10 9 5 4Z" fill="#fa7d86" fill-opacity=".78" stroke="#e86572" stroke-width="1"/><path d="M27 -4 Q26 5 29 7 Q33 4 34 -6" fill="#e84f62" fill-opacity=".85"/><path d="M29 5 L38 -29 L46 -28" fill="none" stroke="#696d73" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/><path d="M29 5 L38 -29 L46 -28" fill="none" stroke="#b8bbc0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M31 -3 L33 -2 M33 -10 L35 -9 M35 -17 L37 -16" stroke="#50545a" stroke-width="2"/></g></svg>`;
+  const w=toothW(n),h=toothH(n);
+  // Keep PP at the apical end, clear of cervical wear. Counter-flip the text
+  // inside upper-arch artwork so the letters remain upright in chart and preview.
+  return `<svg class="surface-svg perio-pocket-overlay" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Perio Pocket"><title>Perio Pocket</title><g transform="translate(${w/2} ${h-7}) scale(1 ${isUpper(n)?-1:1})"><text x="0" y="0" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="21" font-weight="600" fill="#38b6ff" stroke="#123b70" stroke-width="1" paint-order="stroke fill" stroke-linejoin="round">PP</text></g></svg>`;
+}
+
+function impactedOverlaySVG(n,view='occ'){
+  if(view!=='occ')return '';
+  const {width:w,height:h}=crownDims(n),y=isUpper(n)?h-7:7;
+  return `<svg class="surface-svg impacted-root-label" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" role="img" aria-label="Impacted"><title>Impacted</title><text x="${w/2}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="Arial, sans-serif" font-size="15" font-weight="700" fill="#f14d2c" stroke="#fff4e8" stroke-width=".6" paint-order="stroke fill">IMP</text></svg>`;
 }
 function appendConditionBadges(holder,n,layer,view='front'){
   const entries=activeState()[n]?.entries||[];
   const labels=entries.filter(entry=>treatmentFor(entry.treatment).mode==='label'&&entry.treatment!=='spacing'&&(layer==='combined'||entryLayer(entry)===layer));
   if(!labels.length)return;
   const impacted=labels.find(entry=>entry.treatment==='impacted');
-  if(impacted){
-    const mark=document.createElement('span');
-    mark.className=`impacted-tooth-label${impacted.status==='planned'?' planned':''}`;
-    mark.textContent='IMP';
-    mark.title=`Impacted · ${statusLabel(impacted.status)}`;
-    holder.querySelector('.tooth-art')?.append(mark);
-  }
+  if(impacted&&view==='occ')holder.querySelector('.art-core')?.insertAdjacentHTML('beforeend',impactedOverlaySVG(n,view));
+  if(view==='front'&&labels.some(entry=>entry.treatment==='abrasion'))holder.querySelector('.art-core')?.insertAdjacentHTML('beforeend',abrasionOverlaySVG(n,view));
   if(view==='front'&&labels.some(entry=>entry.treatment==='perioPocket'))holder.querySelector('.art-core')?.insertAdjacentHTML('beforeend',perioPocketOverlaySVG(n,view));
-  const externalLabels=view==='front'?labels.filter(entry=>!['impacted','perioPocket'].includes(entry.treatment)):[];
+  const externalLabels=view==='front'?labels.filter(entry=>!['impacted','perioPocket','abrasion'].includes(entry.treatment)):[];
   if(!externalLabels.length)return;
   const wrap=document.createElement('div');wrap.className='condition-badges';
   for(const entry of externalLabels){const badge=document.createElement('span');badge.className=`condition-badge badge-${entry.treatment}${entry.status==='planned'?' planned':''}`;badge.textContent=treatmentFor(entry.treatment).badge||treatmentFor(entry.treatment).label;badge.title=`${treatmentFor(entry.treatment).label} · ${statusLabel(entry.status)}`;wrap.append(badge);}

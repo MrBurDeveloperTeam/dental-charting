@@ -113,3 +113,76 @@ test('surface material color and damage marks stay surface-specific',()=>{
  const damage=c.renderSurfaceOverlay(24,'occ',{complete:{M:{treatment:'fracture'},D:{treatment:'crack'}}});
  assert.match(damage,/damage-fracture/);assert.match(damage,/damage-crack/);assert.match(damage,/clip-path/);
 });
+
+test('abrasion sits between spacing and perio pocket and uses root view without surfaces',()=>{
+ const c=setup();
+ const ids=Array.from(vm.runInContext('Object.keys(TREATMENTS)',c));
+ assert.equal(ids[ids.indexOf('spacing')+1],'abrasion');
+ assert.equal(ids[ids.indexOf('abrasion')+1],'perioPocket');
+ assert.deepEqual(Array.from(c.treatmentFor('abrasion').views),['front']);
+ c.draft={tooth:45,category:'condition',treatment:'abrasion',view:'occ',surfaces:['M']};c.normalizeDraft();
+ assert.equal(c.draft.view,'front');assert.equal(c.draft.surfaces.length,0);
+ assert.equal(c.shouldShowMaterialField('abrasion'),false);
+ assert.match(c.treatmentIconHTML('abrasion'),/#d87532/);
+});
+
+test('abrasion shifts crownward in root views across both arches and dentitions',()=>{
+ const c=setup();
+ for(const n of [11,13,14,16,21,31,33,34,36,41,51,55,71,75]){
+  const svg=c.abrasionOverlaySVG(n,'front');
+  assert.match(svg,/abrasion-overlay/);
+  assert.ok(svg.includes(`translate(0 ${c.crownCutY(n)-8})`));
+  assert.equal(c.abrasionOverlaySVG(n,'occ'),'');
+ }
+});
+
+test('saved abrasion respects chart layers and never creates a crown-view badge',()=>{
+ const c=setup();
+ c.activeState=()=>({45:{entries:[{treatment:'abrasion',status:'existing'}]}});
+ for(const view of ['front','occ'])for(const layer of ['existing','planned','combined']){
+  const inserted=[];
+  const holder={querySelector:()=>({insertAdjacentHTML:(_,html)=>inserted.push(html)}),append:()=>assert.fail('Abrasion should not create a text badge')};
+  c.appendConditionBadges(holder,45,layer,view);
+  assert.equal(inserted.length,view==='front'&&layer!=='planned'?1:0);
+ }
+});
+
+test('perio pocket uses upright blue PP at the root tip on both arches',()=>{
+ const c=setup();
+ for(const n of [11,16,31,46,51,75]){
+  const svg=c.perioPocketOverlaySVG(n,'front');
+  assert.match(svg,/>PP<\/text>/);
+  assert.match(svg,/fill="#38b6ff"/);
+  assert.ok(svg.includes(`translate(${c.toothW(n)/2} ${c.toothH(n)-7}) scale(1 ${c.isUpper(n)?-1:1})`));
+  assert.doesNotMatch(svg,/<path/);
+  assert.equal(c.perioPocketOverlaySVG(n,'occ'),'');
+ }
+});
+
+test('perio pocket and abrasion coexist without a cervical pocket overlay',()=>{
+ const c=setup(),inserted=[];
+ c.activeState=()=>({45:{entries:[{treatment:'abrasion',status:'existing'},{treatment:'perioPocket',status:'existing'}]}});
+ const holder={querySelector:()=>({insertAdjacentHTML:(_,html)=>inserted.push(html)}),append:()=>assert.fail('No external badge expected')};
+ c.appendConditionBadges(holder,45,'existing','front');
+ assert.equal(inserted.length,2);
+ assert.match(inserted[0],/abrasion-overlay/);
+ assert.match(inserted[1],/>PP<\/text>/);
+ assert.doesNotMatch(inserted[1],/<path/);
+});
+
+test('IMP appears only at the inner-view root tip on both arches',()=>{
+ const c=setup();
+ for(const n of [11,26,31,46,51,75]){
+  const dims=c.crownDims(n),svg=c.impactedOverlaySVG(n,'occ');
+  assert.match(svg,/>IMP<\/text>/);
+  assert.ok(svg.includes(`y="${c.isUpper(n)?dims.height-7:7}"`));
+  assert.equal(c.impactedOverlaySVG(n,'front'),'');
+ }
+ c.activeState=()=>({26:{entries:[{treatment:'impacted',status:'existing'}]}});
+ for(const view of ['front','occ'])for(const layer of ['existing','planned','combined']){
+  const marks=[];
+  const holder={append:()=>assert.fail('No external IMP badge'),querySelector:()=>({insertAdjacentHTML:(_,html)=>marks.push(html)})};
+  c.appendConditionBadges(holder,26,layer,view);
+  assert.equal(marks.length,view==='occ'&&layer!=='planned'?1:0);
+ }
+});

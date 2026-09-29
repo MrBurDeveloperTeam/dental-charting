@@ -179,3 +179,16 @@ test('saved summary groups treatment spans and keeps overlapping spacing pairs s
  const groups=c.savedEntryGroups(items);assert.deepEqual(Array.from(groups,g=>g.length),[3,2,2,2,1,1]);
  assert.equal(c.savedEntryGroups([...items,{tooth:36,treatment:'bridge',bridgeId:'b',status:'planned'}]).length,7);
 });
+
+test('lower inner-view spacing markers align with full-tooth midpoints at every zoom',()=>{
+ const {context:c}=setup();
+ const fn=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='positionSpacingMarkers');vm.runInContext(fn.getText(ast),c);
+ for(const scale of [0.6,1,1.5]){
+  const art=(left,width)=>({getBoundingClientRect:()=>({left:left*scale,right:(left+width)*scale,width:width*scale,top:20*scale,height:100*scale})});
+  const left={offsetWidth:60,offsetHeight:120,getBoundingClientRect:()=>({left:90*scale,top:0,width:60*scale,height:120*scale}),querySelector:()=>art(100,40),nextElementSibling:{querySelector:()=>art(160,50)}};
+  left.parentElement={classList:{contains:()=>true},dataset:{bridgeTeeth:'[46,45]'},children:[left,left.nextElementSibling]};
+  const marker={parentElement:left,style:{}};c.document.querySelectorAll=()=>[marker];c.positionSpacingMarkers();
+  assert.ok(Math.abs(parseFloat(marker.style.top)-70)<.001);
+  assert.ok(Math.abs(parseFloat(marker.style.left)-60)<.001);
+ }
+});
