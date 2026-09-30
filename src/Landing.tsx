@@ -127,11 +127,22 @@ export function DentalChartingLandingPage({
     <main className="dental-landing">
       <nav className="dental-nav">
         <a className="dental-brand" href="#top" onClick={closeMenu}>
-          <span className="dental-brand-mark">
+          {/* <span className="dental-brand-mark">
             <Activity size={20} />
           </span>
 
           <span>
+            Dental <strong>Charting</strong>
+          </span> */}
+          <img
+            className="dental-brand-logo"
+            src="/assets/images/snabbb-teal.png"
+            alt="Snabbb"
+          />
+
+          <span className="dental-brand-divider" aria-hidden="true" />
+
+          <span className="dental-brand-product">
             Dental <strong>Charting</strong>
           </span>
         </a>

@@ -101,10 +101,32 @@
 .dental-brand {
   display: inline-flex;
   align-items: center;
-  gap: 10px;
+  gap: 20px;
   color: var(--dental-navy);
-  font-family: "Open Sans", sans-serif;
-  font-size: 18px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.dental-brand-logo {
+  display: block;
+  width: 169px;
+  height: 34px;
+  object-fit: contain;
+}
+
+.dental-brand-divider {
+  width: 1px;
+  height: 46px;
+  background: #d8e2e3;
+}
+
+.dental-brand-product {
+  color: #3f7f78;
+  white-space: nowrap;
+}
+
+.dental-brand-product strong {
+  color: #3f7f78;
   font-weight: 800;
 }
 
@@ -1026,4 +1048,18 @@
   .dental-footer-links {
     margin-left: 0;
   }
+
+  .dental-brand {
+  gap: 12px;
+  font-size: 18px;
+}
+
+.dental-brand-logo {
+  width: 125px;
+  height: 26px;
+}
+
+.dental-brand-divider {
+  height: 32px;
+}
 }
