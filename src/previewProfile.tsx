@@ -1,15 +1,15 @@
 import { createRoot } from "react-dom/client";
-import html2canvas from "html2canvas";
+import { chartToBlob } from "./services/chartImage";
 import { ProfileSettings } from "./components/profileSettings/ProfileSettings";
 import "./components/profileSettings/profileSettings.css";
 
 declare global {
   interface Window {
-    html2canvas: typeof html2canvas;
+    chartToBlob: typeof chartToBlob;
   }
 }
 
-window.html2canvas = html2canvas;
+window.chartToBlob = chartToBlob;
 
 const root = document.getElementById("profile-settings-root");
 

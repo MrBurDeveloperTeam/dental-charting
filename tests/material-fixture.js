@@ -16,6 +16,16 @@ if(new URLSearchParams(location.search).has('export')){
     [27,'partialDenture',{bridgeId:'export-denture'}],
     [38,'implant',{}],[48,'retainedRoot',{}],[18,'implant',{}]
   ])state.permanent[tooth].entries=[{id:'export-'+tooth,tooth,treatment,...extra,category:'prosthetic',view:'front',status:'existing',layer:'existing',surfaces:[],note:''}];
+  // Cover export alignment regressions in both layers and both arches.
+  for(const layer of ['existing','planned']){
+    for(const [tooth,treatment,extra] of [
+      [28,'missing',{}],[45,'missing',{}],
+      [25,'m3',{}],[25,'kiv',{}],[25,'perioPocket',{}],[25,'impacted',{}],
+      [34,'m3',{}],[34,'kiv',{}],[34,'perioPocket',{}],
+      [11,'spacing',{bridgeId:`spacing-upper-${layer}`}],[21,'spacing',{bridgeId:`spacing-upper-${layer}`}],
+      [41,'spacing',{bridgeId:`spacing-lower-${layer}`}],[31,'spacing',{bridgeId:`spacing-lower-${layer}`}]
+    ])state.permanent[tooth].entries.push({id:`export-${layer}-${tooth}-${treatment}`,tooth,treatment,...extra,category:'condition',view:'front',status:layer,layer,surfaces:[],note:''});
+  }
   draft.tooth=null;selection.teeth=[];renderAll();
   // Exercise the production download path without a native file dialog.
   window.showSaveFilePicker=async()=>({createWritable:async()=>({

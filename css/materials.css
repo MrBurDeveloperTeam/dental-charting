@@ -30,12 +30,56 @@
 #material-manager-message { min-height:20px; padding:0 18px; }
 .material-chip:focus-visible,.material-manager-row input:focus-visible { outline:2px solid var(--primary); outline-offset:2px; }
 #note-input { resize:none; min-height:88px; }
-.condition-badges { display:flex; flex-direction:column; align-items:center; gap:2px; position:absolute; left:50%; z-index:7; transform:translateX(-50%); pointer-events:none; }
+.condition-badges { display:flex; flex-direction:column; align-items:center; gap:2px; position:absolute; left:50%; z-index:7; transform:translateX(-50%); pointer-events:none; white-space:nowrap; overflow:visible; }
 .upper-root-row .condition-badges { top:0; transform:translate(-50%,calc(-100% - 5px)); }
 .lower-root-row .condition-badges { bottom:0; transform:translate(-50%,calc(100% + 5px)); }
 .condition-badge { border-radius:4px; padding:2px 4px; font:700 9px/1.2 Inter,sans-serif; background:#fde68a; color:#422006; border:1px solid #fbbf24; }
 .condition-badge.badge-m1,.condition-badge.badge-m2,.condition-badge.badge-m3 { background:#fecdd3; color:#881337; border-color:#fb7185; }
 .condition-badge.planned { border-style:solid; }
+
+/*
+ * Root-view annotations sit outside the tooth artwork. Reserve real layout
+ * space for a two-label stack (for example KIV + M1), so the live chart,
+ * html2canvas PNG clone and printed PDF all include the complete stack.
+ */
+#split-stage {
+  --condition-label-clearance: 38px;
+}
+#split-stage .upper-grid {
+  padding-top: var(--condition-label-clearance);
+}
+#split-stage .lower-grid {
+  padding-bottom: var(--condition-label-clearance);
+}
+#split-stage .split-group,
+#split-stage .arch-grid,
+#split-stage .teeth-row,
+#split-stage .tooth {
+  overflow: visible;
+}
+
+@media screen and (max-width:600px) {
+  #split-stage { --condition-label-clearance: 32px; }
+}
+
+/* Use the empty band above the chart instead of increasing the fixed desktop
+ * panel. This moves every arch upward and keeps the planned lower roots in view. */
+@media screen and (min-width:1101px) {
+  .chart-workspace > .chart-card > .chart-stage-wrap {
+    padding-top: 0;
+  }
+  #split-stage {
+    padding-top: 0;
+  }
+}
+
+@media print {
+  #split-stage { --condition-label-clearance: 38px; }
+  #split-stage .upper-grid { padding-top:var(--condition-label-clearance)!important; }
+  #split-stage .lower-grid { padding-bottom:var(--condition-label-clearance)!important; }
+  #split-stage .condition-badges,
+  #split-stage .condition-badge { visibility:visible!important; opacity:1!important; }
+}
 .perio-pocket-overlay { overflow:visible; pointer-events:none; z-index:8; }
 .mini-condition-badge { position:absolute; top:8px; left:50%; z-index:7; transform:translateX(-50%); pointer-events:none; }
 .impacted-tooth-label { 
@@ -123,6 +167,12 @@
 
 /* Give replacement crowns space inside the saddle and keep end clasps above abutments. */
 .art-core > .partial-denture-crown { transform:scaleX(.88); transform-origin:center; }
+/* In the lower root view, keep the replacement crown at its normal tooth
+ * width. Do not scale its height—the saddle replaces the missing root area. */
+.lower-root-row .art-core.front > .partial-denture-crown {
+  transform:scaleX(1);
+  transform-origin:center;
+}
 .teeth-row > .tooth:has(.partial-denture-overlay) { z-index:11; }
 #split-stage .teeth-row > .tooth:has(.partial-denture-overlay):hover { z-index:12; }
 .mini-bridge-tooth:has(.partial-denture-overlay) { z-index:1; }
