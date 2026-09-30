@@ -69,7 +69,7 @@ Controls use the shared 12px radius. Dense field chips may use 6px radii. The ch
 
 ## Components
 
-All controls require clear hover, focus-visible, active, selected, and disabled states. Treatment-field scrollbars remain visible and inherit application tokens; the saved-entry list is the documented compact-rail exception, remaining wheel/touch/keyboard scrollable while its scrollbar chrome is hidden. Blue solid buttons commit, white outlined buttons are secondary, and red is destructive. The selected-tooth summary is fixed within the editor column; its lower fields own vertical scrolling. Motion is limited to short hover and selection feedback.
+All controls require clear hover, focus-visible, active, selected, and disabled states. Treatment fields and saved-entry lists use visible, tokenized scrollbars. Their internal scrolling chains to the page when continued at the top or bottom edge. Blue solid buttons commit, white outlined buttons are secondary, and red is destructive. The selected-tooth summary is fixed within the editor column; its lower fields own vertical scrolling. Motion is limited to short hover and selection feedback.
 
 ## Do's and Don'ts
 
