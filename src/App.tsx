@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { DentalChartPage } from "./pages/DentalChartPage";
 import { PatientRecordsPage } from "./pages/PatientRecordsPage";
@@ -11,10 +11,21 @@ import { DentalChartingLandingPage } from "./Landing";
 import { pagePathForView, setActivePage } from "./services/activityLog";
 
 export default function App() {
+  // Local-only UI review switch. The DEV guard keeps this unavailable in production.
+  const bypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true";
   const [view, setView] = useState<"chart" | "records" | "review" | "edit">("chart");
   const [selectedRecord, setSelectedRecord] = useState<PatientRecord | null>(null);
   const [patientVisitRecords, setPatientVisitRecords] = useState<PatientRecord[]>([]);
   const [reviewLayer, setReviewLayer] = useState<"existing" | "planned">("existing");
+
+  useLayoutEffect(() => {
+    if (!bypassAuth) return;
+    document.body.classList.remove("auth-session-gated");
+    const renderFrame = window.requestAnimationFrame(() => {
+      document.dispatchEvent(new CustomEvent("dental-chart:auth-ready"));
+    });
+    return () => window.cancelAnimationFrame(renderFrame);
+  }, [bypassAuth]);
 
   useEffect(() => {
     const chartNav = document.getElementById("chart-nav-item");
@@ -190,11 +201,7 @@ export default function App() {
     </>
   );
 
-  // Local-only CSS/UI debugging switch. Production can never use this bypass.
-  // TEMPORARY: bypass login to check the preview layout.
-  const bypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true";
-  // const bypassAuth = true;
-  const profileSettings = document.getElementById("profile-settings-root")
+  const profileSettings = !bypassAuth && document.getElementById("profile-settings-root")
     ? createPortal(<ProfileSettings />, document.getElementById("profile-settings-root")!)
     : null;
 

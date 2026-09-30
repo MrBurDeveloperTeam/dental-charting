@@ -66,21 +66,23 @@ export function PatientModal() {
           </div>
         </section>
 
-        <form className="patient-form" id="patient-form" role="tabpanel" hidden={activeTab !== "new"}>
+        <form className="patient-form" id="patient-form" role="tabpanel" hidden={activeTab !== "new"} noValidate>
           <div className="patient-grid">
             <div className="patient-section-title full"><span>Personal Information</span></div>
             <div className="patient-field full">
               <label htmlFor="patient-full-name">Full Name <span className="patient-required">*</span></label>
-              <input id="patient-full-name" name="fullName" type="text" placeholder="e.g. Sarah Lim Mei Ling" required />
+              <input id="patient-full-name" name="fullName" type="text" placeholder="e.g. Sarah Lim Mei Ling" autoComplete="name" aria-describedby="patient-full-name-error" />
+              <small className="patient-field-error" id="patient-full-name-error" role="alert" hidden />
             </div>
 
             <div className="patient-field">
               <label htmlFor="patient-dob-text">Date of birth <span className="patient-required">*</span></label>
               <div className="date-field-shell">
-                <input className="date-text-input" id="patient-dob-text" type="text" inputMode="numeric" placeholder="DD/MM/YYYY" autoComplete="bday" />
+                <input className="date-text-input" id="patient-dob-text" type="text" inputMode="numeric" placeholder="DD/MM/YYYY" autoComplete="bday" aria-describedby="dob-date-error" />
                 <button className="date-picker-btn" id="patient-dob-trigger" type="button" aria-label="Open date of birth calendar">📅</button>
                 <input id="patient-dob" name="dob" type="hidden" />
               </div>
+              <small className="patient-field-error date-field-error" id="dob-date-error" role="alert" hidden />
             </div>
 
             {/* Internal database ID: populated automatically when patient records are connected. */}
@@ -88,16 +90,18 @@ export function PatientModal() {
 
             <div className="patient-field">
               <label htmlFor="patient-id-number">IC / ID Number <span className="patient-required">*</span></label>
-              <input id="patient-id-number" name="idNumber" type="text" placeholder="e.g. 900101-14-1234" />
+              <input id="patient-id-number" name="idNumber" type="text" inputMode="numeric" placeholder="e.g. 900101-14-1234" aria-describedby="patient-id-number-error" />
+              <small className="patient-field-error" id="patient-id-number-error" role="alert" hidden />
             </div>
 
             <div className="patient-field">
               <label htmlFor="patient-gender">Gender <span className="patient-required">*</span></label>
-              <select id="patient-gender" name="gender" defaultValue="">
+              <select id="patient-gender" name="gender" defaultValue="" aria-describedby="patient-gender-error">
                 <option value="">Select gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
               </select>
+              <small className="patient-field-error" id="patient-gender-error" role="alert" hidden />
             </div>
 
             <div className="patient-field">
@@ -108,12 +112,14 @@ export function PatientModal() {
             <div className="patient-section-title full"><span>Contact Information</span></div>
             <div className="patient-field">
               <label htmlFor="patient-phone">Phone <span className="patient-required">*</span></label>
-              <input id="patient-phone" name="phone" type="tel" placeholder="e.g. +60 12-345 6789" required />
+              <input id="patient-phone" name="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="e.g. +60 12-345 6789" aria-describedby="patient-phone-error" />
+              <small className="patient-field-error" id="patient-phone-error" role="alert" hidden />
             </div>
 
             <div className="patient-field">
-              <label htmlFor="patient-email">Email</label>
-              <input id="patient-email" name="email" type="email" placeholder="e.g. sarah@email.com" />
+              <label htmlFor="patient-email">Email <span className="patient-required">*</span></label>
+              <input id="patient-email" name="email" type="email" autoComplete="email" placeholder="e.g. sarah@email.com" aria-describedby="patient-email-error" />
+              <small className="patient-field-error" id="patient-email-error" role="alert" hidden />
             </div>
 
             <div className="patient-field patient-guardian-email-toggle">
@@ -212,6 +218,7 @@ export function PatientModal() {
           </div>
 
           <div className="modal-actions">
+            <p className="patient-form-status" id="patient-form-status" role="alert" hidden />
             <button className="btn secondary" type="button" id="patient-clear-btn">Clear</button>
             <button className="btn secondary" type="button" id="patient-cancel-btn">Cancel</button>
             <button className="btn primary" type="submit">Save patient</button>

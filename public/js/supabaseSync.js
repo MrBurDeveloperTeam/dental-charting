@@ -190,6 +190,86 @@
     };
   }
 
+  const patientValidationFields = {
+    fullName: { inputId: "patient-full-name", errorId: "patient-full-name-error" },
+    dob: { inputId: "patient-dob-text", errorId: "dob-date-error" },
+    idNumber: { inputId: "patient-id-number", errorId: "patient-id-number-error" },
+    gender: { inputId: "patient-gender", errorId: "patient-gender-error" },
+    phone: { inputId: "patient-phone", errorId: "patient-phone-error" },
+    email: { inputId: "patient-email", errorId: "patient-email-error" },
+  };
+  const touchedPatientFields = new Set();
+  let rejectedPatientIc = null;
+
+  function setPatientFieldError(field, message = "") {
+    const config = patientValidationFields[field];
+    if (!config) return;
+    const input = document.getElementById(config.inputId);
+    const error = document.getElementById(config.errorId);
+    input?.classList.toggle("patient-input-invalid", Boolean(message));
+    if (message) input?.setAttribute("aria-invalid", "true");
+    else input?.removeAttribute("aria-invalid");
+    if (error) {
+      error.textContent = message;
+      error.hidden = !message;
+    }
+  }
+
+  function setPatientFormStatus(message = "") {
+    const status = document.getElementById("patient-form-status");
+    if (!status) return;
+    status.textContent = message;
+    status.hidden = !message;
+  }
+
+  function clearPatientValidation() {
+    rejectedPatientIc = null;
+    touchedPatientFields.clear();
+    Object.keys(patientValidationFields).forEach((field) => setPatientFieldError(field, ""));
+    setPatientFormStatus("");
+  }
+
+  function liveDobError(value, submitted, completeDateError) {
+    const digits = String(value || "").replace(/\D/g, "").slice(0, 8);
+    if (!digits) return submitted ? "Enter the patient's date of birth." : "";
+    if (digits.length < 2) return submitted ? "Complete the date of birth as DD/MM/YYYY." : "";
+
+    const day = Number(digits.slice(0, 2));
+    if (day < 1 || day > 31) return "Enter a valid day from 01 to 31.";
+    if (digits.length < 4) return submitted ? "Complete the date of birth as DD/MM/YYYY." : "";
+
+    const month = Number(digits.slice(2, 4));
+    if (month < 1 || month > 12) return "Enter a valid month from 01 to 12.";
+    if (digits.length < 8) return submitted ? "Complete the date of birth as DD/MM/YYYY." : "";
+    return completeDateError || "";
+  }
+
+  function validatePatientForm({ focusFirst = false, showAll = false } = {}) {
+    const payload = patientFormPayload();
+    if (!payload || !window.dentalPatients?.validate) return payload ? {} : { fullName: "Patient form is unavailable." };
+
+    // Keep the hidden ISO value synchronized while the user types a complete DOB.
+    const dobText = document.getElementById("patient-dob-text")?.value || "";
+    const parsedDob = typeof parseTypedDate === "function" ? parseTypedDate(dobText) : null;
+    payload.dob = typeof parsedDob === "string" ? parsedDob : null;
+    const errors = window.dentalPatients.validate(payload);
+    if (rejectedPatientIc && String(payload.idNumber || "").replace(/\D/g, "") === rejectedPatientIc) {
+      errors.idNumber = "A patient with this IC / ID already exists. Search for and select the existing patient instead.";
+    } else if (rejectedPatientIc) {
+      rejectedPatientIc = null;
+    }
+    errors.dob = liveDobError(dobText, showAll, errors.dob);
+    Object.keys(patientValidationFields).forEach((field) => {
+      if (showAll || touchedPatientFields.has(field)) setPatientFieldError(field, errors[field] || "");
+    });
+    setPatientFormStatus("");
+    if (focusFirst) {
+      const firstField = Object.keys(patientValidationFields).find((field) => errors[field]);
+      if (firstField) document.getElementById(patientValidationFields[firstField].inputId)?.focus();
+    }
+    return errors;
+  }
+
   async function createNewPatient(event) {
     // Capture this submission before app.js stores a patient without a cloud UUID.
     event.preventDefault();
@@ -197,19 +277,13 @@
 
     const form = event.currentTarget;
     const submitButton = form.querySelector('button[type="submit"]');
-    if (typeof commitDateField === "function" && !commitDateField("dob", { emptyOk: true })) {
-      document.getElementById("patient-dob-text")?.focus();
-      return;
-    }
+    if (typeof commitDateField === "function") commitDateField("dob", { emptyOk: false });
     const payload = patientFormPayload();
     if (!payload) return;
-
-    if (!payload.name || !payload.phone) {
-      form.reportValidity();
-      return;
-    }
+    const validationErrors = validatePatientForm({ focusFirst: true, showAll: true });
+    if (Object.keys(validationErrors).length) return;
     if (payload.emailIsGuardian && (!payload.email || !payload.guardianName || !payload.guardianRelationship)) {
-      window.alert("Enter the guardian email, name, and relationship.");
+      setPatientFormStatus("Enter the guardian email, name, and relationship.");
       return;
     }
 
@@ -235,7 +309,17 @@
       setBadge("Cloud: patient created ✓", "#15803d");
     } catch (error) {
       setBadge("Cloud: patient save failed", "#b91c1c");
-      window.alert(error?.message || "Unable to create patient. Please try again.");
+      if (error?.code === "PATIENT_DUPLICATE") {
+        rejectedPatientIc = String(payload.idNumber || "").replace(/\D/g, "");
+        const duplicateField = error.field === "idNumber" ? "idNumber" : "fullName";
+        setPatientFieldError(duplicateField, error.message);
+        document.getElementById(patientValidationFields[duplicateField].inputId)?.focus();
+      } else if (error?.code === "PATIENT_VALIDATION" && error.validationErrors) {
+        Object.entries(error.validationErrors).forEach(([field, message]) => setPatientFieldError(field, message));
+        validatePatientForm({ focusFirst: true });
+      } else {
+        setPatientFormStatus(error?.message || "Unable to create patient. Please try again.");
+      }
     } finally {
       if (submitButton) {
         submitButton.disabled = false;
@@ -607,7 +691,21 @@
 
     // Create the patient in Supabase before allowing local/chart persistence.
     const patientForm = document.getElementById("patient-form");
-    if (patientForm) patientForm.addEventListener("submit", createNewPatient, true);
+    if (patientForm) {
+      patientForm.addEventListener("submit", createNewPatient, true);
+      Object.values(patientValidationFields).forEach(({ inputId }) => {
+        const input = document.getElementById(inputId);
+        const field = Object.keys(patientValidationFields).find((key) => patientValidationFields[key].inputId === inputId);
+        const eventName = input?.tagName === "SELECT" ? "change" : "input";
+        input?.addEventListener(eventName, () => {
+          if (field) touchedPatientFields.add(field);
+          validatePatientForm();
+        });
+        input?.addEventListener("blur", () => validatePatientForm());
+      });
+      patientForm.addEventListener("reset", clearPatientValidation);
+      document.getElementById("patient-clear-btn")?.addEventListener("click", clearPatientValidation);
+    }
 
     const patientTrigger = document.getElementById("patient-trigger");
     if (patientTrigger) patientTrigger.addEventListener("click", searchExistingPatients);

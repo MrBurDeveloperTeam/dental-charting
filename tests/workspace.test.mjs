@@ -34,3 +34,14 @@ test('denied workspace never falls back to profile clinic',async()=>{
  const patients=s.load('../src/services/dentalPatients.ts',{'./workspaceContext':s.workspace,'../lib/supabaseClient':{getSupabaseClient:()=>({auth:{setSession:async()=>({data:{user:{id:'member'}}})}})}},{fetch:async url=>url.endsWith('/sso/exchange')?{ok:true,json:async()=>({access_token:'token',refresh_token:'refresh'})}:{ok:false,json:async()=>({error:'Company access denied'})}});
  await assert.rejects(patients.getClinicSession(),/Company access denied/);
 });
+test('patient validation enforces the six required fields and keeps optional blanks null',()=>{
+ const s=setup();
+ const patients=s.load('../src/services/dentalPatients.ts',{'./workspaceContext':s.workspace,'../lib/supabaseClient':{getSupabaseClient:()=>({})}});
+ const valid={name:'Nur Aisyah',dob:'1990-01-31',idNumber:'900131-14-1234',gender:'female',phone:'+60 12-345 6789',email:'AISYAH@example.com'};
+ assert.deepEqual({...patients.validateDentalPatient(valid)},{});
+ const payload=patients.buildNewPatientPayload(valid,'clinic','user');
+ assert.equal(payload.email,'aisyah@example.com');assert.equal(payload.address,null);assert.equal(payload.notes,null);
+ assert.equal(patients.normalizePatientIdNumber('900131-14-1234'),'900131141234');
+ const errors=patients.validateDentalPatient({name:'Nur 123',dob:'2026-02-30',idNumber:'ABC-12',gender:'',phone:'call-me',email:'not-an-email'});
+ assert.deepEqual(Object.keys(errors).sort(),['dob','email','fullName','gender','idNumber','phone']);
+});

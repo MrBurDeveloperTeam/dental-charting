@@ -71,6 +71,11 @@
 .patient-field input:not([type="checkbox"]):focus,.patient-field textarea:focus,.patient-field select:focus{outline:none;border-color:#1a78e8;box-shadow:0 0 0 3px rgba(26,120,232,.18)}
 .patient-field input[type="checkbox"]{accent-color:#1a78e8}
 .patient-field textarea{min-height:78px;resize:vertical}
+.patient-field input.patient-input-invalid,.patient-field textarea.patient-input-invalid,.patient-field select.patient-input-invalid,.date-text-input.invalid{border-color:#ef4444;box-shadow:0 0 0 1px rgba(239,68,68,.18)}
+.patient-field-error{min-height:16px;margin:0;color:#dc2626;font-size:12px;font-weight:650;line-height:1.35;text-transform:none;letter-spacing:0}
+.patient-field-error[hidden]{display:none}
+.patient-form-status{grid-column:1 / -1;width:100%;margin:0 0 2px;color:#b42318;font-size:12px;font-weight:650;line-height:1.4}
+.patient-form-status[hidden]{display:none}
 .patient-field.full{grid-column:1 / -1}
 .patient-section-title{display:flex;align-items:center;gap:14px;margin-top:12px;color:#1a78e8;font-size:13px;font-weight:700;line-height:1.2;letter-spacing:.13em;text-transform:uppercase}
 .patient-section-title.full{grid-column:1 / -1}
