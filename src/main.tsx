@@ -29,7 +29,10 @@ window.dentalCharts = dentalCharts;
 window.dentalMaterials = dentalMaterials;
 window.chartToBlob = chartToBlob;
 // Must run after the window.dental* services above exist — it wraps them.
-startActivityTracking();
+// Local UI review does not have a Snabbb session, so avoid a guaranteed 401.
+if (!(import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true")) {
+  startActivityTracking();
+}
 
 const rootElement = document.getElementById("react-root");
 if (!rootElement) throw new Error("Missing #react-root migration mount point");
