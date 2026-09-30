@@ -464,8 +464,10 @@
   body.patient-record-review .entries-panel > .entries-list {
     flex: 1 1 auto;
     min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    overflow-y: scroll;
+    /* Match the chart editor: continue scrolling the page at list edges. */
+    overscroll-behavior-y: auto;
+    scrollbar-gutter: stable;
   }
 }
 

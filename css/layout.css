@@ -1063,13 +1063,19 @@ input[type="reset"],
   .entries-panel>.entries-list{
     max-height:none;
     min-height:0;
-    overflow-y:auto;
-    overscroll-behavior:contain;
-    scrollbar-width:none;
-    -ms-overflow-style:none;
+    overflow-y:scroll;
+    /* Hand continued wheel/trackpad movement to the page at either edge. */
+    overscroll-behavior-y:auto;
+    scrollbar-gutter:stable;
+    scrollbar-width:auto;
+    scrollbar-color:var(--scrollbar-thumb) var(--scrollbar-track);
   }
 
-  .entries-panel>.entries-list::-webkit-scrollbar{display:none}
+  .entries-panel>.entries-list::-webkit-scrollbar{display:block;width:12px;background:var(--scrollbar-track)}
+  .entries-panel>.entries-list::-webkit-scrollbar-track{background:var(--scrollbar-track);border-radius:999px}
+  .entries-panel>.entries-list::-webkit-scrollbar-thumb{min-height:44px;border:3px solid var(--scrollbar-track);border-radius:999px;background:var(--scrollbar-thumb)}
+  .entries-panel>.entries-list::-webkit-scrollbar-thumb:hover{background:var(--scrollbar-thumb-hover)}
+  .entries-panel>.entries-list::-webkit-scrollbar-thumb:active{background:var(--scrollbar-thumb-active)}
 }
 
 @media screen and (min-width: 1101px) {
