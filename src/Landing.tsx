@@ -143,7 +143,7 @@ export function DentalChartingLandingPage({
           <span className="dental-brand-divider" aria-hidden="true" />
 
           <span className="dental-brand-product">
-            Dental <strong>Charting</strong>
+            <strong>Dental Charting</strong>
           </span>
         </a>
 
@@ -467,12 +467,23 @@ export function DentalChartingLandingPage({
 
       <footer className="dental-footer">
         <a className="dental-brand" href="#top">
-          <span className="dental-brand-mark">
+          {/* <span className="dental-brand-mark">
             <Activity size={19} />
           </span>
 
           <span>
             Dental <strong>Charting</strong>
+          </span> */}
+          <img
+            className="dental-brand-logo"
+            src="/assets/images/snabbb-teal.png"
+            alt="Snabbb"
+          />
+
+          <span className="dental-brand-divider" aria-hidden="true" />
+
+          <span className="dental-brand-product">
+            <strong>Dental Charting</strong>
           </span>
         </a>
 

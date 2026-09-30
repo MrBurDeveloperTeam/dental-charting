@@ -812,6 +812,13 @@
   background: white;
 }
 
+.light-button:hover,
+.light-button:active,
+.light-button:focus-visible {
+  color: white;
+  background: var(--dental-teal-dark);
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
