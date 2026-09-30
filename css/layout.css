@@ -923,7 +923,7 @@ input[type="reset"],
 /* Clinical chart desktop shell: chart -> treatment editor -> saved entries. */
 @media screen and (min-width:1101px){
   .layout{
-    --clinical-panel-height:820px;
+    --clinical-panel-height:890px;
     grid-template-columns:
       minmax(480px, 1.0fr) /* Chart */
       minmax(450px, 1fr) /* Treatment editor */

@@ -857,106 +857,25 @@ function chartImageFileName(){
   const visitDate=visit.date||isoToday();
   return `dental-chart-${patientName}-${visitDate}.png`;
 }
-function blobAsDataUrl(blob){
-  return new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(reader.error);reader.readAsDataURL(blob)});
-}
-async function inlineChartImageAssets(stage){
-  const images=[...stage.querySelectorAll("image[href]")];
-  const dataUrls=new Map();
-  const originals=[];
-  for(const image of images){
-    const href=image.getAttribute("href");
-    if(!href||href.startsWith("data:"))continue;
-    const absoluteUrl=new URL(href,document.baseURI).href;
-    let dataUrl=dataUrls.get(absoluteUrl);
-    if(!dataUrl){
-      const response=await fetch(absoluteUrl);
-      if(!response.ok)throw new Error(`Unable to load chart image: ${absoluteUrl}`);
-      dataUrl=await blobAsDataUrl(await response.blob());
-      dataUrls.set(absoluteUrl,dataUrl);
-    }
-    originals.push({image,href});
-    image.setAttribute("href",dataUrl);
-  }
-  await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
-  return ()=>originals.forEach(({image,href})=>image.setAttribute("href",href));
-}
-function prepareChartImageClone(stage){
-  const view=stage.ownerDocument.defaultView;
-  // Compensate for the canvas painter's nested upper-tooth transform offset.
-  if(view.innerWidth>=1101)for(const row of stage.querySelectorAll('.upper-root-row')){
-    row.style.top=`${(parseFloat(view.getComputedStyle(row).top)||0)-24}px`;
-    row.style.position='relative';
-  }
-  // Freeze SVG styling before html2canvas serializes each SVG as an image.
-  // This also resolves custom properties used by clasp and treatment artwork.
-  for(const element of stage.querySelectorAll('svg,svg *')){
-    const computed=view.getComputedStyle(element);
-    const properties=['color','fill','fill-opacity','stroke','stroke-width','stroke-opacity','stroke-linecap','stroke-linejoin','stroke-dasharray','stroke-dashoffset','opacity','font-family','font-size','font-weight','text-anchor','paint-order'];
-    const values=properties.map(property=>[property,computed.getPropertyValue(property)]);
-    for(const [property,value] of values)element.style.setProperty(property,value);
-  }
-  // SVG-as-image rendering clips overflow at its viewport. Include the clasps
-  // extending onto adjacent teeth without moving or scaling their artwork.
-  for(const svg of stage.querySelectorAll('svg.partial-denture-overlay')){
-    const box=svg.viewBox.baseVal,pad=24;
-    const width=box.width,height=box.height;
-    svg.setAttribute('viewBox',`${box.x-pad} ${box.y-pad} ${width+pad*2} ${height+pad*2}`);
-    svg.setAttribute('width',width+pad*2);svg.setAttribute('height',height+pad*2);
-    Object.assign(svg.style,{width:`${width+pad*2}px`,height:`${height+pad*2}px`,left:`${-pad}px`,top:`${-pad}px`,maxWidth:'none'});
-  }
-  // html2canvas supports overflow clipping but ignores CSS clip-path. Preserve
-  // the exact inset in local tooth coordinates, including flipped upper teeth.
-  for(const element of stage.querySelectorAll('[style]')){
-    const style=view.getComputedStyle(element);
-    const match=style.clipPath.match(/^inset\(([^)]+)\)$/);
-    if(!match)continue;
-    const values=match[1].trim().split(/\s+/);
-    const [top,right=top,bottom=top,left=right]=values;
-    const width=element.clientWidth,height=element.clientHeight;
-    const pixels=(value,size)=>parseFloat(value)*(value.endsWith('%')?size/100:1);
-    const t=pixels(top,height),r=pixels(right,width),b=pixels(bottom,height),l=pixels(left,width);
-    const crop=stage.ownerDocument.createElement('div'),content=stage.ownerDocument.createElement('div');
-    crop.style.cssText=`position:absolute;top:${t}px;left:${l}px;width:${Math.max(0,width-l-r)}px;height:${Math.max(0,height-t-b)}px;overflow:hidden;`;
-    content.style.cssText=`position:absolute;top:${-t}px;left:${-l}px;width:${width}px;height:${height}px;`;
-    // Keep descendant selector-dependent styles after inserting crop wrappers.
-    for(const child of element.querySelectorAll('*')){
-      const computed=view.getComputedStyle(child);
-      const properties=['position','top','right','bottom','left','width','height','transform','transform-origin','display'];
-      const values=properties.map(property=>[property,computed.getPropertyValue(property)]);
-      for(const [property,value] of values)child.style.setProperty(property,value);
-    }
-    content.append(...element.childNodes);crop.append(content);element.append(crop);
-    element.style.width=`${width}px`;element.style.height=`${height}px`;
-    element.style.clipPath='none';
-    if(style.position==='static')element.style.position='relative';
-  }
-}
 async function downloadChartImage(){
-  if(!els.splitStage||typeof window.html2canvas!=="function"){
+  if(!els.splitStage||typeof window.chartToBlob!=="function"){
     window.alert("Chart image export is not available yet. Please refresh and try again.");
     return;
   }
   const fileName=chartImageFileName();
   const originalLabel=els.downloadChartImageLabel?.textContent||"Download Chart Image";
-  let restoreImageAssets=()=>{};
+
   els.downloadChartImageBtn.disabled=true;
   if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent="Preparing image…";
   try{
     await document.fonts?.ready;
     const stage=els.splitStage;
-    restoreImageAssets=await inlineChartImageAssets(stage);
-    const width=Math.ceil(stage.scrollWidth);
-    const height=Math.ceil(stage.scrollHeight);
-    const scale=Math.min(3,Math.max(2,window.devicePixelRatio||1));
-    const canvas=await window.html2canvas(stage,{
-      backgroundColor:getComputedStyle(stage).backgroundColor,
-      scale,useCORS:true,logging:false,width,height,
-      windowWidth:window.innerWidth,windowHeight:window.innerHeight,
-      scrollX:window.scrollX,scrollY:window.scrollY,
-      onclone:(_document,clonedStage)=>prepareChartImageClone(clonedStage)
+    // Snapshot the live DOM and computed styles. Native SVG foreignObject
+    // rendering preserves transforms, flex/grid alignment and clip-paths;
+    // there is no export-specific tooth layout or badge repositioning.
+    const blob=await window.chartToBlob(stage,{
+      pixelRatio:Math.min(3,Math.max(2,window.devicePixelRatio||1))
     });
-    const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/png"));
     if(!blob)throw new Error("The chart image could not be created.");
     let fileHandle=null;
     // Build the complete PNG before opening the native picker. Opening it first can
@@ -990,7 +909,6 @@ async function downloadChartImage(){
     console.error("Chart image export failed",error);
     window.alert("The chart image could not be downloaded. Please try again.");
   }finally{
-    restoreImageAssets();
     els.downloadChartImageBtn.disabled=false;
     if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent=originalLabel;
   }
@@ -1325,7 +1243,10 @@ function wholeStatusOverlaySVG(n, v, treatment, status, entry = draft, colorTrea
       const leftRim=first?h*.58:h*.78,rightRim=last?h*.58:h*.78;
       // Low interproximal scallops avoid tall acrylic fins between replacement crowns.
       const saddle=`M${left},${leftRim} C${w*.06},${leftRim} ${w*.08},${neck} ${w*.25},${neck+2} Q${w*.5},${h+1} ${w*.75},${neck+2} C${w*.92},${neck} ${w*.94},${rightRim} ${right},${rightRim} Q${right+1},${bottom-5} ${last?w-2:right},${bottom-2} Q${w*.75},${bottom+2} ${w*.5},${bottom} Q${w*.25},${bottom+2} ${first?2:left},${bottom-2} Q${left-1},${bottom-5} ${left},${leftRim} Z`;
-      const clasp=`M-2,${h*.48} C-5,${h*.64} -3,${h*.78} -12,${h*.8} L-22,${h*.82} M-4,${h*.68} Q-9,${h*.81} -8,${h*.97}`;
+      // Only a short silver tip beside the saddle. Long horizontal arms and
+      // secondary hooks obscure the neighbouring tooth's treatment artwork.
+      // Both ends and all arch/view orientations share this same local path.
+      const clasp=`M-2,${h*.48} Q-4,${h*.6} -4,${h*.72}`;
       const metal=side=>`<g transform="${side==='right'?`translate(${w} 0) scale(-1 1)`:''} translate(0 ${h*.7}) scale(.7) translate(0 ${-h*.7})" fill="none" stroke-linecap="round" stroke-linejoin="round"><path class="rpd-clasp-shadow" d="${clasp}" stroke="#353b41" stroke-width="4.6"/><path class="rpd-clasp-metal" d="${clasp}" stroke="url(#${metalId})" style="stroke:url(#${metalId})!important" stroke-width="2.9"/><path class="rpd-clasp-shine" d="${clasp}" stroke="#fff9ee" stroke-width=".65" transform="translate(0 -.65)"/></g>`;
       return `<svg class="surface-svg prosthetic-tooth-overlay partial-denture-overlay${planned?" planned-prosthetic-overlay":""}" width="${w}" height="${dims.height}" viewBox="0 0 ${w} ${dims.height}" style="overflow:visible" aria-hidden="true"><defs><linearGradient id="${gumId}" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f8a6b4"/><stop offset=".35" stop-color="#e77791"/><stop offset=".7" stop-color="#ce506f"/><stop offset="1" stop-color="#ed8c9e"/></linearGradient><linearGradient id="${metalId}" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f9f5eb"/><stop offset=".35" stop-color="#aeb7ba"/><stop offset=".55" stop-color="#626c73"/><stop offset=".8" stop-color="#e5e5df"/><stop offset="1" stop-color="#858f97"/></linearGradient></defs><g transform="translate(0 ${origin}) scale(1 ${reverse?-1:1})" opacity="${status==='preview'?.7:planned?.76:status==='watch'?.6:1}"><path d="${saddle}" fill="url(#${gumId})" stroke="#ad4662" stroke-width=".8"/><path class="rpd-gum-highlight" d="M${w*.1},${neck-3} Q${w*.17},${h+3} ${w*.5},${h+2} Q${w*.83},${h+3} ${w*.9},${neck-3}" fill="none" stroke="#ffd0d7" stroke-width="1.2"/><path class="rpd-gum-highlight" d="M${w*.16},${bottom-2} Q${w*.5},${bottom-5} ${w*.84},${bottom-2}" fill="none" stroke="#f9acba" stroke-width=".7"/>${first?metal('left'):''}${last?metal('right'):''}</g></svg>`;
     }
@@ -1537,6 +1458,7 @@ function appendSpacingMarkers(container,list,view,layer){
 }
 // Measure the rendered anatomy, since tooth widths and responsive zoom differ.
 function positionSpacingMarkers(){
+  positionConditionBadges();
   document.querySelectorAll('.spacing-marker').forEach(marker=>{
     const left=marker.parentElement,right=left?.nextElementSibling;
     const leftArt=left?.querySelector('.art-core'),rightArt=right?.querySelector('.art-core');
@@ -1552,6 +1474,21 @@ function positionSpacingMarkers(){
         const centerB=b.top+b.height/2;
         marker.style.top=`${((centerA+centerB)/2-cell.top)/(cell.height/left.offsetHeight)}px`;
       }
+    }
+  });
+}
+function positionConditionBadges(root=document){
+  root.querySelectorAll('.condition-badges').forEach(stack=>{
+    const tooth=stack.closest('.tooth'),art=tooth?.querySelector('.tooth-art');
+    if(!tooth||!art||!tooth.offsetHeight)return;
+    const toothBox=tooth.getBoundingClientRect(),artBox=art.getBoundingClientRect();
+    const scaleY=toothBox.height/tooth.offsetHeight||1;
+    if(tooth.closest('.upper-root-row')){
+      stack.style.top=`${(artBox.top-toothBox.top)/scaleY}px`;
+      stack.style.bottom='auto';
+    }else if(tooth.closest('.lower-root-row')){
+      stack.style.top='auto';
+      stack.style.bottom=`${(toothBox.bottom-artBox.bottom)/scaleY}px`;
     }
   });
 }

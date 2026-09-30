@@ -7,12 +7,14 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b --pretty false"
+    "typecheck": "tsc -b --pretty false",
+    "build:chart-export": "node scripts/build-chart-export.mjs",
+    "prebuild": "npm run build:chart-export"
   },
   "dependencies": {
     "@fontsource/inter": "^5.3.0",
     "@supabase/supabase-js": "2.90.0",
-    "html2canvas": "^1.4.1",
+    "html-to-image": "^1.11.13",
     "lucide-react": "^1.48.0",
     "react": "18.2.0",
     "react-dom": "18.2.0"

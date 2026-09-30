@@ -6,25 +6,38 @@ import ts from 'typescript';
 
 const source=readFileSync(new URL('../public/js/app.js',import.meta.url),'utf8');
 const ast=ts.createSourceFile('app.js',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
-const helper=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='prepareChartImageClone').getText();
-
-for(const [name,clip,top,height] of [
-  ['implant crown','inset(0% 0px 60% 0px)',0,40],
-  ['reversed inner crown','inset(43% 0px 0% 0px)',43,57],
-  ['retained root','inset(40% 0px 0% 0px)',40,60],
-  ['bridge pontic','inset(0% 0px 60% 0px)',0,40]
-])test(`PNG preserves ${name} clipping without changing anatomy dimensions`,()=>{
-  const anatomy={};
-  const element={style:{},clientWidth:40,clientHeight:100,childNodes:[anatomy],querySelectorAll:()=>[],append(node){this.crop=node;}};
-  const doc={defaultView:{innerWidth:800,getComputedStyle:()=>({clipPath:clip,position:'relative'})},createElement:()=>({style:{},append(...nodes){this.children=nodes;}})};
-  const stage={ownerDocument:doc,querySelectorAll:selector=>selector==='[style]'?[element]:[]};
-  const context=vm.createContext({});vm.runInContext(helper,context);
-  context.prepareChartImageClone(stage);
-  assert.match(element.crop.style.cssText,new RegExp(`top:${top}px`));
-  assert.match(element.crop.style.cssText,new RegExp(`height:${height}px`));
-  assert.match(element.crop.style.cssText,/overflow:hidden/);
-  assert.match(element.crop.children[0].style.cssText,/width:40px;height:100px/);
-  assert.equal(element.crop.children[0].children[0],anatomy);
-  assert.equal(element.style.height,'100px');
-  assert.equal(element.style.clipPath,'none');
+const helper=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='downloadChartImage').getText();
+function setup({fail=false,cancel=false}={}){
+  const stage=Object.freeze({id:'live-chart'}),blob={type:'image/png'},events=[];
+  const els={splitStage:stage,downloadChartImageBtn:{disabled:false},downloadChartImageLabel:{textContent:'Download Chart Image'}};
+  const context=vm.createContext({els,document:{fonts:{ready:Promise.resolve().then(()=>events.push('fonts'))}},chartImageFileName:()=> 'chart.png',console:{error(){}},window:{
+    devicePixelRatio:2,alert:()=>events.push('alert'),
+    chartToBlob:async(node,options)=>{events.push('capture');assert.equal(node,stage);assert.equal(options.pixelRatio,2);assert.equal(options.width,undefined);assert.equal(options.height,undefined);if(fail)throw Error('capture failed');return blob;},
+    showSaveFilePicker:async()=>{events.push('picker');if(cancel)throw {name:'AbortError'};return {createWritable:async()=>({write:async value=>{assert.equal(value,blob);events.push('write');},close:async()=>events.push('close')})};}
+  }});
+  vm.runInContext(helper,context);
+  return {context,els,events};
+}
+test('exports the live chart at its current layout after fonts load, then saves the completed PNG',async()=>{
+  const {context,els,events}=setup();await context.downloadChartImage();
+  assert.deepEqual(events,['fonts','capture','picker','write','close']);
+  assert.equal(els.downloadChartImageBtn.disabled,false);
+  assert.equal(els.downloadChartImageLabel.textContent,'Download Chart Image');
+});
+test('capture failure does not open a picker and restores export controls',async()=>{
+  const {context,els,events}=setup({fail:true});await context.downloadChartImage();
+  assert.deepEqual(events,['fonts','capture','alert']);assert.equal(els.downloadChartImageBtn.disabled,false);
+});
+test('cancelling save does not write a file or show an error',async()=>{
+  const {context,els,events}=setup({cancel:true});await context.downloadChartImage();
+  assert.deepEqual(events,['fonts','capture','picker']);assert.equal(els.downloadChartImageBtn.disabled,false);
+});
+test('static preview registers the export renderer without Vite or module imports',()=>{
+  const html=readFileSync(new URL('../preview.html',import.meta.url),'utf8');
+  const script=html.match(/<script src="\.\/js\/(chart-image-export\.js)[^"]*"><\/script>/);
+  assert.ok(script,'static preview must load the plain JavaScript renderer');
+  const context=vm.createContext({window:{}});
+  vm.runInContext(readFileSync(new URL('../public/js/'+script[1],import.meta.url),'utf8'),context);
+  assert.equal(typeof context.window.chartToBlob,'function');
+  assert.ok(html.indexOf(script[0])<html.indexOf('./js/app.js'));
 });

@@ -158,7 +158,7 @@ test('spacing cannot save when all gap buttons are disabled',()=>{
 
 test('spacing markers center between rendered tooth edges at different widths and zoom levels',()=>{
  const {context:c}=setup();
- const fn=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='positionSpacingMarkers');vm.runInContext(fn.getText(ast),c);
+ const fn=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='positionSpacingMarkers');vm.runInContext(fn.getText(ast),c);c.positionConditionBadges=()=>{};
  for(const scale of [1,.6,1.5]){
    const leftArt={getBoundingClientRect:()=>({right:140*scale,width:40*scale})};
    const rightArt={getBoundingClientRect:()=>({left:160*scale,width:70*scale})};
@@ -182,7 +182,7 @@ test('saved summary groups treatment spans and keeps overlapping spacing pairs s
 
 test('lower inner-view spacing markers align with full-tooth midpoints at every zoom',()=>{
  const {context:c}=setup();
- const fn=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='positionSpacingMarkers');vm.runInContext(fn.getText(ast),c);
+ const fn=ast.statements.find(s=>ts.isFunctionDeclaration(s)&&s.name?.text==='positionSpacingMarkers');vm.runInContext(fn.getText(ast),c);c.positionConditionBadges=()=>{};
  for(const scale of [0.6,1,1.5]){
   const art=(left,width)=>({getBoundingClientRect:()=>({left:left*scale,right:(left+width)*scale,width:width*scale,top:20*scale,height:100*scale})});
   const left={offsetWidth:60,offsetHeight:120,getBoundingClientRect:()=>({left:90*scale,top:0,width:60*scale,height:120*scale}),querySelector:()=>art(100,40),nextElementSibling:{querySelector:()=>art(160,50)}};
