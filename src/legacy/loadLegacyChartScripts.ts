@@ -5,7 +5,7 @@ export async function loadLegacyChartScripts() {
     "js/inner-anatomy.js",
     "js/materials.js?v=7",
     "js/app.js?v=99",
-    "js/supabaseSync.js?v=11",
+    "js/supabaseSync.js?v=12",
   ]) {
     await new Promise<void>((resolve, reject) => {
       const script = document.createElement("script");
