@@ -1335,19 +1335,19 @@ button.number:focus-visible {
   }
 }
 
-/* Compact Saved Entries tab while charting; preserve the complete panel in
-   patient-record review and in print. */
+/* Compact Saved Entries tab while charting, including record editing;
+   preserve the complete panel in patient-record review and in print. */
 @media screen {
-  body:not(.patient-record-review):not(.patient-record-edit) .entries-panel > .entries-head {
+  body:not(.patient-record-review) .entries-panel > .entries-head {
     grid-template-columns:minmax(0,1fr) auto;
     align-items:center;
   }
-  body:not(.patient-record-review):not(.patient-record-edit) .entries-panel > .entries-head .saved-entries-toggle {
+  body:not(.patient-record-review) .entries-panel > .entries-head .saved-entries-toggle {
     grid-column:2;
     grid-row:1;
   }
-  body:not(.patient-record-review):not(.patient-record-edit) .entries-panel > .entries-head .entries-bulk-actions {grid-column:1 / -1}
-  body:not(.patient-record-review):not(.patient-record-edit) #record-edit-chart-root:empty {display:none}
+  body:not(.patient-record-review) .entries-panel > .entries-head .entries-bulk-actions {grid-column:1 / -1}
+  body:not(.patient-record-review) #record-edit-chart-root:empty {display:none}
   .saved-entries-toggle {
     display:grid;
     place-items:center;
@@ -1364,30 +1364,30 @@ button.number:focus-visible {
   .saved-entries-toggle:focus-visible {outline:3px solid #79aef7;outline-offset:2px}
   .saved-entries-toggle svg {width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round}
   .saved-entries-toggle .expand-mark {display:none}
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed {
+  body.saved-entries-collapsed:not(.patient-record-review) .entries-panel.is-collapsed {
     justify-self:end;
     width:min(100%,180px);
     height:auto;
     max-height:none;
     overflow:visible;
   }
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed > .entries-head {
+  body.saved-entries-collapsed:not(.patient-record-review) .entries-panel.is-collapsed > .entries-head {
     min-height:64px;
     padding:12px;
     border-bottom:0;
   }
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed > .entries-head .saved-entries-title {font-size:14px;white-space:nowrap}
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed :is(.entries-bulk-actions,.entries-list) {display:none}
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed .collapse-mark {display:none}
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed .expand-mark {display:block}
-  body:is(.patient-record-review,.patient-record-edit) .saved-entries-toggle {display:none}
+  body.saved-entries-collapsed:not(.patient-record-review) .entries-panel.is-collapsed > .entries-head .saved-entries-title {font-size:14px;white-space:nowrap}
+  body.saved-entries-collapsed:not(.patient-record-review) .entries-panel.is-collapsed :is(.entries-bulk-actions,.entries-list) {display:none}
+  body.saved-entries-collapsed:not(.patient-record-review) .entries-panel.is-collapsed .collapse-mark {display:none}
+  body.saved-entries-collapsed:not(.patient-record-review) .entries-panel.is-collapsed .expand-mark {display:block}
+  body.patient-record-review .saved-entries-toggle {display:none}
 }
 
 @media screen and (min-width:1101px) {
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .layout {
+  body.saved-entries-collapsed:not(.patient-record-review) .layout {
     grid-template-columns:minmax(480px,1fr) minmax(450px,1fr) 180px;
   }
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .chart-workspace > .entries-panel.is-collapsed {
+  body.saved-entries-collapsed:not(.patient-record-review) .chart-workspace > .entries-panel.is-collapsed {
     position:static;
     width:auto;
     height:64px;
@@ -1400,7 +1400,7 @@ button.number:focus-visible {
 @media screen and (max-width:600px) {
   .layout {grid-template-columns:minmax(0,1fr)}
   .chart-workspace {min-width:0;grid-template-columns:minmax(0,1fr)}
-  body.saved-entries-collapsed:not(.patient-record-review):not(.patient-record-edit) .entries-panel.is-collapsed {justify-self:start}
+  body.saved-entries-collapsed:not(.patient-record-review) .entries-panel.is-collapsed {justify-self:start}
   .chart-stage-wrap {overflow-x:hidden}
   #split-stage {
     box-sizing:border-box;
