@@ -258,7 +258,9 @@
     } else if (rejectedPatientIc) {
       rejectedPatientIc = null;
     }
-    errors.dob = liveDobError(dobText, showAll, errors.dob);
+    const dobError = liveDobError(dobText, showAll, errors.dob);
+    if (dobError) errors.dob = dobError;
+    else delete errors.dob;
     Object.keys(patientValidationFields).forEach((field) => {
       if (showAll || touchedPatientFields.has(field)) setPatientFieldError(field, errors[field] || "");
     });
