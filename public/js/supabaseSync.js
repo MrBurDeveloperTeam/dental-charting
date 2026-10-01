@@ -310,6 +310,9 @@
       if (typeof renderAll === "function") renderAll();
       if (typeof closePatientModal === "function") closePatientModal();
       setBadge("Cloud: patient created ✓", "#15803d");
+      // Initialize the chart and clinic materials just as selecting a saved
+      // patient does; restoration validation requires the loaded catalogue.
+      await pullDatabaseChart();
     } catch (error) {
       setBadge("Cloud: patient save failed", "#b91c1c");
       if (error?.code === "PATIENT_DUPLICATE") {

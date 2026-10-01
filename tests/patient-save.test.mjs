@@ -31,6 +31,7 @@ function setup(dobText = '08/09/2000') {
     window: { dentalPatients: { create: async payload => { calls.push(['create', payload]); return { patientId: 'created-id' }; } } },
     patient: {}, normalizePatient: row => row, clearChartForPatientSelection() {},
     closePatientModal: () => calls.push(['close']),
+    pullDatabaseChart: async () => calls.push(['load-chart', context.patient.patientId]),
   });
   loadFunctions(context, '../public/js/app.js', ['parseTypedDate']);
   loadFunctions(context, '../src/services/dentalPatients.ts', ['validateDentalPatient']);
@@ -48,6 +49,7 @@ test('valid patient submission reaches cloud creation and closes the modal', asy
   assert.equal(calls.find(([type]) => type === 'create')[1].dob, '2000-09-08');
   assert.equal(context.patient.patientId, 'created-id');
   assert.ok(calls.some(([type]) => type === 'close'));
+  assert.deepEqual(calls.find(([type]) => type === 'load-chart'), ['load-chart', 'created-id']);
   assert.equal(button.disabled, false);
 });
 
@@ -57,6 +59,30 @@ test('patient submission without DOB reaches cloud creation', async () => {
   await submit();
   assert.equal(calls.find(([type]) => type === 'create')[1].dob, null);
   assert.ok(calls.some(([type]) => type === 'close'));
+});
+
+test('new patient initializes clinic materials so Composite filling can be saved without refresh', async () => {
+  const { context, submit } = setup();
+  context.draft = { treatment: 'filling', material: 'composite' };
+  context.materialCatalogLoaded = false;
+  context.treatmentFor = treatment => ({ category: treatment === 'caries' ? 'condition' : 'restoration', requiresMaterial: treatment === 'filling' });
+  loadFunctions(context, '../public/js/materials.js', ['materialForTreatment', 'materialSelectionError']);
+  assert.match(context.materialSelectionError(), /Load clinic materials/);
+  context.draft.treatment = 'caries';
+  assert.equal(context.materialSelectionError(), '');
+  context.draft.treatment = 'filling';
+
+  const loads = [];
+  context.currentPatientId = () => context.patient.patientId;
+  context.chartContext = () => ({ patientId: context.patient.patientId });
+  context.window.dentalCharts = { load: async chart => { loads.push(chart.patientId); return { entries: [] }; } };
+  context.loadMaterialCatalog = async () => { context.materialCatalogLoaded = true; };
+  context.applyDatabaseEntries = rows => assert.equal(rows.length, 0);
+  loadFunctions(context, '../public/js/supabaseSync.js', ['pullDatabaseChart']);
+
+  await submit();
+  assert.deepEqual(loads, ['created-id']);
+  assert.equal(context.materialSelectionError(), '');
 });
 
 for (const dob of ['08/09', '31/02/2000', '08/09/2999', 'invalid']) {
