@@ -10,6 +10,7 @@ Source: user's 11 September 2026 material/condition sidebar request; existing cl
 | Scrollbar | `css/base.css`, geometry in `css/layout.css` | Editor fields scroll while selected tooth stays visible | Desktop/mobile screenshot |
 | CRUD | `src/services/dentalMaterials.ts`, `src/services/dentalCharts.ts` | Clinic-scoped records; errors propagated; no local color persistence | Build and unit tests; live database verification pending |
 | Patient create form | `PatientModal.tsx`, `supabaseSync.js`, `dentalPatients.ts` | Full name, DOB, IC/ID, gender, phone, and email validate inline; optional blanks persist as null; names may repeat; normalized IC/ID values are unique within a clinic | Typecheck, service tests, browser create/error workflow |
+| Patient modal opening | `PatientModal.tsx`, `openPatientModal` in `public/js/app.js` | Every opening resets to Search Patient and focuses the search input; the selected chart patient is preserved | Build and startup tests |
 | Status | Existing chart status model | Existing/Planning for new entry UI; historical watch rows remain readable | Browser status step |
 
 Sibling patient modal and saved-entry behaviors remain owned by their existing React/legacy integration. Native selects and date inputs in unrelated patient workflows are not redesigned by this change. The existing general-purpose premium audit cannot detect their delegated legacy handlers; its remaining findings are recorded in `docs/material-workflow.md`.
