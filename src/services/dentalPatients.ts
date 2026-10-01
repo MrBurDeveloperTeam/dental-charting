@@ -64,8 +64,7 @@ export function validateDentalPatient(input: PatientInput): PatientValidationErr
   if (!name) errors.fullName = "Enter the patient's full name.";
   else if (!personNamePattern.test(name)) errors.fullName = "Full name can only contain letters, spaces, apostrophes, or hyphens.";
 
-  if (!dob) errors.dob = "Enter the patient's date of birth.";
-  else {
+  if (dob) {
     const match = dob.match(/^(\d{4})-(\d{2})-(\d{2})$/);
     const date = match ? new Date(`${dob}T00:00:00`) : null;
     if (!match || !date || Number.isNaN(date.getTime()) ||
