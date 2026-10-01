@@ -254,6 +254,8 @@ export function DentalChartingLandingPage({
         </div>
 
         <div className="dental-hero-preview">
+          <div className="preview-glow preview-glow-one" />
+          <div className="preview-glow preview-glow-two" />
           <img
             className="dental-chart-preview-image"
             src="/assets/images/landing_image.png"
