@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { DentalDentist } from "../../services/dentalPatients";
 
 /**
@@ -12,6 +12,12 @@ export function PatientModal() {
   const [activeTab, setActiveTab] = useState<"existing" | "new">("existing");
   const [dentists, setDentists] = useState<DentalDentist[]>([]);
   const [dentistsState, setDentistsState] = useState<"idle" | "loading" | "loaded" | "error">("idle");
+
+  useEffect(() => {
+    const resetTab = () => setActiveTab("existing");
+    document.addEventListener("dental-chart:patient-modal-open", resetTab);
+    return () => document.removeEventListener("dental-chart:patient-modal-open", resetTab);
+  }, []);
 
   async function openNewPatientForm() {
     setActiveTab("new");
