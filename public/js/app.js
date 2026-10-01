@@ -143,7 +143,7 @@ els.patientDobText?.addEventListener("input", event => {
   event.target.value = formatDateWhileTyping(event.target.value);
   clearDateFieldError("dob");
 });
-els.patientDobText?.addEventListener("blur",()=>commitDateField("dob",{emptyOk:false}));
+els.patientDobText?.addEventListener("blur",()=>commitDateField("dob",{emptyOk:true}));
 els.patientDobText?.addEventListener("keydown",event=>{
   if(event.key!=="Backspace") return;
   const input=event.currentTarget;
@@ -535,7 +535,7 @@ function fillPatientForm(){PATIENT_TEXT_FIELDS.forEach(field=>{const input=els.p
 function openPatientModal(){fillPatientForm(); document.dispatchEvent(new CustomEvent("dental-chart:patient-modal-open")); els.patientModal.classList.add("show"); els.patientModal.setAttribute("aria-hidden","false"); document.body.style.overflow="hidden"; setTimeout(()=>document.getElementById("patient-search-input")?.focus(),0)}
 function closePatientModal(){closeDatePopover(); els.patientModal.classList.remove("show"); els.patientModal.setAttribute("aria-hidden","true");document.body.style.overflow = "";}
 function clearPatientForm(){els.patientForm.reset(); els.patientForm.gender.value=""; syncDateField("dob")}
-function savePatientFromForm(e){e.preventDefault(); if(!commitDateField("dob",{emptyOk:false})){els.patientDobText.focus(); return} PATIENT_TEXT_FIELDS.forEach(field=>{const input=els.patientForm.elements.namedItem(field); if(input) patient[field]=input.value.trim()}); const guardianInput=els.patientForm.elements.namedItem("emailIsGuardian"); patient.emailIsGuardian=Boolean(guardianInput&&guardianInput.checked); patient.email=patient.email.toLowerCase(); persistPatient(); renderAll(); closePatientModal()}
+function savePatientFromForm(e){e.preventDefault(); if(!commitDateField("dob",{emptyOk:true})){els.patientDobText.focus(); return} PATIENT_TEXT_FIELDS.forEach(field=>{const input=els.patientForm.elements.namedItem(field); if(input) patient[field]=input.value.trim()}); const guardianInput=els.patientForm.elements.namedItem("emailIsGuardian"); patient.emailIsGuardian=Boolean(guardianInput&&guardianInput.checked); patient.email=patient.email.toLowerCase(); persistPatient(); renderAll(); closePatientModal()}
 function fillDateForm(){els.dateForm.visitDate.value=visit.date; syncDateField("visit")}
 function openDateModal(){fillDateForm(); els.dateModal.classList.add("show"); els.dateModal.setAttribute("aria-hidden","false"); setTimeout(()=>els.visitDateTrigger.focus(),0)}
 function closeDateModal(){closeDatePopover(); els.dateModal.classList.remove("show"); els.dateModal.setAttribute("aria-hidden","true")}

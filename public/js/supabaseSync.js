@@ -231,7 +231,8 @@
 
   function liveDobError(value, submitted, completeDateError) {
     const digits = String(value || "").replace(/\D/g, "").slice(0, 8);
-    if (!digits) return submitted ? "Enter the patient's date of birth." : "";
+    if (!String(value || "").trim()) return "";
+    if (!digits) return submitted ? "Enter a valid date as DD/MM/YYYY." : "";
     if (digits.length < 2) return submitted ? "Complete the date of birth as DD/MM/YYYY." : "";
 
     const day = Number(digits.slice(0, 2));
@@ -258,7 +259,7 @@
     } else if (rejectedPatientIc) {
       rejectedPatientIc = null;
     }
-    const dobError = liveDobError(dobText, showAll, errors.dob);
+    const dobError = liveDobError(dobText, showAll, errors.dob || (parsedDob === null ? "Enter a valid date as DD/MM/YYYY." : ""));
     if (dobError) errors.dob = dobError;
     else delete errors.dob;
     Object.keys(patientValidationFields).forEach((field) => {
@@ -279,7 +280,7 @@
 
     const form = event.currentTarget;
     const submitButton = form.querySelector('button[type="submit"]');
-    if (typeof commitDateField === "function") commitDateField("dob", { emptyOk: false });
+    if (typeof commitDateField === "function") commitDateField("dob", { emptyOk: true });
     const payload = patientFormPayload();
     if (!payload) return;
     const validationErrors = validatePatientForm({ focusFirst: true, showAll: true });

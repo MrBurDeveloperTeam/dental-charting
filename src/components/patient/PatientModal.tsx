@@ -82,7 +82,7 @@ export function PatientModal() {
             </div>
 
             <div className="patient-field">
-              <label htmlFor="patient-dob-text">Date of birth <span className="patient-required">*</span></label>
+              <label htmlFor="patient-dob-text">Date of birth (optional)</label>
               <div className="date-field-shell">
                 <input className="date-text-input" id="patient-dob-text" type="text" inputMode="numeric" placeholder="DD/MM/YYYY" autoComplete="bday" aria-describedby="dob-date-error" />
                 <button className="date-picker-btn" id="patient-dob-trigger" type="button" aria-label="Open date of birth calendar">📅</button>

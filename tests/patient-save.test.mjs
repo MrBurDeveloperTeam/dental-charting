@@ -51,7 +51,15 @@ test('valid patient submission reaches cloud creation and closes the modal', asy
   assert.equal(button.disabled, false);
 });
 
-for (const dob of ['', '08/09', '31/02/2000', '08/09/2999']) {
+test('patient submission without DOB reaches cloud creation', async () => {
+  const { context, calls, submit } = setup('');
+  assert.equal(Object.keys(context.validatePatientForm({ showAll: true })).length, 0);
+  await submit();
+  assert.equal(calls.find(([type]) => type === 'create')[1].dob, null);
+  assert.ok(calls.some(([type]) => type === 'close'));
+});
+
+for (const dob of ['08/09', '31/02/2000', '08/09/2999', 'invalid']) {
   test(`invalid DOB ${JSON.stringify(dob)} blocks patient creation`, async () => {
     const { context, calls, submit } = setup(dob);
     assert.ok(context.validatePatientForm({ showAll: true }).dob);
