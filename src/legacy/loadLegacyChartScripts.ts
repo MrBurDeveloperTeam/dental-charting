@@ -3,8 +3,8 @@ export async function loadLegacyChartScripts() {
   for (const path of [
     "js/tooth-silhouettes.js",
     "js/inner-anatomy.js",
-    "js/materials.js?v=7",
-    "js/app.js?v=100",
+    "js/materials.js?v=9",
+    "js/app.js?v=103",
     "js/supabaseSync.js?v=12",
   ]) {
     await new Promise<void>((resolve, reject) => {

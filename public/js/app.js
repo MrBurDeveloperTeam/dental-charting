@@ -625,7 +625,7 @@ function innerSurfaceDefs(n){
       result.push({key:"O",path:`M${w*.35},${y(.36)} C${w*.42},${y(.24)} ${w*.58},${y(.24)} ${w*.65},${y(.36)} C${w*.74},${y(.46)} ${w*.74},${y(.58)} ${w*.65},${y(.7)} C${w*.58},${y(.78)} ${w*.42},${y(.78)} ${w*.35},${y(.7)} C${w*.26},${y(.58)} ${w*.26},${y(.46)} ${w*.35},${y(.36)} Z`,cx:w*.5,cy:y(.52)});
       result.push({key:farKey,path:`M${w*.36},${y(.62)} L${w*.64},${y(.62)} C${w*.78},${y(.76)} ${w*.72},${y(.95)} ${w*.5},${y(.96)} C${w*.28},${y(.95)} ${w*.22},${y(.76)} ${w*.36},${y(.62)} Z`,cx:w*.5,cy:y(.82)});
     }
-    return result;
+    return incisorLingualPatch(n,result);
   }
   const result=[rect(mesialOnRight?"D":"M",0,top,.24,bottom),rect(mesialOnRight?"M":"D",.76,top,1,bottom)];
   if(anterior){
@@ -638,7 +638,17 @@ function innerSurfaceDefs(n){
     result.push(rect("O",.24,upper?rim:inner,.76,upper?inner:rim));
     result.push(rect(upper?"L":"B",.24,upper?inner:top,.76,upper?bottom:inner));
   }
-  return result;
+  return incisorLingualPatch(n,result);
+}
+// Incisor lingual findings use a compact rounded patch within the visible crown.
+function incisorLingualPatch(n,regions){
+  if(toothType(n)!=="incisor")return regions;
+  const {width:w,height:h}=crownDims(n),upper=isUpper(n);
+  const top=upper?.035:.43,bottom=upper?.51:.97;
+  const crownHeight=h*(bottom-top),cx=w*.5,cy=h*top+crownHeight*(upper?.67:.33);
+  const rx=w*.21,ry=crownHeight*.16,k=.55228475;
+  return regions.map(region=>region.key!=="L"?region:{key:"L",cx,cy,
+    path:`M${cx},${cy-ry} C${cx+rx*k},${cy-ry} ${cx+rx},${cy-ry*k} ${cx+rx},${cy} C${cx+rx},${cy+ry*k} ${cx+rx*k},${cy+ry} ${cx},${cy+ry} C${cx-rx*k},${cy+ry} ${cx-rx},${cy+ry*k} ${cx-rx},${cy} C${cx-rx},${cy-ry*k} ${cx-rx*k},${cy-ry} ${cx},${cy-ry} Z`});
 }
 function rightRootNeedsMDSwap(n,v){
   if(v!=="front")return false;
@@ -653,11 +663,10 @@ function frontCrownSurfaceDefs(n){
   // Root artwork has its crown at y=0 before the upper-arch display flip.
   // Narrow proximal bands stop at the neck and are clipped to the tooth silhouette.
   return [region(swap?"D":"M",w*.06,2,side,end-2),
-    region(anterior?"F":"B",w*.22,2,w*.56,end*(anterior?.78:.22)-2),
-    region(swap?"M":"D",w*.78,2,side,end-2),
-    region("L",w*.22,end*.78,w*.56,end*.22)];
+    region(anterior?"F":"B",w*.22,2,w*.56,end-2),
+    region(swap?"M":"D",w*.78,2,side,end-2)];
 }
-function surfaceDefs(n,v)
+function allSurfaceDefs(n,v)
 {const t=toothType(n);
   if(v==="front")return frontCrownSurfaceDefs(n);
   if(v==="occ"&&innerAnatomy(n))return innerSurfaceDefs(n);
@@ -675,6 +684,10 @@ function surfaceDefs(n,v)
   {key:"O",path:`M${w*.35},${h*.36} C${w*.42},${h*.24} ${w*.58},${h*.24} ${w*.65},${h*.36} C${w*.74},${h*.46} ${w*.74},${h*.58} ${w*.65},${h*.7} C${w*.58},${h*.78} ${w*.42},${h*.78} ${w*.35},${h*.7} C${w*.26},${h*.58} ${w*.26},${h*.46} ${w*.35},${h*.36} Z`,cx:w*.5,cy:h*.52},
   {key:"L",path:`M${w/2},${h-3} C${w*.28},${h-4} ${w*.22},${h*.76} ${w*.36},${h*.62} L${w*.64},${h*.62} C${w*.78},${h*.76} ${w*.72},${h-4} ${w/2},${h-3} Z`,cx:w*.5,cy:h*.82},
   {key:"D",path:`M${w-3},${h/2} C${w-4},7 ${w*.8},5 ${w*.66},${h/2} C${w*.8},${h-5} ${w-4},${h-7} ${w-3},${h/2} Z`,cx:w*.82,cy:h*.5}]}
+// Only surfaces facing the viewer are selectable or rendered.
+function surfaceDefs(n,v){
+  return allSurfaceDefs(n,v).filter(region=>v==="front"?region.key!=="L":!["B","F"].includes(region.key));
+}
 function availableSurfaceCodes(n,v){return surfaceDefs(n,v).map(i=>i.key)}
 function defaultSurfaceFor(n,v){const t=toothType(n); if(v==="occ") return (t==="incisor"||t==="canine")?["I"]:["O"]; return (t==="incisor"||t==="canine")?["F"]:["B"]}
 function surfaceLongLabel(code,n,v){
@@ -702,13 +715,12 @@ function surfacePadSpec(n,v){
       spec.push({area:"left",code:"M"},{area:"center",code:"I"},{area:"right",code:"D"});
       if(codes.has("L")) spec.push({area:isUpper(n)?"bottom":"top",code:"L"});
     } else {
-      spec.push({area:"top",code:"B"},{area:"left",code:"M"},{area:"center",code:"O"},{area:"right",code:"D"},{area:"bottom",code:"L"});
+      spec.push({area:"left",code:"M"},{area:"center",code:"O"},{area:"right",code:"D"},{area:"bottom",code:"L"});
     }
   } else {
     const topCode=(t==="incisor"||t==="canine")?"F":"B";
     const swapMD=rightRootNeedsMDSwap(n,v);
     spec.push({area:"top",code:topCode},{area:"left",code:swapMD?"D":"M"},{area:"right",code:swapMD?"M":"D"});
-    if(codes.has("L")) spec.push({area:"bottom",code:"L"});
   }
   const byArea={top:null,left:null,center:null,right:null,bottom:null};
   spec.forEach(item=>{if(codes.has(item.code)) byArea[item.area]=item.code});
@@ -1534,7 +1546,7 @@ function renderSidebar(){if(!canStartCharting()){els.sidebarEmpty.style.display=
 function renderCategoryGrid(disabled=false){els.categoryGrid.innerHTML=""; CATEGORIES.forEach(c=>{const b=document.createElement("button"); b.className=`chip${draft.category===c.id?" active":""}`; b.type="button"; b.textContent=c.label; b.disabled=disabled; if(!disabled) b.addEventListener("click",()=>pickCategory(c.id)); els.categoryGrid.appendChild(b)})}
 function renderViewGrid(disabled=false){const t=treatmentFor(draft.treatment); els.viewGrid.innerHTML=""; [{id:"occ",label:"Crown + inner view"},{id:"front",label:"Root view"}].forEach(v=>{const b=document.createElement("button"); b.className=`chip${draft.view===v.id?" active":""}`; b.type="button"; b.textContent=v.label; const blocked=disabled||!t.views.includes(v.id); b.disabled=blocked; if(!blocked) b.addEventListener("click",()=>pickView(v.id)); if(!t.views.includes(v.id)) b.style.opacity=".38"; els.viewGrid.appendChild(b)}); els.viewNote.textContent=disabled?"Select a tooth first.":(t.mode==="surface"?"Surface treatments color only the selected region.":(t.mode==="root"?"Root canal and root findings use the root view only.":"Whole-tooth treatments cover the whole tooth representation."))}
 function renderSurfaceGrid(disabled=false){const t=treatmentFor(draft.treatment),show=true,interactive=!disabled&&t.mode==="surface"; els.surfaceField.style.display=show?"grid":"none"; els.surfaceGrid.innerHTML=""; if(!show){els.surfaceNote.textContent=disabled?"":"";
-return} const pad=document.createElement("div"); pad.className=`surface-pad${interactive?"":" inactive"}`; const spec=surfacePadSpec(draft.tooth,draft.view); ["top","left","center","right","bottom"].forEach(area=>{const code=spec[area]; const b=document.createElement("button"); b.className=`surface-chip${code&&draft.surfaces.includes(code)?" active":""}${code?"":" empty"}`; b.type="button"; b.dataset.area=area; if(!code){b.disabled=true; b.textContent=""; pad.appendChild(b); return} b.disabled=!interactive; b.textContent=surfaceShortLabel(code,draft.tooth,draft.view); b.title=surfaceLongLabel(code,draft.tooth,draft.view); if(interactive) b.addEventListener("click",()=>toggleSurface(code)); pad.appendChild(b)}); els.surfaceGrid.appendChild(pad); els.surfaceNote.textContent=interactive?(draft.view==="occ"?"Tap the pad to build combinations like MO, MOD or OL.":"Tap the root pad for mesial, buccal/facial, distal or lingual root areas."):"Surface selection is not used for this treatment, so the pad stays visible but read-only."}
+return} const pad=document.createElement("div"); pad.className=`surface-pad${interactive?"":" inactive"}`; const spec=surfacePadSpec(draft.tooth,draft.view); ["top","left","center","right","bottom"].forEach(area=>{const code=spec[area]; const b=document.createElement("button"); b.className=`surface-chip${code&&draft.surfaces.includes(code)?" active":""}${code?"":" empty"}`; b.type="button"; b.dataset.area=area; if(!code){b.disabled=true; b.textContent=""; pad.appendChild(b); return} b.disabled=!interactive; b.textContent=surfaceShortLabel(code,draft.tooth,draft.view); b.title=surfaceLongLabel(code,draft.tooth,draft.view); if(interactive) b.addEventListener("click",()=>toggleSurface(code)); pad.appendChild(b)}); els.surfaceGrid.appendChild(pad); els.surfaceNote.textContent=interactive?(draft.view==="occ"?"Tap the pad to build combinations like MO, MOD or OL.":"Tap the root pad for mesial, buccal/facial or distal surfaces."):"Surface selection is not used for this treatment, so the pad stays visible but read-only."}
 function renderTreatmentGrid(disabled=false){
   els.treatmentGrid.replaceChildren();
   for(const category of CATEGORIES){
