@@ -148,6 +148,8 @@ test('abrasion shifts crownward in root views across both arches and dentitions'
  for(const n of [11,13,14,16,21,31,33,34,36,41,51,55,71,75]){
   const svg=c.abrasionOverlaySVG(n,'front');
   assert.match(svg,/abrasion-overlay/);
+  assert.doesNotMatch(svg,/abrasion-buccal-face/);
+  assert.match(svg,/#d87532/);
   assert.ok(svg.includes(`translate(0 ${c.crownCutY(n)-8})`));
   assert.equal(c.abrasionOverlaySVG(n,'occ'),'');
  }

@@ -22,14 +22,14 @@ test('every supplied tooth has an asset and a matching nonempty silhouette',()=>
     assert.ok(a.width>0&&a.height>0&&a.path.startsWith('M'));
   }
 });
-test('both dentitions retain legacy surface codes and expose inner anterior faces',()=>{
+test('both dentitions expose only crown-facing surfaces',()=>{
   for(const mode of ['permanent','primary']){
     const c=setup(mode);
     for(const key of Object.keys(c.assets).filter(k=>k.startsWith(mode+':'))){
       const n=Number(key.split(':')[1]);
       const codes=Array.from(c.availableSurfaceCodes(n,'occ')).sort();
       const anterior=['incisor','canine'].includes(c.toothType(n));
-      assert.deepEqual(codes,anterior?['D','I','L','M']:['B','D','L','M','O']);
+      assert.deepEqual(codes,anterior?['D','I','L','M']:['D','L','M','O']);
       assert.ok(c.defaultSurfaceFor(n,'occ').every(code=>codes.includes(code)));
       assert.deepEqual(Object.values(c.surfacePadSpec(n,'occ')).filter(Boolean).sort(),codes,'every selectable surface must be exposed by the keyboard-accessible pad');
       for(const region of c.innerSurfaceDefs(n)){
@@ -53,8 +53,9 @@ test('lower crown buccal and lingual regions match their visual sides without ch
     for(const n of teeth){
       const crown=c.innerSurfaceDefs(n),buccal=crown.find(r=>r.key==='B'),lingual=crown.find(r=>r.key==='L');
       assert.ok(buccal.cy>lingual.cy,`${n} lower crown maps buccal to the far visual side`);
-      const root=c.surfaceDefs(n,'front'),rootBuccal=root.find(r=>r.key==='B'),rootLingual=root.find(r=>r.key==='L');
-      assert.ok(rootBuccal.cy<rootLingual.cy,`${n} root mapping remains unchanged`);
+      const root=c.surfaceDefs(n,'front');
+      assert.ok(root.some(r=>r.key==='B'));
+      assert.ok(!root.some(r=>r.key==='L'));
     }
   }
   const c=setup();
@@ -75,7 +76,8 @@ test('lower teeth 31, 33 and 43 map lingual and incisal correctly while preservi
   assert.ok(regions31.find(r=>r.key==='M').cx<regions31.find(r=>r.key==='D').cx);
   for(const n of [31,33,43]){
     const root=c.surfaceDefs(n,'front');
-    assert.ok(root.find(r=>r.key==='L').cy>root.find(r=>r.key==='F').cy,`${n} root mapping remains unchanged`);
+    assert.ok(root.some(r=>r.key==='F'));
+    assert.ok(!root.some(r=>r.key==='L'));
   }
 });
 test('right-side permanent root views map mesial and distal to their anatomical sides',()=>{
@@ -88,7 +90,7 @@ test('right-side permanent root views map mesial and distal to their anatomical 
     assert.equal(pad.top,[13,12,11,43,42,41].includes(n)?'F':'B',`${n} root pad keeps its facial/buccal surface`);
     assert.equal(pad.left,'D',`${n} left root pad selects distal`);
     assert.equal(pad.right,'M',`${n} right root pad selects mesial`);
-    assert.equal(pad.bottom,'L',`${n} root pad keeps its lingual surface`);
+    assert.equal(pad.bottom,null,`${n} root pad omits the hidden lingual surface`);
     const crown=c.innerSurfaceDefs(n),crownM=crown.find(r=>r.key==='M'),crownD=crown.find(r=>r.key==='D');
     assert.ok(crownM.cx>crownD.cx,`${n} crown mapping remains unchanged`);
   }
@@ -111,7 +113,7 @@ test('crown regions use circular sectors except for the requested anterior teeth
   const rectangular=[13,12,11,21,22,23,42,41,32];
   const permanent=[11,12,13,14,15,16,17,18,21,22,23,24,25,26,27,28,31,32,33,34,35,36,37,38,41,42,43,44,45,46,47,48];
   for(const n of permanent){
-    const paths=c.innerSurfaceDefs(n).map(region=>region.path);
+    const paths=c.innerSurfaceDefs(n).filter(region=>c.toothType(n)!=="incisor"||region.key!=="L").map(region=>region.path);
     assert.ok(paths.every(path=>rectangular.includes(n)?!path.includes('C'):path.includes('C')),`${n} crown geometry`);
   }
 });
@@ -179,4 +181,47 @@ test('permanent and primary charts swap counterparts independently and round-tri
   }
   assert.equal(c.swapPrimarySlot(16),null);
   assert.equal(c.swapPrimarySlot(18),null);
+});
+
+ test('opposite-facing findings and selections stay hidden, including legacy entries',()=>{
+  const c=setup();
+  c.treatmentFor=()=>({mode:'surface',views:['occ','front']});
+  for(const mode of ['permanent','primary']){
+    c.chartMode=mode;
+    for(const key of Object.keys(c.assets).filter(k=>k.startsWith(mode+':'))){
+      const n=Number(key.split(':')[1]);
+      const entry={tooth:n,view:'occ',treatment:'caries',surfaces:['B','F','L']};
+      assert.deepEqual(Array.from(c.visibleEntrySurfaces(n,'occ',entry)),['L']);
+      assert.ok(!c.visibleEntrySurfaces(n,'front',entry).includes('L'));
+      c.draft=entry;
+      assert.ok(!c.selectedSurfaces(n,'front').has('L'));
+      c.draft={...entry,view:'front',surfaces:['B','F']};
+      assert.equal(c.selectedSurfaces(n,'occ').size,0);
+      const facial=c.surfaceDefs(n,'front').find(r=>['B','F'].includes(r.key));
+      const values=facial.path.match(/[0-9.]+/g).map(Number);
+      assert.ok(values[3]-values[1]>c.toothH(n)*.38,`${n} facial coverage reaches the neck`);
+      for(const status of ['existing','planned','watch']){
+        c.entriesByStatus=()=>[entry];
+        assert.equal(c.surfaceMap(n,'front',status).L,undefined);
+        assert.equal(c.surfaceMap(n,'occ',status).B,undefined);
+      }
+    }
+  }
+ });
+
+test('incisor lingual patches are rounded, compact and contained within the crown',()=>{
+  for(const mode of ['permanent','primary']){
+    const c=setup(mode);
+    const teeth=mode==='permanent'?[11,12,21,22,31,32,41,42]:[51,52,61,62,71,72,81,82];
+    for(const n of teeth){
+      const region=c.surfaceDefs(n,'occ').find(r=>r.key==='L');
+      assert.match(region.path,/C/);
+      const values=region.path.match(/[0-9.]+/g).map(Number);
+      const xs=values.filter((_,i)=>i%2===0),ys=values.filter((_,i)=>i%2===1);
+      const {width:w,height:h}=c.crownDims(n);
+      assert.ok(Math.max(...xs)-Math.min(...xs)<w*.43);
+      assert.ok(Math.max(...ys)-Math.min(...ys)<h*.18);
+      assert.ok(c.isUpper(n)?Math.max(...ys)<h*.51:Math.min(...ys)>h*.43);
+    }
+  }
 });
