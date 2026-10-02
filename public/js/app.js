@@ -701,6 +701,7 @@ function surfaceLongLabel(code,n,v){
   return code
 }
 function surfaceShortLabel(code,n,v){
+  if(code==="L") return "P/L";
   if(v==="front"){
     if(code==="B") return "B/F";
     if(code==="F") return "F/V";
