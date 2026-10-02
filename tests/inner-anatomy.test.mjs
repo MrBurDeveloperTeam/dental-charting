@@ -31,13 +31,34 @@ test('both dentitions expose only crown-facing surfaces',()=>{
       const anterior=['incisor','canine'].includes(c.toothType(n));
       assert.deepEqual(codes,anterior?['D','I','L','M']:['D','L','M','O']);
       assert.ok(c.defaultSurfaceFor(n,'occ').every(code=>codes.includes(code)));
-      assert.deepEqual(Object.values(c.surfacePadSpec(n,'occ')).filter(Boolean).sort(),codes,'every selectable surface must be exposed by the keyboard-accessible pad');
+      for(const view of ['occ','front']){
+        const pad=c.surfacePadSpec(n,view);
+        assert.deepEqual(Object.values(pad).sort(),anterior?['D','F','I','L','M']:['B','D','L','M','O']);
+        assert.equal(c.surfaceShortLabel(pad.top,n,view),'B/F');
+        assert.equal(c.surfaceShortLabel(pad.bottom,n,view),'P/L');
+      }
       for(const region of c.innerSurfaceDefs(n)){
         const y=region.cy/c.crownDims(n).height;
         assert.ok(c.isUpper(n)?y<.56:y>.42,`${n} surface must avoid the root`);
       }
     }
   }
+});
+
+test('surface selection spans both views while respecting treatment view restrictions',()=>{
+  const c=setup();
+  c.draft={tooth:16,category:'condition',treatment:'caries',view:'front',surfaces:['B','M','O','D','L']};
+  c.TREATMENTS={caries:{category:'condition',mode:'surface',views:['occ','front']},rootCaries:{category:'condition',mode:'surface',views:['front']}};
+  c.normalizeDraft();
+  assert.deepEqual(Array.from(c.draft.surfaces),['B','M','O','D','L']);
+  c.draft.view='occ';
+  c.normalizeDraft();
+  assert.deepEqual(Array.from(c.draft.surfaces),['B','M','O','D','L']);
+  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'front',c.draft)).sort(),['B','D','M']);
+  assert.deepEqual(Array.from(c.visibleEntrySurfaces(16,'occ',c.draft)).sort(),['D','L','M','O']);
+  c.draft.treatment='rootCaries';
+  c.normalizeDraft();
+  assert.deepEqual(Array.from(c.draft.surfaces),['B','M','D']);
 });
 test('mesial selection faces the midline on all four quadrants',()=>{
   const c=setup();
@@ -90,7 +111,7 @@ test('right-side permanent root views map mesial and distal to their anatomical 
     assert.equal(pad.top,[13,12,11,43,42,41].includes(n)?'F':'B',`${n} root pad keeps its facial/buccal surface`);
     assert.equal(pad.left,'D',`${n} left root pad selects distal`);
     assert.equal(pad.right,'M',`${n} right root pad selects mesial`);
-    assert.equal(pad.bottom,null,`${n} root pad omits the hidden lingual surface`);
+    assert.equal(pad.bottom,'L',`${n} root pad exposes lingual selection for the crown view`);
     const crown=c.innerSurfaceDefs(n),crownM=crown.find(r=>r.key==='M'),crownD=crown.find(r=>r.key==='D');
     assert.ok(crownM.cx>crownD.cx,`${n} crown mapping remains unchanged`);
   }

@@ -689,6 +689,7 @@ function surfaceDefs(n,v){
   return allSurfaceDefs(n,v).filter(region=>v==="front"?region.key!=="L":!["B","F"].includes(region.key));
 }
 function availableSurfaceCodes(n,v){return surfaceDefs(n,v).map(i=>i.key)}
+function selectableSurfaceCodes(n,t){return [...new Set(t.views.flatMap(v=>availableSurfaceCodes(n,v)))]}
 function defaultSurfaceFor(n,v){const t=toothType(n); if(v==="occ") return (t==="incisor"||t==="canine")?["I"]:["O"]; return (t==="incisor"||t==="canine")?["F"]:["B"]}
 function surfaceLongLabel(code,n,v){
   if(code==="M") return "Mesial";
@@ -702,6 +703,7 @@ function surfaceLongLabel(code,n,v){
 }
 function surfaceShortLabel(code,n,v){
   if(code==="L") return "P/L";
+  if(code==="B"||code==="F") return "B/F";
   if(v==="front"){
     if(code==="B") return "B/F";
     if(code==="F") return "F/V";
@@ -709,23 +711,9 @@ function surfaceShortLabel(code,n,v){
   return code
 }
 function surfacePadSpec(n,v){
-  const t=toothType(n),codes=new Set(availableSurfaceCodes(n,v));
-  const spec=[];
-  if(v==="occ"){
-    if(t==="incisor"||t==="canine"){
-      spec.push({area:"left",code:"M"},{area:"center",code:"I"},{area:"right",code:"D"});
-      if(codes.has("L")) spec.push({area:isUpper(n)?"bottom":"top",code:"L"});
-    } else {
-      spec.push({area:"left",code:"M"},{area:"center",code:"O"},{area:"right",code:"D"},{area:"bottom",code:"L"});
-    }
-  } else {
-    const topCode=(t==="incisor"||t==="canine")?"F":"B";
-    const swapMD=rightRootNeedsMDSwap(n,v);
-    spec.push({area:"top",code:topCode},{area:"left",code:swapMD?"D":"M"},{area:"right",code:swapMD?"M":"D"});
-  }
-  const byArea={top:null,left:null,center:null,right:null,bottom:null};
-  spec.forEach(item=>{if(codes.has(item.code)) byArea[item.area]=item.code});
-  return byArea
+  const anterior=["incisor","canine"].includes(toothType(n));
+  const swapMD=v==="front"&&rightRootNeedsMDSwap(n,v);
+  return {top:anterior?"F":"B",left:swapMD?"D":"M",center:anterior?"I":"O",right:swapMD?"M":"D",bottom:"L"}
 }
 function treatmentHint(id){
   const hints={
@@ -826,7 +814,7 @@ function statusLabel(status){return STATUSES.find(s=>s.id===status)?.label||stat
 function entrySurfaceLabel(entry){const mode=treatmentFor(entry.treatment).mode; if(mode==="surface") return entry.surfaces.join("/"); if(mode==="root") return "Root"; if(mode==="label")return "Tooth annotation"; return "Whole tooth"}
 function toothTooltipText(n){if(isGhostPrimarySlot(n)) return "Double-click to add this permanent molar"; const items=entriesForTooth(n); if(!items.length) return ""; return items.map(entry=>{const treatment=treatmentFor(entry.treatment); const details=[]; details.push(treatment.label); details.push(statusLabel(entry.status)); if(treatment.mode!=="whole"){details.push(entry.view==="occ"?"Crown + inner":"Root"); details.push(entrySurfaceLabel(entry))} if(entry.note) details.push(`Note: ${entry.note}`); return details.join(" · ")}).join("\n")}
 function tooltipOnLeft(n){const order=isUpper(n)?activeUpper():activeLower(); return order.indexOf(n)>=Math.max(0,order.length-4)}
-function normalizeDraft(){if(!draft.tooth)return; const avail=Object.entries(TREATMENTS).filter(([,t])=>t.category===draft.category); if(!avail.find(([id])=>id===draft.treatment)) draft.treatment=avail[0][0]; const t=treatmentFor(draft.treatment); if(t.category==="condition")draft.material=null; if(!t.views.includes(draft.view)) draft.view=t.views[0]; if(t.mode==="surface"){const allowed=new Set(availableSurfaceCodes(draft.tooth,draft.view)); draft.surfaces=draft.surfaces.filter(s=>allowed.has(s))} else draft.surfaces=[]}
+function normalizeDraft(){if(!draft.tooth)return; const avail=Object.entries(TREATMENTS).filter(([,t])=>t.category===draft.category); if(!avail.find(([id])=>id===draft.treatment)) draft.treatment=avail[0][0]; const t=treatmentFor(draft.treatment); if(t.category==="condition")draft.material=null; if(!t.views.includes(draft.view)) draft.view=t.views[0]; if(t.mode==="surface"){const allowed=new Set(selectableSurfaceCodes(draft.tooth,t)); draft.surfaces=draft.surfaces.filter(s=>allowed.has(s))} else draft.surfaces=[]}
 function surfaceSelectionError(){return treatmentFor(draft.treatment).mode==="surface"&&!draft.surfaces.length?"Select at least one surface before saving this treatment.":""}
 function openTooth(n,v,surface=null,preserve=false,statusContext="existing"){if(!canStartCharting())return; if(!editingEntry?.bridgeId)editingEntry=null; draft.tooth=n; draft.view=v; draft.layer=statusContext; if(!preserve&&draft.treatment!=="bridge"){draft.category="condition"; draft.treatment="caries"; draft.material=null; draft.status=statusContext; draft.note=""; els.noteInput.value=""} else {draft.status=statusContext} draft.surfaces=surface?[surface]:[]; if(selection.multi){if(!selection.teeth.includes(n)) selection.teeth.push(n)} else selection.teeth=[n]; normalizeDraft(); renderAll()}
 function resetDraft(){
@@ -1172,7 +1160,8 @@ function rctOverlayHTML(n){
     const mainCanalPath=`M${startX-topRadius} ${startY+1} Q${startX} ${startY-1} ${startX+topRadius} ${startY+1} C${startX+bend+topRadius*.72} ${g.height*.69} ${endX-bend+tipRadius} ${g.height*.8} ${endX+tipRadius} ${endY-1} Q${endX} ${endY+1} ${endX-tipRadius} ${endY-1} C${endX-bend-tipRadius} ${g.height*.8} ${startX+bend-topRadius*.72} ${g.height*.69} ${startX-topRadius} ${startY+1} Z`;
     const wisdomBranches=branchedWisdomCanal?` M${startX-1} ${startY+9} Q${startX-3.5} ${startY+4} ${startX-7} ${startY+1} Q${startX-7.5} ${startY+4} ${startX-2} ${startY+12} Z M${startX+1} ${startY+9} Q${startX+3.5} ${startY+4} ${startX+7} ${startY+1} Q${startX+7.5} ${startY+4} ${startX+2} ${startY+12} Z`:'';
     const wisdomBranchDetail=branchedWisdomCanal?` M${startX} ${startY+10} Q${startX-3.5} ${startY+5} ${startX-6.5} ${startY+2} M${startX} ${startY+10} Q${startX+3.5} ${startY+5} ${startX+6.5} ${startY+2}`:'';
-    return `<path class="rct-canal" d="${mainCanalPath}${wisdomBranches}"/><path class="rct-canal-detail" d="${centerPath}${wisdomBranchDetail}"/>`;
+    // Export clones SVG children without their computed CSS; keep canal paint inline.
+    return `<path class="rct-canal" style="fill:#ef5149;stroke:#c93430;stroke-width:.8px;opacity:1" d="${mainCanalPath}${wisdomBranches}"/><path class="rct-canal-detail" style="fill:none;stroke:#ff9b78;stroke-width:1.25px;stroke-linecap:round;stroke-linejoin:round;opacity:.92;vector-effect:non-scaling-stroke" d="${centerPath}${wisdomBranchDetail}"/>`;
   }).join('');
   return `<svg class="surface-svg rct-anatomy" width="${g.width}" height="${g.height}" viewBox="0 0 ${g.width} ${g.height}" aria-hidden="true"><defs><clipPath id="${clipId}">${surfaceClipPath(n,"front")}</clipPath></defs><g clip-path="url(#${clipId})">${canals}</g></svg>`;
 }
@@ -1547,7 +1536,7 @@ function renderSidebar(){if(!canStartCharting()){els.sidebarEmpty.style.display=
 function renderCategoryGrid(disabled=false){els.categoryGrid.innerHTML=""; CATEGORIES.forEach(c=>{const b=document.createElement("button"); b.className=`chip${draft.category===c.id?" active":""}`; b.type="button"; b.textContent=c.label; b.disabled=disabled; if(!disabled) b.addEventListener("click",()=>pickCategory(c.id)); els.categoryGrid.appendChild(b)})}
 function renderViewGrid(disabled=false){const t=treatmentFor(draft.treatment); els.viewGrid.innerHTML=""; [{id:"occ",label:"Crown + inner view"},{id:"front",label:"Root view"}].forEach(v=>{const b=document.createElement("button"); b.className=`chip${draft.view===v.id?" active":""}`; b.type="button"; b.textContent=v.label; const blocked=disabled||!t.views.includes(v.id); b.disabled=blocked; if(!blocked) b.addEventListener("click",()=>pickView(v.id)); if(!t.views.includes(v.id)) b.style.opacity=".38"; els.viewGrid.appendChild(b)}); els.viewNote.textContent=disabled?"Select a tooth first.":(t.mode==="surface"?"Surface treatments color only the selected region.":(t.mode==="root"?"Root canal and root findings use the root view only.":"Whole-tooth treatments cover the whole tooth representation."))}
 function renderSurfaceGrid(disabled=false){const t=treatmentFor(draft.treatment),show=true,interactive=!disabled&&t.mode==="surface"; els.surfaceField.style.display=show?"grid":"none"; els.surfaceGrid.innerHTML=""; if(!show){els.surfaceNote.textContent=disabled?"":"";
-return} const pad=document.createElement("div"); pad.className=`surface-pad${interactive?"":" inactive"}`; const spec=surfacePadSpec(draft.tooth,draft.view); ["top","left","center","right","bottom"].forEach(area=>{const code=spec[area]; const b=document.createElement("button"); b.className=`surface-chip${code&&draft.surfaces.includes(code)?" active":""}${code?"":" empty"}`; b.type="button"; b.dataset.area=area; if(!code){b.disabled=true; b.textContent=""; pad.appendChild(b); return} b.disabled=!interactive; b.textContent=surfaceShortLabel(code,draft.tooth,draft.view); b.title=surfaceLongLabel(code,draft.tooth,draft.view); if(interactive) b.addEventListener("click",()=>toggleSurface(code)); pad.appendChild(b)}); els.surfaceGrid.appendChild(pad); els.surfaceNote.textContent=interactive?(draft.view==="occ"?"Tap the pad to build combinations like MO, MOD or OL.":"Tap the root pad for mesial, buccal/facial or distal surfaces."):"Surface selection is not used for this treatment, so the pad stays visible but read-only."}
+return} const pad=document.createElement("div"); pad.className=`surface-pad${interactive?"":" inactive"}`; const spec=surfacePadSpec(draft.tooth,draft.view); ["top","left","center","right","bottom"].forEach(area=>{const code=spec[area]; const b=document.createElement("button"); b.className=`surface-chip${code&&draft.surfaces.includes(code)?" active":""}${code?"":" empty"}`; b.type="button"; b.dataset.area=area; if(!code){b.disabled=true; b.textContent=""; pad.appendChild(b); return} const allowed=interactive&&selectableSurfaceCodes(draft.tooth,t).includes(code); b.disabled=!allowed; b.textContent=surfaceShortLabel(code,draft.tooth,draft.view); b.title=surfaceLongLabel(code,draft.tooth,draft.view); if(allowed) b.addEventListener("click",()=>toggleSurface(code)); pad.appendChild(b)}); els.surfaceGrid.appendChild(pad); els.surfaceNote.textContent=interactive?"Select any surface here. B/F marks the root view; P/L and O/I mark the crown view.":"Surface selection is not used for this treatment, so the pad stays visible but read-only."}
 function renderTreatmentGrid(disabled=false){
   els.treatmentGrid.replaceChildren();
   for(const category of CATEGORIES){

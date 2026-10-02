@@ -109,6 +109,25 @@ test('root canal overlay draws root-only lines clipped to each tooth',()=>{
    assert.doesNotMatch(overlay,/rct-chamber|rct-horn|rct-canal-glow/);
  }
 });
+
+test('root canal SVG retains live colors when exported without chart stylesheets',()=>{
+ const c=setup();
+ const chartCss=readFileSync(new URL('../css/chart.css',import.meta.url),'utf8');
+ for(const mode of ['permanent','primary']){
+   c.chartMode=mode;
+   const teeth=mode==='permanent'?[11,14,16,18,28,34,36,37,46]:[51,54,55,71,74,75];
+   for(const n of teeth){
+     const svg=c.rctOverlayHTML(n);
+     for(const name of ['rct-canal','rct-canal-detail']){
+       const css=chartCss.match(new RegExp('\\.art-core\\.front \\.rct-anatomy \\.'+name+'\\{([^}]+)\\}'))[1];
+       const inline=svg.match(new RegExp('class="'+name+'" style="([^"]+)"'))[1];
+       for(const declaration of css.split(';').map(value=>value.trim()).filter(Boolean)){
+         assert.ok(inline.split(';').includes(declaration.replace(/!important/g,'')),`${n} ${name} preserves ${declaration}`);
+       }
+     }
+   }
+ }
+});
 test('labels do not replace whole-tooth anatomy',()=>{const c=setup();for(const id of ['impacted','m1','m2','m3','kiv'])assert.equal(c.treatmentFor(id).mode,'label');});
 test('label conditions render in the mini preview',()=>{
  const c=setup();
