@@ -871,6 +871,33 @@ function chartImageFileName(){
   const visitDate=visit.date||isoToday();
   return `dental-chart-${patientName}-${visitDate}.png`;
 }
+function isMobileChartDownload(){
+  const nav=window.navigator;
+  return !!(nav?.userAgentData?.mobile||/Android|iPhone|iPad|iPod/i.test(nav?.userAgent||"")||
+    (nav?.platform==="MacIntel"&&nav.maxTouchPoints>1));
+}
+async function downloadMobileChartImage(blob,fileName){
+  // A data URL keeps the PNG available while a mobile browser opens its download
+  // prompt. Revoking a temporary blob URL early can interrupt that hand-off.
+  const url=await new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(reader.error||new Error("The chart image could not be read."));
+    reader.readAsDataURL(blob);
+  });
+  const link=document.createElement("a");
+  link.className="chart-image-mobile-save";
+  link.href=url;
+  link.download=fileName;
+  link.target="_blank";
+  link.rel="noopener";
+  link.textContent="Download ready — tap here if it didn’t start";
+  // Keep a real link for browsers that require a fresh tap after image rendering.
+  // The review screen forwards its download button to the hidden chart button.
+  const container=document.querySelector(".record-review-toolbar")||els.downloadChartImageBtn.parentElement;
+  container.insertAdjacentElement("afterend",link);
+  link.click();
+}
 async function downloadChartImage(){
   if(!els.splitStage||typeof window.chartToBlob!=="function"){
     window.alert("Chart image export is not available yet. Please refresh and try again.");
@@ -878,6 +905,8 @@ async function downloadChartImage(){
   }
   const fileName=chartImageFileName();
   const originalLabel=els.downloadChartImageLabel?.textContent||"Download Chart Image";
+  const mobileDownload=isMobileChartDownload();
+  if(mobileDownload)document.querySelectorAll(".chart-image-mobile-save").forEach(link=>link.remove());
 
   els.downloadChartImageBtn.disabled=true;
   if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent="Preparing image…";
@@ -891,6 +920,10 @@ async function downloadChartImage(){
       pixelRatio:Math.min(3,Math.max(2,window.devicePixelRatio||1))
     });
     if(!blob)throw new Error("The chart image could not be created.");
+    if(mobileDownload){
+      await downloadMobileChartImage(blob,fileName);
+      return;
+    }
     let fileHandle=null;
     // Build the complete PNG before opening the native picker. Opening it first can
     // leave a temporary zero-byte/partial file that Windows Photos tries to read.
