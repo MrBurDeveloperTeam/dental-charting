@@ -6,17 +6,28 @@ import ts from 'typescript';
 
 const source=readFileSync(new URL('../public/js/app.js',import.meta.url),'utf8');
 const ast=ts.createSourceFile('app.js',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
-const helper=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='downloadChartImage').getText();
-function setup({fail=false,cancel=false}={}){
+const helper=ast.statements.filter(n=>ts.isFunctionDeclaration(n)&&['downloadChartImage','isMobileChartDownload','downloadMobileChartImage'].includes(n.name.text)).map(n=>n.getText()).join('\n');
+function setup({fail=false,cancel=false,navigator={},picker=true,pickerFail=false,readFail=false,review=false}={}){
   const stage=Object.freeze({id:'live-chart'}),blob={type:'image/png'},events=[];
-  const els={splitStage:stage,downloadChartImageBtn:{disabled:false},downloadChartImageLabel:{textContent:'Download Chart Image'}};
-  const context=vm.createContext({els,document:{fonts:{ready:Promise.resolve().then(()=>events.push('fonts'))}},chartImageFileName:()=> 'chart.png',console:{error(){}},window:{
+  const links=[],timers=[];
+  const container={insertAdjacentElement(position,link){assert.equal(position,'afterend');links.push(link);events.push('link');}};
+  const reviewContainer={insertAdjacentElement(position,link){assert.equal(position,'afterend');links.push(link);events.push('review-link');}};
+  const els={splitStage:stage,downloadChartImageBtn:{disabled:false,parentElement:container},downloadChartImageLabel:{textContent:'Download Chart Image'}};
+  const context=vm.createContext({els,document:{fonts:{ready:Promise.resolve().then(()=>events.push('fonts'))},
+    querySelector:()=>review?reviewContainer:null,querySelectorAll:()=>links.filter(link=>!link.removed),
+    createElement:()=>({click(){events.push('download');},remove(){this.removed=true;}}),
+    body:{appendChild:link=>links.push(link)}
+  },FileReader:class{
+    readAsDataURL(value){assert.equal(value,blob);events.push('read');if(readFail){this.onerror();return;}this.result='data:image/png;base64,cG5n';this.onload();}
+  },URL:{createObjectURL:()=> 'blob:chart',revokeObjectURL:()=>events.push('revoke')},setTimeout:(callback,delay)=>timers.push({callback,delay}),
+  chartImageFileName:()=> 'chart.png',console:{error(){},warn(){}},window:{
+    navigator,
     devicePixelRatio:2,alert:()=>events.push('alert'),
     chartToBlob:async(node,options)=>{events.push('capture');assert.equal(node,stage);assert.equal(options.pixelRatio,2);assert.equal(options.width,undefined);assert.equal(options.height,undefined);if(fail)throw Error('capture failed');return blob;},
-    showSaveFilePicker:async()=>{events.push('picker');if(cancel)throw {name:'AbortError'};return {createWritable:async()=>({write:async value=>{assert.equal(value,blob);events.push('write');},close:async()=>events.push('close')})};}
+    showSaveFilePicker:picker?async()=>{events.push('picker');if(cancel)throw {name:'AbortError'};if(pickerFail)throw {name:'SecurityError'};return {createWritable:async()=>({write:async value=>{assert.equal(value,blob);events.push('write');},close:async()=>events.push('close')})};}:undefined
   }});
   vm.runInContext(helper,context);
-  return {context,els,events};
+  return {context,els,events,links,timers};
 }
 test('exports the live chart at its current layout after fonts load, then saves the completed PNG',async()=>{
   const {context,els,events}=setup();await context.downloadChartImage();
@@ -32,6 +43,59 @@ test('cancelling save does not write a file or show an error',async()=>{
   const {context,els,events}=setup({cancel:true});await context.downloadChartImage();
   assert.deepEqual(events,['fonts','capture','picker']);assert.equal(els.downloadChartImageBtn.disabled,false);
 });
+for(const [device,navigator] of Object.entries({
+  Android:{userAgent:'Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile'},
+  iPhone:{userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)'},
+  iPad:{userAgent:'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15)',platform:'MacIntel',maxTouchPoints:5},
+  mobileHints:{userAgentData:{mobile:true}}
+})){
+  test(`${device} downloads a PNG directly without opening the native picker`,async()=>{
+    const {context,els,events,links,timers}=setup({navigator});
+    await context.downloadChartImage();
+    assert.deepEqual(events,['fonts','capture','read','link','download']);
+    assert.equal(links[0].download,'chart.png');
+    assert.equal(links[0].href,'data:image/png;base64,cG5n');
+    assert.equal(links[0].target,'_blank');
+    assert.equal(links[0].removed,undefined,'retain a tappable link if the automatic download is blocked');
+    assert.equal(timers.length,0,'the mobile image must not expire while a save prompt is open');
+    assert.equal(els.downloadChartImageBtn.disabled,false);
+    assert.equal(els.downloadChartImageLabel.textContent,'Download Chart Image');
+  });
+}
+test('a touch-enabled Windows laptop keeps the desktop picker',async()=>{
+  const {context,events}=setup({navigator:{userAgent:'Windows',platform:'Win32',maxTouchPoints:10}});
+  await context.downloadChartImage();
+  assert.deepEqual(events,['fonts','capture','picker','write','close']);
+});
+test('mobile retry link appears in the patient review screen and is replaced on the next export',async()=>{
+  const {context,events,links}=setup({navigator:{userAgent:'Android'},review:true});
+  await context.downloadChartImage();
+  assert.ok(events.includes('review-link'));
+  await context.downloadChartImage();
+  assert.equal(links[0].removed,true);
+  assert.equal(links[1].removed,undefined);
+});
+test('mobile image conversion failure restores controls and reports an error',async()=>{
+  const {context,els,events,links}=setup({navigator:{userAgent:'iPhone'},readFail:true});
+  await context.downloadChartImage();
+  assert.deepEqual(events,['fonts','capture','read','alert']);
+  assert.equal(els.downloadChartImageBtn.disabled,false);
+  assert.equal(links.length,0);
+});
+for(const options of [{picker:false},{pickerFail:true}]){
+  test(`desktop fallback still downloads when the picker is ${options.pickerFail?'blocked':'unavailable'}`,async()=>{
+    const {context,events,links,timers}=setup(options);
+    await context.downloadChartImage();
+    assert.ok(events.includes('download'));
+    assert.ok(!events.includes('alert'));
+    assert.equal(links[0].href,'blob:chart');
+    assert.equal(links[0].download,'chart.png');
+    assert.equal(links[0].removed,true);
+    assert.equal(timers[0].delay,1000);
+    timers[0].callback();
+    assert.equal(events.at(-1),'revoke');
+  });
+}
 test('static preview registers the export renderer without Vite or module imports',()=>{
   const html=readFileSync(new URL('../preview.html',import.meta.url),'utf8');
   const script=html.match(/<script src="\.\/js\/(chart-image-export\.js)[^"]*"><\/script>/);
