@@ -816,47 +816,33 @@
   // src/services/chartImage.ts
   var captureQueue = Promise.resolve();
   function chartToBlob(node, options) {
-    const capture = captureQueue.then(() => captureDesktopChart(node, options));
+    const capture = captureQueue.then(() => captureChartTab(node, options));
     captureQueue = capture.catch(() => void 0);
     return capture;
   }
-  async function captureDesktopChart(node, options) {
-    const frame = document.createElement("iframe");
-    frame.setAttribute("aria-hidden", "true");
-    frame.style.cssText = "position:fixed;left:-10000px;top:0;width:1440px;height:1600px;border:0;pointer-events:none";
-    document.body.appendChild(frame);
+  async function captureChartTab(node, options) {
+    const body = document.body;
+    const panel = document.querySelector(".chart-workspace > .entries-panel");
+    const wasReview = body.classList.contains("patient-record-review");
+    const wasCollapsed = body.classList.contains("saved-entries-collapsed");
+    const panelWasCollapsed = panel?.classList.contains("is-collapsed") ?? false;
+    const positionMarkers = window.positionSpacingMarkers;
     try {
-      const doc = frame.contentDocument;
-      const view = frame.contentWindow;
-      const base = doc.createElement("base");
-      base.href = document.baseURI;
-      doc.head.appendChild(base);
-      const styles = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]'));
-      await Promise.all(styles.map((style) => new Promise((resolve, reject) => {
-        const copy = style.cloneNode(true);
-        if (copy.tagName === "LINK") {
-          copy.onload = () => resolve();
-          copy.onerror = () => reject(new Error("Export stylesheet could not be loaded."));
-        }
-        doc.head.appendChild(copy);
-        if (copy.tagName !== "LINK") resolve();
-      })));
-      doc.body.className = "saved-entries-collapsed";
-      const chart = node.cloneNode(true);
-      chart.style.width = "1100px";
-      chart.style.minWidth = "1100px";
-      chart.style.maxWidth = "none";
-      doc.body.appendChild(chart);
-      await doc.fonts.ready;
-      await new Promise((resolve) => view.requestAnimationFrame(() => view.requestAnimationFrame(() => resolve())));
-      const positionMarkers = window.positionSpacingMarkers;
-      positionMarkers?.(chart);
-      const properties = Array.from(view.getComputedStyle(doc.documentElement)).filter((property) => property !== "font-size");
+      body.classList.remove("patient-record-review");
+      body.classList.add("saved-entries-collapsed");
+      panel?.classList.add("is-collapsed");
+      await document.fonts.ready;
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
+      positionMarkers?.(node);
+      const properties = Array.from(getComputedStyle(document.documentElement)).filter((property) => property !== "font-size");
       const captureOptions = { ...options, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
-      await toBlob(chart, captureOptions);
-      return await toBlob(chart, captureOptions);
+      await toBlob(node, captureOptions);
+      return await toBlob(node, captureOptions);
     } finally {
-      frame.remove();
+      body.classList.toggle("patient-record-review", wasReview);
+      body.classList.toggle("saved-entries-collapsed", wasCollapsed);
+      panel?.classList.toggle("is-collapsed", panelWasCollapsed);
+      positionMarkers?.(node);
     }
   }
 
