@@ -151,7 +151,15 @@
 
 /* Branded clinical report: screen and chart-image styling remain independent. */
 @media print {
-  @page {size:A4 portrait;margin:12mm}
+  @page {
+    size:A4 portrait;
+    margin:12mm;
+    /* Own the top margin instead of the browser's date and document title. */
+    @top-left {content:""}
+    @top-center {content:" ";width:100%;border-bottom:1px solid #cbddeb;margin-bottom:3mm}
+    @top-right {content:""}
+  }
+  .app-header {display:none!important}
   body {color:#243547}
   .print-patient-card {padding:0 0 12px!important;margin-bottom:10px!important}
   .print-export-head {margin:0 0 12px;padding:0 0 12px;border-bottom:2px solid #59beb5}
