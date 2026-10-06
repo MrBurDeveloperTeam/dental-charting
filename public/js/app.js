@@ -438,15 +438,16 @@ function calcAge(dob){if(!dob) return null; const birth=new Date(`${dob}T00:00:0
 function printFieldHTML(label,value,wide=false){return `<div class="print-info-item${wide?" wide":""}"><span class="print-label">${label}</span><strong class="print-value">${value||"—"}</strong></div>`}
 function renderPatientHeader(){const hasPatient=Boolean(patient.fullName); els.patientTrigger.classList.toggle("needs-patient",!hasPatient); els.patientNameDisplay.textContent=patient.fullName||"Add patient details"; const parts=[]; if(patient.dob) parts.push(formatDobLabel(patient.dob)); if(patient.patientId) parts.push(`ID ${patient.patientId}`); els.patientSubDisplay.textContent=parts.join(" · ")||"Click to add patient information"; els.patientTrigger.title=parts.join(" · ")||"Click to add patient details"}
 function renderVisitHeader(){els.visitDateDisplay.textContent=formatVisitDate(visit.date); els.visitDateSubDisplay.textContent="Click to change visit date"; els.dateTrigger.title="Click to change visit date"}
-function renderPrintSections(){
+function renderPrintSections(dentistName="Not assigned"){
   const fields=[
-    ["Patient",patient.fullName||"Not set"],
-    ["Visit date",formatVisitDate(visit.date)],
+    ["Patient name",patient.fullName||"Not set"],
     ["Date of birth",patient.dob?formatInputDate(patient.dob):"—"],
-    ["Dentition",activeDentition().label],
+    ["IC / ID number",patient.idNumber||"—"],
     ["Gender",patient.gender||"—"],
     ["Phone",patient.phone||"—"],
-    ["Email",patient.email||"—"]
+    ["Email",patient.email||"—"],
+    ["Visit date",formatVisitDate(visit.date)],
+    ["Treating dentist",dentistName]
   ];
   els.printPatientGrid.innerHTML=fields.map(([label,value])=>printFieldHTML(label,value)).join("");
   els.printNoteBody.textContent=patient.notes?.trim()||"No patient note recorded.";
@@ -859,12 +860,58 @@ function pdfFileName(){
   const visitDate=visit.date||isoToday();
   return `${patientName}_${visitDate}`;
 }
-function downloadPdf(){
+async function captureChartImage(){
+  if(!els.splitStage||typeof window.chartToBlob!=="function")throw new Error("Chart image export is not available yet.");
+  await document.fonts?.ready;
+  const blob=await window.chartToBlob(els.splitStage,{
+    pixelRatio:Math.min(3,Math.max(2,window.devicePixelRatio||1))
+  });
+  if(!blob)throw new Error("The chart image could not be created.");
+  return blob;
+}
+let pdfExportBusy=false;
+async function downloadPdf(){
+  if(pdfExportBusy)return;
+  pdfExportBusy=true;
   const previousTitle=document.title,summaryHeading=document.querySelector(".saved-entries-title"),previousHeading=summaryHeading?.textContent;
-  document.title=pdfFileName();
-  if(summaryHeading)summaryHeading.textContent="Summary";
-  window.addEventListener("afterprint",()=>{document.title=previousTitle;if(summaryHeading)summaryHeading.textContent=previousHeading||"Saved Entries"},{once:true});
-  window.print();
+  let image=null,url=null;
+  const cleanup=()=>{
+    window.removeEventListener("afterprint",cleanup);
+    image?.remove();
+    if(url)URL.revokeObjectURL(url);
+    document.body.classList.remove("pdf-chart-image-ready");
+    document.title=previousTitle;
+    if(summaryHeading)summaryHeading.textContent=previousHeading||"Saved Entries";
+    els.downloadPdfBtn.disabled=false;
+    els.downloadPdfBtn.removeAttribute("aria-busy");
+    pdfExportBusy=false;
+  };
+  els.downloadPdfBtn.disabled=true;
+  els.downloadPdfBtn.setAttribute("aria-busy","true");
+  try{
+    const dentistName=window.dentalCharts?.treatingDentist&&patient.patientId
+      ? await window.dentalCharts.treatingDentist({patientId:patient.patientId,visitDate:visit.date||isoToday()})
+      : "Not assigned";
+    renderPrintSections(dentistName);
+    // Capture screen styles before print CSS can rearrange the chart.
+    const blob=await captureChartImage();
+    url=URL.createObjectURL(blob);
+    image=document.createElement("img");
+    image.className="print-chart-image";
+    image.alt="Dental chart";
+    image.src=url;
+    await image.decode();
+    els.splitStage.closest(".chart-card").appendChild(image);
+    document.body.classList.add("pdf-chart-image-ready");
+    document.title=pdfFileName();
+    if(summaryHeading)summaryHeading.textContent="Summary";
+    window.addEventListener("afterprint",cleanup,{once:true});
+    window.print();
+  }catch(error){
+    cleanup();
+    console.error("PDF chart export failed",error);
+    window.alert("The PDF chart image could not be prepared. Please try again.");
+  }
 }
 function chartImageFileName(){
   const patientName=(patient.fullName||"patient").trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"patient";
@@ -911,15 +958,10 @@ async function downloadChartImage(){
   els.downloadChartImageBtn.disabled=true;
   if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent="Preparing image…";
   try{
-    await document.fonts?.ready;
-    const stage=els.splitStage;
     // Snapshot the live DOM and computed styles. Native SVG foreignObject
     // rendering preserves transforms, flex/grid alignment and clip-paths;
     // there is no export-specific tooth layout or badge repositioning.
-    const blob=await window.chartToBlob(stage,{
-      pixelRatio:Math.min(3,Math.max(2,window.devicePixelRatio||1))
-    });
-    if(!blob)throw new Error("The chart image could not be created.");
+    const blob=await captureChartImage();
     if(mobileDownload){
       await downloadMobileChartImage(blob,fileName);
       return;
@@ -1144,10 +1186,7 @@ function renderMobileToothModal(){
       ? `Switch to permanent tooth ${successor}`
       : `Switch to primary tooth ${successor}`;
 
-    mobileToothEls.primarySwap.classList.toggle(
-      "activate",
-      isPrimaryTooth(draft.tooth)
-    );
+    mobileToothEls.primarySwap.classList.add("activate");
   }
   const neighbors=mobileToothNeighbors(draft.tooth);
   mobileToothEls.prev.disabled=!neighbors.previous;

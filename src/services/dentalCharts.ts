@@ -194,7 +194,29 @@ export async function deleteDentalChartEntries(context: VisitContext, entryIds: 
   if (error) throw error;
 }
 
+async function treatingDentist(context: VisitContext): Promise<string> {
+  const supabase = getSupabaseClient();
+  const { clinicId } = await getClinicSession();
+  const visit = await findVisit(context);
+  let dentistId = visit?.dentist_id;
+  if (!dentistId) {
+    let query = supabase.from("appointments").select("dentist_id").eq("clinic_id", clinicId);
+    query = visit?.appointment_id
+      ? query.eq("id", visit.appointment_id)
+      : query.eq("patient_id", context.patientId).eq("date", context.visitDate);
+    const { data, error } = await query.order("created_at", { ascending: false }).limit(1);
+    if (error) throw error;
+    dentistId = data?.[0]?.dentist_id;
+  }
+  if (!dentistId) return "Not assigned";
+  const { data, error } = await supabase.from("apt_staff").select("name")
+    .eq("clinic_id", clinicId).eq("id", dentistId).maybeSingle();
+  if (error) throw error;
+  return data?.name || "Not assigned";
+}
+
 export const dentalCharts = {
+  treatingDentist,
   load: loadDentalChart,
   saveEntry: saveDentalChartEntry,
   deleteEntry: deleteDentalChartEntry,

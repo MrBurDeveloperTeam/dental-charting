@@ -466,8 +466,8 @@ input[type="reset"],
   .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;min-height:58px;gap:6px;padding:6px 8px}
   .brand{grid-column:1;grid-row:1;min-width:0;padding-right:0;border-right:0}
   #profile-settings-root{grid-column:2;grid-row:1;justify-self:end}
-  .snabbb-home{width:64px;height:30px}
-  .snabbb-home img{width:62px}
+  .snabbb-home{width:90px;height:36px}
+  .snabbb-home img{width:88px}
   .brand-divider{font-size:25px}
   .logo{width:38px;height:38px;border-radius:10px}
   .logo img{border-radius:9px}
@@ -503,8 +503,8 @@ input[type="reset"],
 
 @media (max-width:390px){
   .topbar{grid-template-columns:minmax(0,1fr) auto}
-  .snabbb-home{width:54px}
-  .snabbb-home img{width:52px}
+  .snabbb-home{width:90px}
+  .snabbb-home img{width:88px}
   .brand-divider{font-size:23px}
   .logo{width:34px;height:34px}
   .back-to-appointments{min-width:0;width:150px;padding-inline:7px;font-size:9px}
@@ -1402,6 +1402,12 @@ button.number:focus-visible {
   }
 }
 
+/* Join desktop/tablet panels without exposing the dark stage between them. */
+@media screen and (min-width:601px) {
+  #split-stage {gap:0;padding:0;border:0}
+  #split-stage .split-group {border-radius:0}
+}
+
 /* Keep every tooth and its number visible in the four-arch phone chart. */
 @media screen and (max-width:600px) {
   .layout {grid-template-columns:minmax(0,1fr)}
@@ -1412,11 +1418,15 @@ button.number:focus-visible {
     box-sizing:border-box;
     width:100%;
     min-width:0;
-    padding:8px 4px;
+    /* Join the mobile panels without exposing the dark stage underneath. */
+    gap:0;
+    padding:0;
+    border:0;
     overflow:hidden;
   }
-  #split-stage .split-group {min-width:0;padding:6px 0}
+  #split-stage .split-group {min-width:0;padding:6px 0;border-radius:0}
   #split-stage .arch-grid {min-width:0;grid-template-columns:43px minmax(0,1fr)}
+  #split-stage .arch-label-row {padding-left:10px}
   #split-stage .upper-grid {grid-template-rows:58px 48px 20px}
   #split-stage .lower-grid {grid-template-rows:20px 48px 58px;margin-top:0;padding-bottom:0}
   #split-stage .lower-grid .lower-label {transform:none}
