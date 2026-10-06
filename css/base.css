@@ -67,7 +67,7 @@ body:has(.modal-backdrop.show) .profile-settings-fallback{z-index:90;pointer-eve
 .snabbb-home{display:flex;align-items:center;justify-content:center;width:82px;height:34px;flex:none;border-radius:8px;transition:background-color .16s ease,transform .16s ease}
 .snabbb-home:hover{background:transparent;transform:translateY(-1px)}
 .snabbb-home:focus-visible{outline:3px solid rgba(89,190,181,.25);outline-offset:2px}
-.snabbb-home img{display:block;width:78px;height:auto;object-fit:contain}
+.snabbb-home img{display:block;width:90px;height:auto;object-fit:contain}
 .brand-divider{width:auto;height:auto;flex:none;background:none;color:#d8e2ee;font-size:28px;font-weight:300;line-height:1}
 .brand-copy{display:grid;align-content:center;gap:4px;min-width:0}
 .contextbar{display:grid;grid-template-columns:398px minmax(500px,624px) minmax(300px,1fr);align-items:stretch;gap:0;min-height:78px;padding:0;background:#fff;border-bottom:1px solid var(--line)}

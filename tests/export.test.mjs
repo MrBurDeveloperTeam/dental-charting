@@ -6,7 +6,43 @@ import ts from 'typescript';
 
 const source=readFileSync(new URL('../public/js/app.js',import.meta.url),'utf8');
 const ast=ts.createSourceFile('app.js',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
-const helper=ast.statements.filter(n=>ts.isFunctionDeclaration(n)&&['downloadChartImage','isMobileChartDownload','downloadMobileChartImage'].includes(n.name.text)).map(n=>n.getText()).join('\n');
+const helper=ast.statements.filter(n=>ts.isFunctionDeclaration(n)&&['captureChartImage','downloadChartImage','isMobileChartDownload','downloadMobileChartImage'].includes(n.name.text)).map(n=>n.getText()).join('\n');
+const pdfHelper=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='downloadPdf').getText();
+for(const failure of [null,'capture','decode','print']){
+  test(`PDF embeds the shared chart capture and cleans up (${failure||'success'})`,async()=>{
+    const events=[],listeners=new Map(),classes=new Set();
+    const heading={textContent:'Saved Entries'},button={disabled:false,setAttribute(){},removeAttribute(){}};
+    const image={async decode(){events.push('decode');if(failure==='decode')throw Error('decode');},remove(){events.push('remove');}};
+    const context=vm.createContext({
+      els:{downloadPdfBtn:button,splitStage:{closest:()=>({appendChild(value){assert.equal(value,image);events.push('append');}})}},
+      document:{title:'Chart',querySelector:()=>heading,createElement:()=>image,body:{classList:{add:value=>classes.add(value),remove:value=>classes.delete(value)}}},
+      renderPrintSections:()=>{},patient:{patientId:'test'},
+      captureChartImage:async()=>{events.push('capture');if(failure==='capture')throw Error('capture');return {};},
+      pdfFileName:()=> 'Patient_2026-10-06',URL:{createObjectURL:()=> 'blob:pdf',revokeObjectURL:()=>events.push('revoke')},console:{error(){}},
+      window:{addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name),
+        print(){events.push('print');assert.ok(classes.has('pdf-chart-image-ready'));assert.equal(image.src,'blob:pdf');if(failure==='print')throw Error('print');},
+        alert:()=>events.push('alert')}
+    });
+    vm.runInContext('let pdfExportBusy=false;\n'+pdfHelper,context);
+    await context.downloadPdf();
+    if(!failure){
+      assert.deepEqual(events,['capture','decode','append','print']);
+      assert.equal(button.disabled,true);
+      await context.downloadPdf();
+      assert.equal(events.filter(event=>event==='capture').length,1);
+      listeners.get('afterprint')(); // Also fired when the print dialog is cancelled.
+    }else{
+      assert.ok(events.includes('alert'));
+      if(failure!=='print')assert.ok(!events.includes('print'));
+    }
+    assert.equal(context.document.title,'Chart');
+    assert.equal(heading.textContent,'Saved Entries');
+    assert.equal(button.disabled,false);
+    assert.equal(classes.size,0);
+    assert.equal(listeners.size,0);
+    if(failure!=='capture')assert.ok(events.includes('revoke'));
+  });
+}
 function setup({fail=false,cancel=false,navigator={},picker=true,pickerFail=false,readFail=false,review=false}={}){
   const stage=Object.freeze({id:'live-chart'}),blob={type:'image/png'},events=[];
   const links=[],timers=[];
