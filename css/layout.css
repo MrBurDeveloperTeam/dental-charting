@@ -1,4 +1,4 @@
-@media (max-width:1300px){
+@media screen and (max-width:1300px){
   .layout{grid-template-columns:1fr; padding: 0px;}
   .chart-workspace{border-right:0;padding-bottom:24px}
   .entries-panel{margin-bottom:0}
@@ -7,7 +7,7 @@
   .selected-side{max-width:none}
   #treatment-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
 }
-@media (max-width:900px){
+@media screen and (max-width:900px){
   .page{padding:12px}
   .app-header{position:static}
   .topbar{grid-template-columns:auto minmax(0,1fr) auto;padding:12px}
@@ -27,7 +27,7 @@
   .field-pair{grid-template-columns:1fr}
   #treatment-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
-@media (max-width:600px){
+@media screen and (max-width:600px){
   .modal.patient-modal{height:calc(100dvh - 20px);padding:0;border-radius:18px;grid-template-rows:78px 48px minmax(0,1fr)}
   .patient-modal>.modal-head{padding:14px 18px}
   .patient-modal-title-icon{width:42px;height:42px}
@@ -336,7 +336,7 @@
   .date-weekdays,.date-days{gap:4px}
   .date-grid-btn{min-height:42px;border-radius:13px}
 
-@media (max-width:420px){
+@media screen and (max-width:420px){
   .brand{flex-basis:150px;gap:8px}
   .logo{width:40px;height:40px}
   .title{font-size:16px}
@@ -437,7 +437,7 @@ input[type="reset"],
   .app-nav-item.active::after,.app-nav-item:not(.active):hover::after{transform:scaleX(1)}
 }
 
-@media (max-width:1200px) and (min-width:901px){
+@media screen and (max-width:1200px) and (min-width:901px){
   .contextbar{grid-template-columns:300px minmax(450px,1fr) auto}
   .dentition-switch{padding-inline:18px;gap:12px}
   .dentition-btn{padding-inline:14px}
@@ -453,14 +453,14 @@ input[type="reset"],
 }
 
 /* Keep the compact laptop view guide on a single horizontal line. */
-@media (max-width:1900px) and (min-width:901px){
+@media screen and (max-width:1900px) and (min-width:901px){
   .chart-head>div:first-child{min-width:0;flex:1 1 auto}
   .chart-head-controls{width:max-content;flex:0 0 auto}
   .chart-view-key{width:max-content;flex-wrap:nowrap;justify-content:flex-start;gap:8px;padding-inline:12px;white-space:nowrap}
   .chart-view-key span{font-size:9px}
 }
 
-@media (max-width:600px){
+@media screen and (max-width:600px){
   .page{padding:0}
   .app-header{width:100%;overflow:hidden}
   .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;min-height:58px;gap:6px;padding:6px 8px}
@@ -501,7 +501,7 @@ input[type="reset"],
   .context-action-icon{width:16px;height:16px}
 }
 
-@media (max-width:390px){
+@media screen and (max-width:390px){
   .topbar{grid-template-columns:minmax(0,1fr) auto}
   .snabbb-home{width:90px}
   .snabbb-home img{width:88px}
@@ -514,19 +514,19 @@ input[type="reset"],
   .contextbar>.topbar-actions .btn,.contextbar>.topbar-actions .pdf-icon-btn{font-size:10px}
 }
 
-@media (max-width:600px){
+@media screen and (max-width:600px){
   .modal.patient-modal{grid-template-rows:78px 48px minmax(0,1fr)}
   .patient-tabs{display:flex;width:100%;min-width:0;height:48px;overflow:hidden}
   .patient-modal .patient-tab{flex:1 1 0;width:50%;min-width:0;min-height:48px;padding:5px;gap:6px;font-size:10px;line-height:1.1;letter-spacing:.02em;white-space:nowrap}
   .patient-modal .patient-tab::before{width:15px;height:15px;flex-basis:15px;background-size:15px 15px}
 }
 
-@media (max-width:360px){
+@media screen and (max-width:360px){
   .patient-modal .patient-tab{padding-inline:3px;gap:4px;font-size:9px;letter-spacing:0}
   .patient-modal .patient-tab::before{width:14px;height:14px;flex-basis:14px;background-size:14px 14px}
 }
 
-@media (max-width:600px){
+@media screen and (max-width:600px){
   .finish-visit-modal,.delete-entry-modal{width:calc(100% - 20px)}
   .date-modal-card{width:calc(100% - 20px);border-radius:16px}
   .date-modal-card>.modal-head{align-items:flex-start;padding:20px 20px 12px}
@@ -545,7 +545,7 @@ input[type="reset"],
   .date-modal-card .btn.primary{min-width:118px}
 }
 
-@media (max-width:360px){
+@media screen and (max-width:360px){
   .finish-visit-modal,.delete-entry-modal{width:calc(100% - 12px)}
   .date-modal-card{width:calc(100% - 12px)}
   .date-modal-card>.modal-head{padding-inline:16px}
@@ -555,7 +555,7 @@ input[type="reset"],
   .date-modal-card .btn.primary{min-width:104px}
 }
 
-@media (max-width:600px){
+@media screen and (max-width:600px){
   .chart-workspace{width:100%;border-right:0}
   .chart-card{width:calc(100% - 12px);margin:16px 6px 0;border-radius:8px}
   .chart-stage{padding-right:0;padding-left:0}
@@ -574,7 +574,7 @@ input[type="reset"],
   .entries-panel .entry-empty{padding:12px}
 }
 
-@media (max-width:360px){
+@media screen and (max-width:360px){
   .entries-panel{margin-inline:6px}
   .entries-panel>.entries-head{padding-inline:14px}
   .entries-panel>.entries-head .entries-bulk-actions{grid-template-columns:auto minmax(0,1fr);gap:7px;padding-left:0}
@@ -582,7 +582,7 @@ input[type="reset"],
   .entries-panel>.entries-list{padding:10px 14px 14px}
 }
 
-@media (max-width:600px){
+@media screen and (max-width:600px){
   .patient-modal>.modal-head h3{font-size:19px}
   .existing-patient-panel{grid-template-rows:auto minmax(0,1fr);gap:16px;padding:18px 16px 20px}
   .patient-search-copy p{font-size:12px;line-height:1.4}
@@ -618,7 +618,7 @@ input[type="reset"],
   .patient-modal .modal-actions .btn{height:38px;padding:0 12px;font-size:10px}
 }
 
-@media (max-width:360px){
+@media screen and (max-width:360px){
   .patient-search-bar{grid-template-columns:minmax(0,1fr) 88px}
   .patient-search-bar .btn.primary{width:88px;min-width:88px;padding-inline:7px;font-size:10px}
 }
@@ -727,7 +727,7 @@ input[type="reset"],
   }
 }
 
-@media (min-width: 601px) and (max-width: 1100px) {
+@media screen and (min-width: 601px) and (max-width: 1100px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
     grid-template-areas:
@@ -757,7 +757,7 @@ input[type="reset"],
  * Prevent treatment buttons from becoming squeezed in the
  * side-by-side laptop layout.
  */
-@media (min-width: 1101px) and (max-width: 1600px) {
+@media screen and (min-width: 1101px) and (max-width: 1600px) {
   #treatment-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -805,9 +805,9 @@ input[type="reset"],
 .chart-layer-switch{display:none!important}
 .chart-stage-wrap{scrollbar-width:thin}
 .chart-stage-wrap::-webkit-scrollbar{display:block;height:8px}
-@media(max-width:600px){.chart-stage-wrap{overflow-x:auto}#split-stage .arch-label-text{font-size:12px}}
+@media screen and (max-width:600px){.chart-stage-wrap{overflow-x:auto}#split-stage .arch-label-text{font-size:12px}}
 /* Give enlarged arches the full workspace on laptops. */
-@media (min-width:601px) and (max-width:1400px){
+@media screen and (min-width:601px) and (max-width:1400px){
   .layout{grid-template-columns:minmax(0,1fr);grid-template-areas:"chart-header" "chart-workspace" "chart-sidebar"}
   .layout>.chart-head{grid-area:chart-header}
   .layout>.chart-workspace{grid-area:chart-workspace}

@@ -1,2 +1,865 @@
-(()=>{function A(t,e){if(t.match(/^[a-z]+:\/\//i))return t;if(t.match(/^\/\//))return window.location.protocol+t;if(t.match(/^[a-z]+:/i))return t;let r=document.implementation.createHTMLDocument(),n=r.createElement("base"),i=r.createElement("a");return r.head.appendChild(n),r.body.appendChild(i),e&&(n.href=e),i.href=t,i.href}var I=(()=>{let t=0,e=()=>`0000${(Math.random()*36**4<<0).toString(36)}`.slice(-4);return()=>(t+=1,`u${e()}${t}`)})();function f(t){let e=[];for(let r=0,n=t.length;r<n;r++)e.push(t[r]);return e}var g=null;function E(t={}){return g||(t.includeStyleProperties?(g=t.includeStyleProperties,g):(g=f(window.getComputedStyle(document.documentElement)),g))}function S(t,e){let n=(t.ownerDocument.defaultView||window).getComputedStyle(t).getPropertyValue(e);return n?parseFloat(n.replace("px","")):0}function et(t){let e=S(t,"border-left-width"),r=S(t,"border-right-width");return t.clientWidth+e+r}function rt(t){let e=S(t,"border-top-width"),r=S(t,"border-bottom-width");return t.clientHeight+e+r}function P(t,e={}){let r=e.width||et(t),n=e.height||rt(t);return{width:r,height:n}}function D(){let t,e;try{e=process}catch{}let r=e&&e.env?e.env.devicePixelRatio:null;return r&&(t=parseInt(r,10),Number.isNaN(t)&&(t=1)),t||window.devicePixelRatio||1}var u=16384;function U(t){(t.width>u||t.height>u)&&(t.width>u&&t.height>u?t.width>t.height?(t.height*=u/t.width,t.width=u):(t.width*=u/t.height,t.height=u):t.width>u?(t.height*=u/t.width,t.width=u):(t.width*=u/t.height,t.height=u))}function k(t,e={}){return t.toBlob?new Promise(r=>{t.toBlob(r,e.type?e.type:"image/png",e.quality?e.quality:1)}):new Promise(r=>{let n=window.atob(t.toDataURL(e.type?e.type:void 0,e.quality?e.quality:void 0).split(",")[1]),i=n.length,o=new Uint8Array(i);for(let s=0;s<i;s+=1)o[s]=n.charCodeAt(s);r(new Blob([o],{type:e.type?e.type:"image/png"}))})}function d(t){return new Promise((e,r)=>{let n=new Image;n.onload=()=>{n.decode().then(()=>{requestAnimationFrame(()=>e(n))})},n.onerror=r,n.crossOrigin="anonymous",n.decoding="async",n.src=t})}async function nt(t){return Promise.resolve().then(()=>new XMLSerializer().serializeToString(t)).then(encodeURIComponent).then(e=>`data:image/svg+xml;charset=utf-8,${e}`)}async function M(t,e,r){let n="http://www.w3.org/2000/svg",i=document.createElementNS(n,"svg"),o=document.createElementNS(n,"foreignObject");return i.setAttribute("width",`${e}`),i.setAttribute("height",`${r}`),i.setAttribute("viewBox",`0 0 ${e} ${r}`),o.setAttribute("width","100%"),o.setAttribute("height","100%"),o.setAttribute("x","0"),o.setAttribute("y","0"),o.setAttribute("externalResourcesRequired","true"),i.appendChild(o),o.appendChild(t),nt(i)}var l=(t,e)=>{if(t instanceof e)return!0;let r=Object.getPrototypeOf(t);return r===null?!1:r.constructor.name===e.name||l(r,e)};function ot(t){let e=t.getPropertyValue("content");return`${t.cssText} content: '${e.replace(/'|"/g,"")}';`}function it(t,e){return E(e).map(r=>{let n=t.getPropertyValue(r),i=t.getPropertyPriority(r);return`${r}: ${n}${i?" !important":""};`}).join(" ")}function st(t,e,r,n){let i=`.${t}:${e}`,o=r.cssText?ot(r):it(r,n);return document.createTextNode(`${i}{${o}}`)}function H(t,e,r,n){let i=window.getComputedStyle(t,r),o=i.getPropertyValue("content");if(o===""||o==="none")return;let s=I();try{e.className=`${e.className} ${s}`}catch{return}let a=document.createElement("style");a.appendChild(st(s,r,i,n)),e.appendChild(a)}function V(t,e,r){H(t,e,":before",r),H(t,e,":after",r)}var B="application/font-woff",O="image/jpeg",at={woff:B,woff2:B,ttf:"application/font-truetype",eot:"application/vnd.ms-fontobject",png:"image/png",jpg:O,jpeg:O,gif:"image/gif",tiff:"image/tiff",svg:"image/svg+xml",webp:"image/webp"};function ct(t){let e=/\.([^./]*?)$/g.exec(t);return e?e[1]:""}function p(t){let e=ct(t).toLowerCase();return at[e]||""}function lt(t){return t.split(/,/)[1]}function b(t){return t.search(/^(data:)/)!==-1}function L(t,e){return`data:${e};base64,${t}`}async function $(t,e,r){let n=await fetch(t,e);if(n.status===404)throw new Error(`Resource "${n.url}" not found`);let i=await n.blob();return new Promise((o,s)=>{let a=new FileReader;a.onerror=s,a.onloadend=()=>{try{o(r({res:n,result:a.result}))}catch(c){s(c)}},a.readAsDataURL(i)})}var T={};function ut(t,e,r){let n=t.replace(/\?.*/,"");return r&&(n=t),/ttf|otf|eot|woff2?/i.test(n)&&(n=n.replace(/.*\//,"")),e?`[${e}]${n}`:n}async function y(t,e,r){let n=ut(t,e,r.includeQueryParams);if(T[n]!=null)return T[n];r.cacheBust&&(t+=(/\?/.test(t)?"&":"?")+new Date().getTime());let i;try{let o=await $(t,r.fetchRequestInit,({res:s,result:a})=>(e||(e=s.headers.get("Content-Type")||""),lt(a)));i=L(o,e)}catch(o){i=r.imagePlaceholder||"";let s=`Failed to fetch resource: ${t}`;o&&(s=typeof o=="string"?o:o.message),s&&console.warn(s)}return T[n]=i,i}async function ft(t){let e=t.toDataURL();return e==="data:,"?t.cloneNode(!1):d(e)}async function mt(t,e){if(t.currentSrc){let o=document.createElement("canvas"),s=o.getContext("2d");o.width=t.clientWidth,o.height=t.clientHeight,s?.drawImage(t,0,0,o.width,o.height);let a=o.toDataURL();return d(a)}let r=t.poster,n=p(r),i=await y(r,n,e);return d(i)}async function ht(t,e){var r;try{if(!((r=t?.contentDocument)===null||r===void 0)&&r.body)return await x(t.contentDocument.body,e,!0)}catch{}return t.cloneNode(!1)}async function gt(t,e){return l(t,HTMLCanvasElement)?ft(t):l(t,HTMLVideoElement)?mt(t,e):l(t,HTMLIFrameElement)?ht(t,e):t.cloneNode(q(t))}var dt=t=>t.tagName!=null&&t.tagName.toUpperCase()==="SLOT",q=t=>t.tagName!=null&&t.tagName.toUpperCase()==="SVG";async function pt(t,e,r){var n,i;if(q(e))return e;let o=[];return dt(t)&&t.assignedNodes?o=f(t.assignedNodes()):l(t,HTMLIFrameElement)&&(!((n=t.contentDocument)===null||n===void 0)&&n.body)?o=f(t.contentDocument.body.childNodes):o=f(((i=t.shadowRoot)!==null&&i!==void 0?i:t).childNodes),o.length===0||l(t,HTMLVideoElement)||await o.reduce((s,a)=>s.then(()=>x(a,r)).then(c=>{c&&e.appendChild(c)}),Promise.resolve()),e}function yt(t,e,r){let n=e.style;if(!n)return;let i=window.getComputedStyle(t);i.cssText?(n.cssText=i.cssText,n.transformOrigin=i.transformOrigin):E(r).forEach(o=>{let s=i.getPropertyValue(o);o==="font-size"&&s.endsWith("px")&&(s=`${Math.floor(parseFloat(s.substring(0,s.length-2)))-.1}px`),l(t,HTMLIFrameElement)&&o==="display"&&s==="inline"&&(s="block"),o==="d"&&e.getAttribute("d")&&(s=`path(${e.getAttribute("d")})`),n.setProperty(o,s,i.getPropertyPriority(o))})}function wt(t,e){l(t,HTMLTextAreaElement)&&(e.innerHTML=t.value),l(t,HTMLInputElement)&&e.setAttribute("value",t.value)}function bt(t,e){if(l(t,HTMLSelectElement)){let n=Array.from(e.children).find(i=>t.value===i.getAttribute("value"));n&&n.setAttribute("selected","")}}function xt(t,e,r){return l(e,Element)&&(yt(t,e,r),V(t,e,r),wt(t,e),bt(t,e)),e}async function St(t,e){let r=t.querySelectorAll?t.querySelectorAll("use"):[];if(r.length===0)return t;let n={};for(let o=0;o<r.length;o++){let a=r[o].getAttribute("xlink:href");if(a){let c=t.querySelector(a),m=document.querySelector(a);!c&&m&&!n[a]&&(n[a]=await x(m,e,!0))}}let i=Object.values(n);if(i.length){let o="http://www.w3.org/1999/xhtml",s=document.createElementNS(o,"svg");s.setAttribute("xmlns",o),s.style.position="absolute",s.style.width="0",s.style.height="0",s.style.overflow="hidden",s.style.display="none";let a=document.createElementNS(o,"defs");s.appendChild(a);for(let c=0;c<i.length;c++)a.appendChild(i[c]);t.appendChild(s)}return t}async function x(t,e,r){return!r&&e.filter&&!e.filter(t)?null:Promise.resolve(t).then(n=>gt(n,e)).then(n=>pt(t,n,e)).then(n=>xt(t,n,e)).then(n=>St(n,e))}var W=/url\((['"]?)([^'"]+?)\1\)/g,Et=/url\([^)]+\)\s*format\((["']?)([^"']+)\1\)/g,Rt=/src:\s*(?:url\([^)]+\)\s*format\([^)]+\)[,;]\s*)+/g;function Ct(t){let e=t.replace(/([.*+?^${}()|\[\]\/\\])/g,"\\$1");return new RegExp(`(url\\(['"]?)(${e})(['"]?\\))`,"g")}function Pt(t){let e=[];return t.replace(W,(r,n,i)=>(e.push(i),r)),e.filter(r=>!b(r))}async function Tt(t,e,r,n,i){try{let o=r?A(e,r):e,s=p(e),a;if(i){let c=await i(o);a=L(c,s)}else a=await y(o,s,n);return t.replace(Ct(e),`$1${a}$3`)}catch{}return t}function Lt(t,{preferredFontFormat:e}){return e?t.replace(Rt,r=>{for(;;){let[n,,i]=Et.exec(r)||[];if(!i)return"";if(i===e)return`src: ${n};`}}):t}function v(t){return t.search(W)!==-1}async function R(t,e,r){if(!v(t))return t;let n=Lt(t,r);return Pt(n).reduce((o,s)=>o.then(a=>Tt(a,s,e,r)),Promise.resolve(n))}async function w(t,e,r){var n;let i=(n=e.style)===null||n===void 0?void 0:n.getPropertyValue(t);if(i){let o=await R(i,null,r);return e.style.setProperty(t,o,e.style.getPropertyPriority(t)),!0}return!1}async function $t(t,e){await w("background",t,e)||await w("background-image",t,e),await w("mask",t,e)||await w("-webkit-mask",t,e)||await w("mask-image",t,e)||await w("-webkit-mask-image",t,e)}async function vt(t,e){let r=l(t,HTMLImageElement);if(!(r&&!b(t.src))&&!(l(t,SVGImageElement)&&!b(t.href.baseVal)))return;let n=r?t.src:t.href.baseVal,i=await y(n,p(n),e);await new Promise((o,s)=>{t.onload=o,t.onerror=e.onImageErrorHandler?(...c)=>{try{o(e.onImageErrorHandler(...c))}catch(m){s(m)}}:s;let a=t;a.decode&&(a.decode=o),a.loading==="lazy"&&(a.loading="eager"),r?(t.srcset="",t.src=i):t.href.baseVal=i})}async function Ft(t,e){let n=f(t.childNodes).map(i=>F(i,e));await Promise.all(n).then(()=>t)}async function F(t,e){l(t,Element)&&(await $t(t,e),await vt(t,e),await Ft(t,e))}function _(t,e){let{style:r}=t;e.backgroundColor&&(r.backgroundColor=e.backgroundColor),e.width&&(r.width=`${e.width}px`),e.height&&(r.height=`${e.height}px`);let n=e.style;return n!=null&&Object.keys(n).forEach(i=>{r[i]=n[i]}),t}var j={};async function z(t){let e=j[t];if(e!=null)return e;let n=await(await fetch(t)).text();return e={url:t,cssText:n},j[t]=e,e}async function G(t,e){let r=t.cssText,n=/url\(["']?([^"')]+)["']?\)/g,o=(r.match(/url\([^)]+\)/g)||[]).map(async s=>{let a=s.replace(n,"$1");return a.startsWith("https://")||(a=new URL(a,t.url).href),$(a,e.fetchRequestInit,({result:c})=>(r=r.replace(s,`url(${c})`),[s,c]))});return Promise.all(o).then(()=>r)}function X(t){if(t==null)return[];let e=[],r=/(\/\*[\s\S]*?\*\/)/gi,n=t.replace(r,""),i=new RegExp("((@.*?keyframes [\\s\\S]*?){([\\s\\S]*?}\\s*?)})","gi");for(;;){let c=i.exec(n);if(c===null)break;e.push(c[0])}n=n.replace(i,"");let o=/@import[\s\S]*?url\([^)]*\)[\s\S]*?;/gi,s="((\\s*?(?:\\/\\*[\\s\\S]*?\\*\\/)?\\s*?@media[\\s\\S]*?){([\\s\\S]*?)}\\s*?})|(([\\s\\S]*?){([\\s\\S]*?)})",a=new RegExp(s,"gi");for(;;){let c=o.exec(n);if(c===null){if(c=a.exec(n),c===null)break;o.lastIndex=a.lastIndex}else a.lastIndex=o.lastIndex;e.push(c[0])}return e}async function At(t,e){let r=[],n=[];return t.forEach(i=>{if("cssRules"in i)try{f(i.cssRules||[]).forEach((o,s)=>{if(o.type===CSSRule.IMPORT_RULE){let a=s+1,c=o.href,m=z(c).then(h=>G(h,e)).then(h=>X(h).forEach(C=>{try{i.insertRule(C,C.startsWith("@import")?a+=1:i.cssRules.length)}catch(tt){console.error("Error inserting rule from remote css",{rule:C,error:tt})}})).catch(h=>{console.error("Error loading remote css",h.toString())});n.push(m)}})}catch(o){let s=t.find(a=>a.href==null)||document.styleSheets[0];i.href!=null&&n.push(z(i.href).then(a=>G(a,e)).then(a=>X(a).forEach(c=>{s.insertRule(c,s.cssRules.length)})).catch(a=>{console.error("Error loading remote stylesheet",a)})),console.error("Error inlining remote css file",o)}}),Promise.all(n).then(()=>(t.forEach(i=>{if("cssRules"in i)try{f(i.cssRules||[]).forEach(o=>{r.push(o)})}catch(o){console.error(`Error while reading CSS rules from ${i.href}`,o)}}),r))}function It(t){return t.filter(e=>e.type===CSSRule.FONT_FACE_RULE).filter(e=>v(e.style.getPropertyValue("src")))}async function Dt(t,e){if(t.ownerDocument==null)throw new Error("Provided element is not within a Document");let r=f(t.ownerDocument.styleSheets),n=await At(r,e);return It(n)}function J(t){return t.trim().replace(/["']/g,"")}function Ut(t){let e=new Set;function r(n){(n.style.fontFamily||getComputedStyle(n).fontFamily).split(",").forEach(o=>{e.add(J(o))}),Array.from(n.children).forEach(o=>{o instanceof HTMLElement&&r(o)})}return r(t),e}async function K(t,e){let r=await Dt(t,e),n=Ut(t);return(await Promise.all(r.filter(o=>n.has(J(o.style.fontFamily))).map(o=>{let s=o.parentStyleSheet?o.parentStyleSheet.href:null;return R(o.cssText,s,e)}))).join(`
-`)}async function Q(t,e){let r=e.fontEmbedCSS!=null?e.fontEmbedCSS:e.skipFonts?null:await K(t,e);if(r){let n=document.createElement("style"),i=document.createTextNode(r);n.appendChild(i),t.firstChild?t.insertBefore(n,t.firstChild):t.appendChild(n)}}async function kt(t,e={}){let{width:r,height:n}=P(t,e),i=await x(t,e,!0);return await Q(i,e),await F(i,e),_(i,e),await M(i,r,n)}async function Mt(t,e={}){let{width:r,height:n}=P(t,e),i=await kt(t,e),o=await d(i),s=document.createElement("canvas"),a=s.getContext("2d"),c=e.pixelRatio||D(),m=e.canvasWidth||r,h=e.canvasHeight||n;return s.width=m*c,s.height=h*c,e.skipAutoScale||U(s),s.style.width=`${m}`,s.style.height=`${h}`,e.backgroundColor&&(a.fillStyle=e.backgroundColor,a.fillRect(0,0,s.width,s.height)),a.drawImage(o,0,0,s.width,s.height),s}async function Y(t,e={}){let r=await Mt(t,e);return await k(r)}var Z=Promise.resolve();function N(t,e){let r=Z.then(()=>Ht(t,e));return Z=r.catch(()=>{}),r}async function Ht(t,e){let r=document.body,n=document.querySelector(".chart-workspace > .entries-panel"),i=r.classList.contains("saved-entries-collapsed"),o=n?.classList.contains("is-collapsed")??!1,s=r.classList.contains("patient-record-review");r.classList.add("saved-entries-collapsed"),n?.classList.add("is-collapsed"),r.classList.remove("patient-record-review");try{await new Promise(c=>requestAnimationFrame(()=>requestAnimationFrame(()=>c())));let a=Array.from(getComputedStyle(document.documentElement)).filter(c=>c!=="font-size");return await Y(t,{...e,includeStyleProperties:[...a,"font"]})}finally{r.classList.toggle("saved-entries-collapsed",i),n?.classList.toggle("is-collapsed",o),r.classList.toggle("patient-record-review",s)}}window.chartToBlob=N;})();
+(() => {
+  // node_modules/html-to-image/es/util.js
+  function resolveUrl(url, baseUrl) {
+    if (url.match(/^[a-z]+:\/\//i)) {
+      return url;
+    }
+    if (url.match(/^\/\//)) {
+      return window.location.protocol + url;
+    }
+    if (url.match(/^[a-z]+:/i)) {
+      return url;
+    }
+    const doc = document.implementation.createHTMLDocument();
+    const base = doc.createElement("base");
+    const a = doc.createElement("a");
+    doc.head.appendChild(base);
+    doc.body.appendChild(a);
+    if (baseUrl) {
+      base.href = baseUrl;
+    }
+    a.href = url;
+    return a.href;
+  }
+  var uuid = /* @__PURE__ */ (() => {
+    let counter = 0;
+    const random = () => (
+      // eslint-disable-next-line no-bitwise
+      `0000${(Math.random() * 36 ** 4 << 0).toString(36)}`.slice(-4)
+    );
+    return () => {
+      counter += 1;
+      return `u${random()}${counter}`;
+    };
+  })();
+  function toArray(arrayLike) {
+    const arr = [];
+    for (let i = 0, l = arrayLike.length; i < l; i++) {
+      arr.push(arrayLike[i]);
+    }
+    return arr;
+  }
+  var styleProps = null;
+  function getStyleProperties(options = {}) {
+    if (styleProps) {
+      return styleProps;
+    }
+    if (options.includeStyleProperties) {
+      styleProps = options.includeStyleProperties;
+      return styleProps;
+    }
+    styleProps = toArray(window.getComputedStyle(document.documentElement));
+    return styleProps;
+  }
+  function px(node, styleProperty) {
+    const win = node.ownerDocument.defaultView || window;
+    const val = win.getComputedStyle(node).getPropertyValue(styleProperty);
+    return val ? parseFloat(val.replace("px", "")) : 0;
+  }
+  function getNodeWidth(node) {
+    const leftBorder = px(node, "border-left-width");
+    const rightBorder = px(node, "border-right-width");
+    return node.clientWidth + leftBorder + rightBorder;
+  }
+  function getNodeHeight(node) {
+    const topBorder = px(node, "border-top-width");
+    const bottomBorder = px(node, "border-bottom-width");
+    return node.clientHeight + topBorder + bottomBorder;
+  }
+  function getImageSize(targetNode, options = {}) {
+    const width = options.width || getNodeWidth(targetNode);
+    const height = options.height || getNodeHeight(targetNode);
+    return { width, height };
+  }
+  function getPixelRatio() {
+    let ratio;
+    let FINAL_PROCESS;
+    try {
+      FINAL_PROCESS = process;
+    } catch (e) {
+    }
+    const val = FINAL_PROCESS && FINAL_PROCESS.env ? FINAL_PROCESS.env.devicePixelRatio : null;
+    if (val) {
+      ratio = parseInt(val, 10);
+      if (Number.isNaN(ratio)) {
+        ratio = 1;
+      }
+    }
+    return ratio || window.devicePixelRatio || 1;
+  }
+  var canvasDimensionLimit = 16384;
+  function checkCanvasDimensions(canvas) {
+    if (canvas.width > canvasDimensionLimit || canvas.height > canvasDimensionLimit) {
+      if (canvas.width > canvasDimensionLimit && canvas.height > canvasDimensionLimit) {
+        if (canvas.width > canvas.height) {
+          canvas.height *= canvasDimensionLimit / canvas.width;
+          canvas.width = canvasDimensionLimit;
+        } else {
+          canvas.width *= canvasDimensionLimit / canvas.height;
+          canvas.height = canvasDimensionLimit;
+        }
+      } else if (canvas.width > canvasDimensionLimit) {
+        canvas.height *= canvasDimensionLimit / canvas.width;
+        canvas.width = canvasDimensionLimit;
+      } else {
+        canvas.width *= canvasDimensionLimit / canvas.height;
+        canvas.height = canvasDimensionLimit;
+      }
+    }
+  }
+  function canvasToBlob(canvas, options = {}) {
+    if (canvas.toBlob) {
+      return new Promise((resolve) => {
+        canvas.toBlob(resolve, options.type ? options.type : "image/png", options.quality ? options.quality : 1);
+      });
+    }
+    return new Promise((resolve) => {
+      const binaryString = window.atob(canvas.toDataURL(options.type ? options.type : void 0, options.quality ? options.quality : void 0).split(",")[1]);
+      const len = binaryString.length;
+      const binaryArray = new Uint8Array(len);
+      for (let i = 0; i < len; i += 1) {
+        binaryArray[i] = binaryString.charCodeAt(i);
+      }
+      resolve(new Blob([binaryArray], {
+        type: options.type ? options.type : "image/png"
+      }));
+    });
+  }
+  function createImage(url) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        img.decode().then(() => {
+          requestAnimationFrame(() => resolve(img));
+        });
+      };
+      img.onerror = reject;
+      img.crossOrigin = "anonymous";
+      img.decoding = "async";
+      img.src = url;
+    });
+  }
+  async function svgToDataURL(svg) {
+    return Promise.resolve().then(() => new XMLSerializer().serializeToString(svg)).then(encodeURIComponent).then((html) => `data:image/svg+xml;charset=utf-8,${html}`);
+  }
+  async function nodeToDataURL(node, width, height) {
+    const xmlns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(xmlns, "svg");
+    const foreignObject = document.createElementNS(xmlns, "foreignObject");
+    svg.setAttribute("width", `${width}`);
+    svg.setAttribute("height", `${height}`);
+    svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+    foreignObject.setAttribute("width", "100%");
+    foreignObject.setAttribute("height", "100%");
+    foreignObject.setAttribute("x", "0");
+    foreignObject.setAttribute("y", "0");
+    foreignObject.setAttribute("externalResourcesRequired", "true");
+    svg.appendChild(foreignObject);
+    foreignObject.appendChild(node);
+    return svgToDataURL(svg);
+  }
+  var isInstanceOfElement = (node, instance) => {
+    if (node instanceof instance)
+      return true;
+    const nodePrototype = Object.getPrototypeOf(node);
+    if (nodePrototype === null)
+      return false;
+    return nodePrototype.constructor.name === instance.name || isInstanceOfElement(nodePrototype, instance);
+  };
+
+  // node_modules/html-to-image/es/clone-pseudos.js
+  function formatCSSText(style) {
+    const content = style.getPropertyValue("content");
+    return `${style.cssText} content: '${content.replace(/'|"/g, "")}';`;
+  }
+  function formatCSSProperties(style, options) {
+    return getStyleProperties(options).map((name) => {
+      const value = style.getPropertyValue(name);
+      const priority = style.getPropertyPriority(name);
+      return `${name}: ${value}${priority ? " !important" : ""};`;
+    }).join(" ");
+  }
+  function getPseudoElementStyle(className, pseudo, style, options) {
+    const selector = `.${className}:${pseudo}`;
+    const cssText = style.cssText ? formatCSSText(style) : formatCSSProperties(style, options);
+    return document.createTextNode(`${selector}{${cssText}}`);
+  }
+  function clonePseudoElement(nativeNode, clonedNode, pseudo, options) {
+    const style = window.getComputedStyle(nativeNode, pseudo);
+    const content = style.getPropertyValue("content");
+    if (content === "" || content === "none") {
+      return;
+    }
+    const className = uuid();
+    try {
+      clonedNode.className = `${clonedNode.className} ${className}`;
+    } catch (err) {
+      return;
+    }
+    const styleElement = document.createElement("style");
+    styleElement.appendChild(getPseudoElementStyle(className, pseudo, style, options));
+    clonedNode.appendChild(styleElement);
+  }
+  function clonePseudoElements(nativeNode, clonedNode, options) {
+    clonePseudoElement(nativeNode, clonedNode, ":before", options);
+    clonePseudoElement(nativeNode, clonedNode, ":after", options);
+  }
+
+  // node_modules/html-to-image/es/mimes.js
+  var WOFF = "application/font-woff";
+  var JPEG = "image/jpeg";
+  var mimes = {
+    woff: WOFF,
+    woff2: WOFF,
+    ttf: "application/font-truetype",
+    eot: "application/vnd.ms-fontobject",
+    png: "image/png",
+    jpg: JPEG,
+    jpeg: JPEG,
+    gif: "image/gif",
+    tiff: "image/tiff",
+    svg: "image/svg+xml",
+    webp: "image/webp"
+  };
+  function getExtension(url) {
+    const match = /\.([^./]*?)$/g.exec(url);
+    return match ? match[1] : "";
+  }
+  function getMimeType(url) {
+    const extension = getExtension(url).toLowerCase();
+    return mimes[extension] || "";
+  }
+
+  // node_modules/html-to-image/es/dataurl.js
+  function getContentFromDataUrl(dataURL) {
+    return dataURL.split(/,/)[1];
+  }
+  function isDataUrl(url) {
+    return url.search(/^(data:)/) !== -1;
+  }
+  function makeDataUrl(content, mimeType) {
+    return `data:${mimeType};base64,${content}`;
+  }
+  async function fetchAsDataURL(url, init, process2) {
+    const res = await fetch(url, init);
+    if (res.status === 404) {
+      throw new Error(`Resource "${res.url}" not found`);
+    }
+    const blob = await res.blob();
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onloadend = () => {
+        try {
+          resolve(process2({ res, result: reader.result }));
+        } catch (error) {
+          reject(error);
+        }
+      };
+      reader.readAsDataURL(blob);
+    });
+  }
+  var cache = {};
+  function getCacheKey(url, contentType, includeQueryParams) {
+    let key = url.replace(/\?.*/, "");
+    if (includeQueryParams) {
+      key = url;
+    }
+    if (/ttf|otf|eot|woff2?/i.test(key)) {
+      key = key.replace(/.*\//, "");
+    }
+    return contentType ? `[${contentType}]${key}` : key;
+  }
+  async function resourceToDataURL(resourceUrl, contentType, options) {
+    const cacheKey = getCacheKey(resourceUrl, contentType, options.includeQueryParams);
+    if (cache[cacheKey] != null) {
+      return cache[cacheKey];
+    }
+    if (options.cacheBust) {
+      resourceUrl += (/\?/.test(resourceUrl) ? "&" : "?") + (/* @__PURE__ */ new Date()).getTime();
+    }
+    let dataURL;
+    try {
+      const content = await fetchAsDataURL(resourceUrl, options.fetchRequestInit, ({ res, result }) => {
+        if (!contentType) {
+          contentType = res.headers.get("Content-Type") || "";
+        }
+        return getContentFromDataUrl(result);
+      });
+      dataURL = makeDataUrl(content, contentType);
+    } catch (error) {
+      dataURL = options.imagePlaceholder || "";
+      let msg = `Failed to fetch resource: ${resourceUrl}`;
+      if (error) {
+        msg = typeof error === "string" ? error : error.message;
+      }
+      if (msg) {
+        console.warn(msg);
+      }
+    }
+    cache[cacheKey] = dataURL;
+    return dataURL;
+  }
+
+  // node_modules/html-to-image/es/clone-node.js
+  async function cloneCanvasElement(canvas) {
+    const dataURL = canvas.toDataURL();
+    if (dataURL === "data:,") {
+      return canvas.cloneNode(false);
+    }
+    return createImage(dataURL);
+  }
+  async function cloneVideoElement(video, options) {
+    if (video.currentSrc) {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = video.clientWidth;
+      canvas.height = video.clientHeight;
+      ctx === null || ctx === void 0 ? void 0 : ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataURL2 = canvas.toDataURL();
+      return createImage(dataURL2);
+    }
+    const poster = video.poster;
+    const contentType = getMimeType(poster);
+    const dataURL = await resourceToDataURL(poster, contentType, options);
+    return createImage(dataURL);
+  }
+  async function cloneIFrameElement(iframe, options) {
+    var _a;
+    try {
+      if ((_a = iframe === null || iframe === void 0 ? void 0 : iframe.contentDocument) === null || _a === void 0 ? void 0 : _a.body) {
+        return await cloneNode(iframe.contentDocument.body, options, true);
+      }
+    } catch (_b) {
+    }
+    return iframe.cloneNode(false);
+  }
+  async function cloneSingleNode(node, options) {
+    if (isInstanceOfElement(node, HTMLCanvasElement)) {
+      return cloneCanvasElement(node);
+    }
+    if (isInstanceOfElement(node, HTMLVideoElement)) {
+      return cloneVideoElement(node, options);
+    }
+    if (isInstanceOfElement(node, HTMLIFrameElement)) {
+      return cloneIFrameElement(node, options);
+    }
+    return node.cloneNode(isSVGElement(node));
+  }
+  var isSlotElement = (node) => node.tagName != null && node.tagName.toUpperCase() === "SLOT";
+  var isSVGElement = (node) => node.tagName != null && node.tagName.toUpperCase() === "SVG";
+  async function cloneChildren(nativeNode, clonedNode, options) {
+    var _a, _b;
+    if (isSVGElement(clonedNode)) {
+      return clonedNode;
+    }
+    let children = [];
+    if (isSlotElement(nativeNode) && nativeNode.assignedNodes) {
+      children = toArray(nativeNode.assignedNodes());
+    } else if (isInstanceOfElement(nativeNode, HTMLIFrameElement) && ((_a = nativeNode.contentDocument) === null || _a === void 0 ? void 0 : _a.body)) {
+      children = toArray(nativeNode.contentDocument.body.childNodes);
+    } else {
+      children = toArray(((_b = nativeNode.shadowRoot) !== null && _b !== void 0 ? _b : nativeNode).childNodes);
+    }
+    if (children.length === 0 || isInstanceOfElement(nativeNode, HTMLVideoElement)) {
+      return clonedNode;
+    }
+    await children.reduce((deferred, child) => deferred.then(() => cloneNode(child, options)).then((clonedChild) => {
+      if (clonedChild) {
+        clonedNode.appendChild(clonedChild);
+      }
+    }), Promise.resolve());
+    return clonedNode;
+  }
+  function cloneCSSStyle(nativeNode, clonedNode, options) {
+    const targetStyle = clonedNode.style;
+    if (!targetStyle) {
+      return;
+    }
+    const sourceStyle = window.getComputedStyle(nativeNode);
+    if (sourceStyle.cssText) {
+      targetStyle.cssText = sourceStyle.cssText;
+      targetStyle.transformOrigin = sourceStyle.transformOrigin;
+    } else {
+      getStyleProperties(options).forEach((name) => {
+        let value = sourceStyle.getPropertyValue(name);
+        if (name === "font-size" && value.endsWith("px")) {
+          const reducedFont = Math.floor(parseFloat(value.substring(0, value.length - 2))) - 0.1;
+          value = `${reducedFont}px`;
+        }
+        if (isInstanceOfElement(nativeNode, HTMLIFrameElement) && name === "display" && value === "inline") {
+          value = "block";
+        }
+        if (name === "d" && clonedNode.getAttribute("d")) {
+          value = `path(${clonedNode.getAttribute("d")})`;
+        }
+        targetStyle.setProperty(name, value, sourceStyle.getPropertyPriority(name));
+      });
+    }
+  }
+  function cloneInputValue(nativeNode, clonedNode) {
+    if (isInstanceOfElement(nativeNode, HTMLTextAreaElement)) {
+      clonedNode.innerHTML = nativeNode.value;
+    }
+    if (isInstanceOfElement(nativeNode, HTMLInputElement)) {
+      clonedNode.setAttribute("value", nativeNode.value);
+    }
+  }
+  function cloneSelectValue(nativeNode, clonedNode) {
+    if (isInstanceOfElement(nativeNode, HTMLSelectElement)) {
+      const clonedSelect = clonedNode;
+      const selectedOption = Array.from(clonedSelect.children).find((child) => nativeNode.value === child.getAttribute("value"));
+      if (selectedOption) {
+        selectedOption.setAttribute("selected", "");
+      }
+    }
+  }
+  function decorate(nativeNode, clonedNode, options) {
+    if (isInstanceOfElement(clonedNode, Element)) {
+      cloneCSSStyle(nativeNode, clonedNode, options);
+      clonePseudoElements(nativeNode, clonedNode, options);
+      cloneInputValue(nativeNode, clonedNode);
+      cloneSelectValue(nativeNode, clonedNode);
+    }
+    return clonedNode;
+  }
+  async function ensureSVGSymbols(clone, options) {
+    const uses = clone.querySelectorAll ? clone.querySelectorAll("use") : [];
+    if (uses.length === 0) {
+      return clone;
+    }
+    const processedDefs = {};
+    for (let i = 0; i < uses.length; i++) {
+      const use = uses[i];
+      const id = use.getAttribute("xlink:href");
+      if (id) {
+        const exist = clone.querySelector(id);
+        const definition = document.querySelector(id);
+        if (!exist && definition && !processedDefs[id]) {
+          processedDefs[id] = await cloneNode(definition, options, true);
+        }
+      }
+    }
+    const nodes = Object.values(processedDefs);
+    if (nodes.length) {
+      const ns = "http://www.w3.org/1999/xhtml";
+      const svg = document.createElementNS(ns, "svg");
+      svg.setAttribute("xmlns", ns);
+      svg.style.position = "absolute";
+      svg.style.width = "0";
+      svg.style.height = "0";
+      svg.style.overflow = "hidden";
+      svg.style.display = "none";
+      const defs = document.createElementNS(ns, "defs");
+      svg.appendChild(defs);
+      for (let i = 0; i < nodes.length; i++) {
+        defs.appendChild(nodes[i]);
+      }
+      clone.appendChild(svg);
+    }
+    return clone;
+  }
+  async function cloneNode(node, options, isRoot) {
+    if (!isRoot && options.filter && !options.filter(node)) {
+      return null;
+    }
+    return Promise.resolve(node).then((clonedNode) => cloneSingleNode(clonedNode, options)).then((clonedNode) => cloneChildren(node, clonedNode, options)).then((clonedNode) => decorate(node, clonedNode, options)).then((clonedNode) => ensureSVGSymbols(clonedNode, options));
+  }
+
+  // node_modules/html-to-image/es/embed-resources.js
+  var URL_REGEX = /url\((['"]?)([^'"]+?)\1\)/g;
+  var URL_WITH_FORMAT_REGEX = /url\([^)]+\)\s*format\((["']?)([^"']+)\1\)/g;
+  var FONT_SRC_REGEX = /src:\s*(?:url\([^)]+\)\s*format\([^)]+\)[,;]\s*)+/g;
+  function toRegex(url) {
+    const escaped = url.replace(/([.*+?^${}()|\[\]\/\\])/g, "\\$1");
+    return new RegExp(`(url\\(['"]?)(${escaped})(['"]?\\))`, "g");
+  }
+  function parseURLs(cssText) {
+    const urls = [];
+    cssText.replace(URL_REGEX, (raw, quotation, url) => {
+      urls.push(url);
+      return raw;
+    });
+    return urls.filter((url) => !isDataUrl(url));
+  }
+  async function embed(cssText, resourceURL, baseURL, options, getContentFromUrl) {
+    try {
+      const resolvedURL = baseURL ? resolveUrl(resourceURL, baseURL) : resourceURL;
+      const contentType = getMimeType(resourceURL);
+      let dataURL;
+      if (getContentFromUrl) {
+        const content = await getContentFromUrl(resolvedURL);
+        dataURL = makeDataUrl(content, contentType);
+      } else {
+        dataURL = await resourceToDataURL(resolvedURL, contentType, options);
+      }
+      return cssText.replace(toRegex(resourceURL), `$1${dataURL}$3`);
+    } catch (error) {
+    }
+    return cssText;
+  }
+  function filterPreferredFontFormat(str, { preferredFontFormat }) {
+    return !preferredFontFormat ? str : str.replace(FONT_SRC_REGEX, (match) => {
+      while (true) {
+        const [src, , format] = URL_WITH_FORMAT_REGEX.exec(match) || [];
+        if (!format) {
+          return "";
+        }
+        if (format === preferredFontFormat) {
+          return `src: ${src};`;
+        }
+      }
+    });
+  }
+  function shouldEmbed(url) {
+    return url.search(URL_REGEX) !== -1;
+  }
+  async function embedResources(cssText, baseUrl, options) {
+    if (!shouldEmbed(cssText)) {
+      return cssText;
+    }
+    const filteredCSSText = filterPreferredFontFormat(cssText, options);
+    const urls = parseURLs(filteredCSSText);
+    return urls.reduce((deferred, url) => deferred.then((css) => embed(css, url, baseUrl, options)), Promise.resolve(filteredCSSText));
+  }
+
+  // node_modules/html-to-image/es/embed-images.js
+  async function embedProp(propName, node, options) {
+    var _a;
+    const propValue = (_a = node.style) === null || _a === void 0 ? void 0 : _a.getPropertyValue(propName);
+    if (propValue) {
+      const cssString = await embedResources(propValue, null, options);
+      node.style.setProperty(propName, cssString, node.style.getPropertyPriority(propName));
+      return true;
+    }
+    return false;
+  }
+  async function embedBackground(clonedNode, options) {
+    ;
+    await embedProp("background", clonedNode, options) || await embedProp("background-image", clonedNode, options);
+    await embedProp("mask", clonedNode, options) || await embedProp("-webkit-mask", clonedNode, options) || await embedProp("mask-image", clonedNode, options) || await embedProp("-webkit-mask-image", clonedNode, options);
+  }
+  async function embedImageNode(clonedNode, options) {
+    const isImageElement = isInstanceOfElement(clonedNode, HTMLImageElement);
+    if (!(isImageElement && !isDataUrl(clonedNode.src)) && !(isInstanceOfElement(clonedNode, SVGImageElement) && !isDataUrl(clonedNode.href.baseVal))) {
+      return;
+    }
+    const url = isImageElement ? clonedNode.src : clonedNode.href.baseVal;
+    const dataURL = await resourceToDataURL(url, getMimeType(url), options);
+    await new Promise((resolve, reject) => {
+      clonedNode.onload = resolve;
+      clonedNode.onerror = options.onImageErrorHandler ? (...attributes) => {
+        try {
+          resolve(options.onImageErrorHandler(...attributes));
+        } catch (error) {
+          reject(error);
+        }
+      } : reject;
+      const image = clonedNode;
+      if (image.decode) {
+        image.decode = resolve;
+      }
+      if (image.loading === "lazy") {
+        image.loading = "eager";
+      }
+      if (isImageElement) {
+        clonedNode.srcset = "";
+        clonedNode.src = dataURL;
+      } else {
+        clonedNode.href.baseVal = dataURL;
+      }
+    });
+  }
+  async function embedChildren(clonedNode, options) {
+    const children = toArray(clonedNode.childNodes);
+    const deferreds = children.map((child) => embedImages(child, options));
+    await Promise.all(deferreds).then(() => clonedNode);
+  }
+  async function embedImages(clonedNode, options) {
+    if (isInstanceOfElement(clonedNode, Element)) {
+      await embedBackground(clonedNode, options);
+      await embedImageNode(clonedNode, options);
+      await embedChildren(clonedNode, options);
+    }
+  }
+
+  // node_modules/html-to-image/es/apply-style.js
+  function applyStyle(node, options) {
+    const { style } = node;
+    if (options.backgroundColor) {
+      style.backgroundColor = options.backgroundColor;
+    }
+    if (options.width) {
+      style.width = `${options.width}px`;
+    }
+    if (options.height) {
+      style.height = `${options.height}px`;
+    }
+    const manual = options.style;
+    if (manual != null) {
+      Object.keys(manual).forEach((key) => {
+        style[key] = manual[key];
+      });
+    }
+    return node;
+  }
+
+  // node_modules/html-to-image/es/embed-webfonts.js
+  var cssFetchCache = {};
+  async function fetchCSS(url) {
+    let cache2 = cssFetchCache[url];
+    if (cache2 != null) {
+      return cache2;
+    }
+    const res = await fetch(url);
+    const cssText = await res.text();
+    cache2 = { url, cssText };
+    cssFetchCache[url] = cache2;
+    return cache2;
+  }
+  async function embedFonts(data, options) {
+    let cssText = data.cssText;
+    const regexUrl = /url\(["']?([^"')]+)["']?\)/g;
+    const fontLocs = cssText.match(/url\([^)]+\)/g) || [];
+    const loadFonts = fontLocs.map(async (loc) => {
+      let url = loc.replace(regexUrl, "$1");
+      if (!url.startsWith("https://")) {
+        url = new URL(url, data.url).href;
+      }
+      return fetchAsDataURL(url, options.fetchRequestInit, ({ result }) => {
+        cssText = cssText.replace(loc, `url(${result})`);
+        return [loc, result];
+      });
+    });
+    return Promise.all(loadFonts).then(() => cssText);
+  }
+  function parseCSS(source) {
+    if (source == null) {
+      return [];
+    }
+    const result = [];
+    const commentsRegex = /(\/\*[\s\S]*?\*\/)/gi;
+    let cssText = source.replace(commentsRegex, "");
+    const keyframesRegex = new RegExp("((@.*?keyframes [\\s\\S]*?){([\\s\\S]*?}\\s*?)})", "gi");
+    while (true) {
+      const matches = keyframesRegex.exec(cssText);
+      if (matches === null) {
+        break;
+      }
+      result.push(matches[0]);
+    }
+    cssText = cssText.replace(keyframesRegex, "");
+    const importRegex = /@import[\s\S]*?url\([^)]*\)[\s\S]*?;/gi;
+    const combinedCSSRegex = "((\\s*?(?:\\/\\*[\\s\\S]*?\\*\\/)?\\s*?@media[\\s\\S]*?){([\\s\\S]*?)}\\s*?})|(([\\s\\S]*?){([\\s\\S]*?)})";
+    const unifiedRegex = new RegExp(combinedCSSRegex, "gi");
+    while (true) {
+      let matches = importRegex.exec(cssText);
+      if (matches === null) {
+        matches = unifiedRegex.exec(cssText);
+        if (matches === null) {
+          break;
+        } else {
+          importRegex.lastIndex = unifiedRegex.lastIndex;
+        }
+      } else {
+        unifiedRegex.lastIndex = importRegex.lastIndex;
+      }
+      result.push(matches[0]);
+    }
+    return result;
+  }
+  async function getCSSRules(styleSheets, options) {
+    const ret = [];
+    const deferreds = [];
+    styleSheets.forEach((sheet) => {
+      if ("cssRules" in sheet) {
+        try {
+          toArray(sheet.cssRules || []).forEach((item, index) => {
+            if (item.type === CSSRule.IMPORT_RULE) {
+              let importIndex = index + 1;
+              const url = item.href;
+              const deferred = fetchCSS(url).then((metadata) => embedFonts(metadata, options)).then((cssText) => parseCSS(cssText).forEach((rule) => {
+                try {
+                  sheet.insertRule(rule, rule.startsWith("@import") ? importIndex += 1 : sheet.cssRules.length);
+                } catch (error) {
+                  console.error("Error inserting rule from remote css", {
+                    rule,
+                    error
+                  });
+                }
+              })).catch((e) => {
+                console.error("Error loading remote css", e.toString());
+              });
+              deferreds.push(deferred);
+            }
+          });
+        } catch (e) {
+          const inline = styleSheets.find((a) => a.href == null) || document.styleSheets[0];
+          if (sheet.href != null) {
+            deferreds.push(fetchCSS(sheet.href).then((metadata) => embedFonts(metadata, options)).then((cssText) => parseCSS(cssText).forEach((rule) => {
+              inline.insertRule(rule, inline.cssRules.length);
+            })).catch((err) => {
+              console.error("Error loading remote stylesheet", err);
+            }));
+          }
+          console.error("Error inlining remote css file", e);
+        }
+      }
+    });
+    return Promise.all(deferreds).then(() => {
+      styleSheets.forEach((sheet) => {
+        if ("cssRules" in sheet) {
+          try {
+            toArray(sheet.cssRules || []).forEach((item) => {
+              ret.push(item);
+            });
+          } catch (e) {
+            console.error(`Error while reading CSS rules from ${sheet.href}`, e);
+          }
+        }
+      });
+      return ret;
+    });
+  }
+  function getWebFontRules(cssRules) {
+    return cssRules.filter((rule) => rule.type === CSSRule.FONT_FACE_RULE).filter((rule) => shouldEmbed(rule.style.getPropertyValue("src")));
+  }
+  async function parseWebFontRules(node, options) {
+    if (node.ownerDocument == null) {
+      throw new Error("Provided element is not within a Document");
+    }
+    const styleSheets = toArray(node.ownerDocument.styleSheets);
+    const cssRules = await getCSSRules(styleSheets, options);
+    return getWebFontRules(cssRules);
+  }
+  function normalizeFontFamily(font) {
+    return font.trim().replace(/["']/g, "");
+  }
+  function getUsedFonts(node) {
+    const fonts = /* @__PURE__ */ new Set();
+    function traverse(node2) {
+      const fontFamily = node2.style.fontFamily || getComputedStyle(node2).fontFamily;
+      fontFamily.split(",").forEach((font) => {
+        fonts.add(normalizeFontFamily(font));
+      });
+      Array.from(node2.children).forEach((child) => {
+        if (child instanceof HTMLElement) {
+          traverse(child);
+        }
+      });
+    }
+    traverse(node);
+    return fonts;
+  }
+  async function getWebFontCSS(node, options) {
+    const rules = await parseWebFontRules(node, options);
+    const usedFonts = getUsedFonts(node);
+    const cssTexts = await Promise.all(rules.filter((rule) => usedFonts.has(normalizeFontFamily(rule.style.fontFamily))).map((rule) => {
+      const baseUrl = rule.parentStyleSheet ? rule.parentStyleSheet.href : null;
+      return embedResources(rule.cssText, baseUrl, options);
+    }));
+    return cssTexts.join("\n");
+  }
+  async function embedWebFonts(clonedNode, options) {
+    const cssText = options.fontEmbedCSS != null ? options.fontEmbedCSS : options.skipFonts ? null : await getWebFontCSS(clonedNode, options);
+    if (cssText) {
+      const styleNode = document.createElement("style");
+      const sytleContent = document.createTextNode(cssText);
+      styleNode.appendChild(sytleContent);
+      if (clonedNode.firstChild) {
+        clonedNode.insertBefore(styleNode, clonedNode.firstChild);
+      } else {
+        clonedNode.appendChild(styleNode);
+      }
+    }
+  }
+
+  // node_modules/html-to-image/es/index.js
+  async function toSvg(node, options = {}) {
+    const { width, height } = getImageSize(node, options);
+    const clonedNode = await cloneNode(node, options, true);
+    await embedWebFonts(clonedNode, options);
+    await embedImages(clonedNode, options);
+    applyStyle(clonedNode, options);
+    const datauri = await nodeToDataURL(clonedNode, width, height);
+    return datauri;
+  }
+  async function toCanvas(node, options = {}) {
+    const { width, height } = getImageSize(node, options);
+    const svg = await toSvg(node, options);
+    const img = await createImage(svg);
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    const ratio = options.pixelRatio || getPixelRatio();
+    const canvasWidth = options.canvasWidth || width;
+    const canvasHeight = options.canvasHeight || height;
+    canvas.width = canvasWidth * ratio;
+    canvas.height = canvasHeight * ratio;
+    if (!options.skipAutoScale) {
+      checkCanvasDimensions(canvas);
+    }
+    canvas.style.width = `${canvasWidth}`;
+    canvas.style.height = `${canvasHeight}`;
+    if (options.backgroundColor) {
+      context.fillStyle = options.backgroundColor;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    context.drawImage(img, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  }
+  async function toBlob(node, options = {}) {
+    const canvas = await toCanvas(node, options);
+    const blob = await canvasToBlob(canvas);
+    return blob;
+  }
+
+  // src/services/chartImage.ts
+  var captureQueue = Promise.resolve();
+  function chartToBlob(node, options) {
+    const capture = captureQueue.then(() => captureDesktopChart(node, options));
+    captureQueue = capture.catch(() => void 0);
+    return capture;
+  }
+  async function captureDesktopChart(node, options) {
+    const frame = document.createElement("iframe");
+    frame.setAttribute("aria-hidden", "true");
+    frame.style.cssText = "position:fixed;left:-10000px;top:0;width:1440px;height:1600px;border:0;pointer-events:none";
+    document.body.appendChild(frame);
+    try {
+      const doc = frame.contentDocument;
+      const view = frame.contentWindow;
+      const base = doc.createElement("base");
+      base.href = document.baseURI;
+      doc.head.appendChild(base);
+      const styles = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]'));
+      await Promise.all(styles.map((style) => new Promise((resolve, reject) => {
+        const copy = style.cloneNode(true);
+        if (copy.tagName === "LINK") {
+          copy.onload = () => resolve();
+          copy.onerror = () => reject(new Error("Export stylesheet could not be loaded."));
+        }
+        doc.head.appendChild(copy);
+        if (copy.tagName !== "LINK") resolve();
+      })));
+      doc.body.className = "saved-entries-collapsed";
+      const chart = node.cloneNode(true);
+      chart.style.width = "1100px";
+      chart.style.minWidth = "1100px";
+      chart.style.maxWidth = "none";
+      doc.body.appendChild(chart);
+      await doc.fonts.ready;
+      await new Promise((resolve) => view.requestAnimationFrame(() => view.requestAnimationFrame(() => resolve())));
+      const positionMarkers = window.positionSpacingMarkers;
+      positionMarkers?.(chart);
+      const properties = Array.from(view.getComputedStyle(doc.documentElement)).filter((property) => property !== "font-size");
+      const captureOptions = { ...options, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
+      await toBlob(chart, captureOptions);
+      return await toBlob(chart, captureOptions);
+    } finally {
+      frame.remove();
+    }
+  }
+
+  // src/previewChartImage.ts
+  window.chartToBlob = chartToBlob;
+})();

@@ -864,15 +864,31 @@ async function captureChartImage(){
   if(!els.splitStage||typeof window.chartToBlob!=="function")throw new Error("Chart image export is not available yet.");
   await document.fonts?.ready;
   const blob=await window.chartToBlob(els.splitStage,{
-    pixelRatio:Math.min(3,Math.max(2,window.devicePixelRatio||1))
+    pixelRatio:2
   });
   if(!blob)throw new Error("The chart image could not be created.");
   return blob;
 }
 let pdfExportBusy=false;
+function isSafariExport(){
+  const nav=window.navigator||{};
+  return /iPhone|iPad|iPod/i.test(nav.userAgent||"")||
+    (nav.platform==="MacIntel"&&nav.maxTouchPoints>1)||
+    (/Safari/i.test(nav.userAgent||"")&&!/Chrome|Chromium|Android/i.test(nav.userAgent||""));
+}
+function openExportWindow(){
+  // Reserve the window during the original tap, before rendering loses activation.
+  const preview=window.open("","_blank");
+  if(preview){
+    preview.document.title="Preparing download";
+    preview.document.body.textContent="Preparing your download…";
+  }
+  return preview;
+}
 async function downloadPdf(){
   if(pdfExportBusy)return;
   pdfExportBusy=true;
+  const preview=isSafariExport()?openExportWindow():null;
   const previousTitle=document.title,summaryHeading=document.querySelector(".saved-entries-title"),previousHeading=summaryHeading?.textContent;
   let image=null,url=null;
   const cleanup=()=>{
@@ -905,9 +921,41 @@ async function downloadPdf(){
     document.body.classList.add("pdf-chart-image-ready");
     document.title=pdfFileName();
     if(summaryHeading)summaryHeading.textContent="Summary";
+    if(preview&&!preview.closed){
+      const doc=preview.document;
+      doc.head.innerHTML=document.head.innerHTML;
+      doc.querySelectorAll("script").forEach(script=>script.remove());
+      const base=doc.createElement("base");base.href=document.baseURI;doc.head.prepend(base);
+      doc.title=document.title;
+      doc.body.replaceWith(document.body.cloneNode(true));
+      doc.querySelectorAll("script,.chart-image-mobile-save,.pdf-export-save").forEach(item=>item.remove());
+      doc.body.classList.remove("patient-record-review");
+      const button=doc.createElement("button");
+      button.textContent="Save PDF / Print";
+      button.style.cssText="position:fixed;top:12px;right:12px;z-index:99999;padding:16px;font:16px sans-serif";
+      button.onclick=()=>preview.print();
+      doc.body.prepend(button);
+      const style=doc.createElement("style");style.textContent="@media print{body>button{display:none!important}}";doc.head.appendChild(style);
+      // The preview owns a data URL, so cleaning up the live chart is safe.
+      const previewImage=doc.querySelector(".print-chart-image");
+      previewImage.src=await blobDataUrl(blob);
+      await previewImage.decode();
+      cleanup();
+      return;
+    }
+    if(isSafariExport()){
+      // Popup blocking still leaves a visible action in either source tab.
+      const button=document.createElement("button");
+      button.className="pdf-export-save";button.textContent="PDF ready — tap to save / print";
+      button.onclick=()=>window.print();
+      const container=document.querySelector(".record-review-toolbar")||els.downloadPdfBtn.parentElement;
+      container.insertAdjacentElement("afterend",button);
+      window.addEventListener("afterprint",()=>button.remove(),{once:true});
+    }
     window.addEventListener("afterprint",cleanup,{once:true});
     window.print();
   }catch(error){
+    preview?.close();
     cleanup();
     console.error("PDF chart export failed",error);
     window.alert("The PDF chart image could not be prepared. Please try again.");
@@ -926,12 +974,7 @@ function isMobileChartDownload(){
 async function downloadMobileChartImage(blob,fileName){
   // A data URL keeps the PNG available while a mobile browser opens its download
   // prompt. Revoking a temporary blob URL early can interrupt that hand-off.
-  const url=await new Promise((resolve,reject)=>{
-    const reader=new FileReader();
-    reader.onload=()=>resolve(reader.result);
-    reader.onerror=()=>reject(reader.error||new Error("The chart image could not be read."));
-    reader.readAsDataURL(blob);
-  });
+  const url=await blobDataUrl(blob);
   const link=document.createElement("a");
   link.className="chart-image-mobile-save";
   link.href=url;
@@ -939,11 +982,17 @@ async function downloadMobileChartImage(blob,fileName){
   link.target="_blank";
   link.rel="noopener";
   link.textContent="Download ready — tap here if it didn’t start";
-  // Keep a real link for browsers that require a fresh tap after image rendering.
-  // The review screen forwards its download button to the hidden chart button.
   const container=document.querySelector(".record-review-toolbar")||els.downloadChartImageBtn.parentElement;
   container.insertAdjacentElement("afterend",link);
   link.click();
+}
+function blobDataUrl(blob){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onload=()=>resolve(reader.result);
+    reader.onerror=()=>reject(reader.error||new Error("The chart image could not be read."));
+    reader.readAsDataURL(blob);
+  });
 }
 async function downloadChartImage(){
   if(!els.splitStage||typeof window.chartToBlob!=="function"){
@@ -953,6 +1002,7 @@ async function downloadChartImage(){
   const fileName=chartImageFileName();
   const originalLabel=els.downloadChartImageLabel?.textContent||"Download Chart Image";
   const mobileDownload=isMobileChartDownload();
+  const preview=isSafariExport()?openExportWindow():null;
   if(mobileDownload)document.querySelectorAll(".chart-image-mobile-save").forEach(link=>link.remove());
 
   els.downloadChartImageBtn.disabled=true;
@@ -962,6 +1012,16 @@ async function downloadChartImage(){
     // rendering preserves transforms, flex/grid alignment and clip-paths;
     // there is no export-specific tooth layout or badge repositioning.
     const blob=await captureChartImage();
+    if(preview&&!preview.closed){
+      const doc=preview.document;doc.body.textContent="";doc.title=fileName;
+      const url=await blobDataUrl(blob);
+      const link=doc.createElement("a");link.href=url;link.download=fileName;
+      link.textContent="Save chart image";doc.body.appendChild(link);
+      const image=doc.createElement("img");image.src=url;image.alt="Dental chart";
+      image.style.cssText="display:block;max-width:100%;height:auto";doc.body.appendChild(image);
+      const hint=doc.createElement("p");hint.textContent="Tap Save chart image, or touch and hold the chart to save it to Photos.";doc.body.prepend(hint);
+      return;
+    }
     if(mobileDownload){
       await downloadMobileChartImage(blob,fileName);
       return;
@@ -995,6 +1055,7 @@ async function downloadChartImage(){
       setTimeout(()=>URL.revokeObjectURL(url),1000);
     }
   }catch(error){
+    preview?.close();
     console.error("Chart image export failed",error);
     window.alert("The chart image could not be downloaded. Please try again.");
   }finally{
@@ -1544,9 +1605,9 @@ function appendSpacingMarkers(container,list,view,layer){
   });
 }
 // Measure the rendered anatomy, since tooth widths and responsive zoom differ.
-function positionSpacingMarkers(){
-  positionConditionBadges();
-  document.querySelectorAll('.spacing-marker').forEach(marker=>{
+function positionSpacingMarkers(root=document){
+  positionConditionBadges(root);
+  root.querySelectorAll('.spacing-marker').forEach(marker=>{
     const left=marker.parentElement,right=left?.nextElementSibling;
     const leftArt=left?.querySelector('.art-core'),rightArt=right?.querySelector('.art-core');
     if(!leftArt||!rightArt||!left.offsetWidth)return;

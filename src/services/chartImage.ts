@@ -3,38 +3,52 @@ import { toBlob } from "html-to-image";
 let captureQueue: Promise<unknown> = Promise.resolve();
 
 export function chartToBlob(node: HTMLElement, options: Parameters<typeof toBlob>[1]) {
-  const capture = captureQueue.then(() => captureCollapsedChart(node, options));
+  const capture = captureQueue.then(() => captureDesktopChart(node, options));
   captureQueue = capture.catch(() => undefined);
   return capture;
 }
 
-async function captureCollapsedChart(node: HTMLElement, options: Parameters<typeof toBlob>[1]) {
-  const body = document.body;
-  const panel = document.querySelector(".chart-workspace > .entries-panel");
-  const bodyCollapsed = body.classList.contains("saved-entries-collapsed");
-  const panelCollapsed = panel?.classList.contains("is-collapsed") ?? false;
-  const reviewingRecord = body.classList.contains("patient-record-review");
-  // Both PNG and PDF use the wider chart layout, independent of the entry panel.
-  // Do not change the saved preference or the toggle's accessibility state.
-  body.classList.add("saved-entries-collapsed");
-  panel?.classList.add("is-collapsed");
-  // Review uses different workspace widths. Capture with Chart-tab geometry,
-  // then restore the review UI without changing its patient or chart data.
-  body.classList.remove("patient-record-review");
+async function captureDesktopChart(node: HTMLElement, options: Parameters<typeof toBlob>[1]) {
+  // A separate viewport evaluates desktop media queries even on an iPhone.
+  // Never resize or restyle the live chart while an export is being prepared.
+  const frame = document.createElement("iframe");
+  frame.setAttribute("aria-hidden", "true");
+  frame.style.cssText = "position:fixed;left:-10000px;top:0;width:1440px;height:1600px;border:0;pointer-events:none";
+  document.body.appendChild(frame);
   try {
-  // Let pending live-chart layout callbacks finish before taking the snapshot.
-  await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-  // Copy the exact computed font shorthand. The library rounds font-size down
-  // when copying it separately, which changes small badges and tooth numbers.
-  const properties = Array.from(getComputedStyle(document.documentElement))
-    .filter(property => property !== "font-size");
-  return await toBlob(node, {
-    ...options,
-    includeStyleProperties: [...properties, "font"],
-  });
+    const doc = frame.contentDocument!;
+    const view = frame.contentWindow!;
+    const base = doc.createElement("base");
+    base.href = document.baseURI;
+    doc.head.appendChild(base);
+    const styles = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]'));
+    await Promise.all(styles.map(style => new Promise<void>((resolve, reject) => {
+      const copy = style.cloneNode(true) as HTMLElement;
+      if (copy.tagName === "LINK") {
+        copy.onload = () => resolve();
+        copy.onerror = () => reject(new Error("Export stylesheet could not be loaded."));
+      }
+      doc.head.appendChild(copy);
+      if (copy.tagName !== "LINK") resolve();
+    })));
+    doc.body.className = "saved-entries-collapsed";
+    const chart = node.cloneNode(true) as HTMLElement;
+    chart.style.width = "1100px";
+    chart.style.minWidth = "1100px";
+    chart.style.maxWidth = "none";
+    doc.body.appendChild(chart);
+    await doc.fonts.ready;
+    await new Promise<void>(resolve => view.requestAnimationFrame(() => view.requestAnimationFrame(() => resolve())));
+    // These annotations carry measured inline positions from the live viewport.
+    const positionMarkers = (window as Window & { positionSpacingMarkers?: (root: HTMLElement) => void }).positionSpacingMarkers;
+    positionMarkers?.(chart);
+    const properties = Array.from(view.getComputedStyle(doc.documentElement))
+      .filter(property => property !== "font-size");
+    // Safari may need a warm-up pass for embedded SVGs and fonts.
+    const captureOptions = { ...options, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
+    await toBlob(chart, captureOptions);
+    return await toBlob(chart, captureOptions);
   } finally {
-    body.classList.toggle("saved-entries-collapsed", bodyCollapsed);
-    panel?.classList.toggle("is-collapsed", panelCollapsed);
-    body.classList.toggle("patient-record-review", reviewingRecord);
+    frame.remove();
   }
 }
