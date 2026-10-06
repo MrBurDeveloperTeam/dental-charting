@@ -13,10 +13,14 @@ async function captureCollapsedChart(node: HTMLElement, options: Parameters<type
   const panel = document.querySelector(".chart-workspace > .entries-panel");
   const bodyCollapsed = body.classList.contains("saved-entries-collapsed");
   const panelCollapsed = panel?.classList.contains("is-collapsed") ?? false;
+  const reviewingRecord = body.classList.contains("patient-record-review");
   // Both PNG and PDF use the wider chart layout, independent of the entry panel.
   // Do not change the saved preference or the toggle's accessibility state.
   body.classList.add("saved-entries-collapsed");
   panel?.classList.add("is-collapsed");
+  // Review uses different workspace widths. Capture with Chart-tab geometry,
+  // then restore the review UI without changing its patient or chart data.
+  body.classList.remove("patient-record-review");
   try {
   // Let pending live-chart layout callbacks finish before taking the snapshot.
   await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
@@ -31,5 +35,6 @@ async function captureCollapsedChart(node: HTMLElement, options: Parameters<type
   } finally {
     body.classList.toggle("saved-entries-collapsed", bodyCollapsed);
     panel?.classList.toggle("is-collapsed", panelCollapsed);
+    body.classList.toggle("patient-record-review", reviewingRecord);
   }
 }
