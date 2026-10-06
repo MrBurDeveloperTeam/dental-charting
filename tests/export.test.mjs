@@ -6,7 +6,7 @@ import ts from 'typescript';
 
 const source=readFileSync(new URL('../public/js/app.js',import.meta.url),'utf8');
 const ast=ts.createSourceFile('app.js',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
-const helper=ast.statements.filter(n=>ts.isFunctionDeclaration(n)&&['captureChartImage','downloadChartImage','isMobileChartDownload','downloadMobileChartImage'].includes(n.name.text)).map(n=>n.getText()).join('\n');
+const helper=ast.statements.filter(n=>ts.isFunctionDeclaration(n)&&['captureChartImage','downloadChartImage','isMobileChartDownload','downloadMobileChartImage','blobDataUrl','isSafariExport','openExportWindow'].includes(n.name.text)).map(n=>n.getText()).join('\n');
 const pdfHelper=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='downloadPdf').getText();
 for(const failure of [null,'capture','decode','print']){
   test(`PDF embeds the shared chart capture and cleans up (${failure||'success'})`,async()=>{
@@ -16,7 +16,7 @@ for(const failure of [null,'capture','decode','print']){
     const context=vm.createContext({
       els:{downloadPdfBtn:button,splitStage:{closest:()=>({appendChild(value){assert.equal(value,image);events.push('append');}})}},
       document:{title:'Chart',querySelector:()=>heading,createElement:()=>image,body:{classList:{add:value=>classes.add(value),remove:value=>classes.delete(value)}}},
-      renderPrintSections:()=>{},patient:{patientId:'test'},
+      isSafariExport:()=>false,renderPrintSections:()=>{},patient:{patientId:'test'},
       captureChartImage:async()=>{events.push('capture');if(failure==='capture')throw Error('capture');return {};},
       pdfFileName:()=> 'Patient_2026-10-06',URL:{createObjectURL:()=> 'blob:pdf',revokeObjectURL:()=>events.push('revoke')},console:{error(){}},
       window:{addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name),
@@ -57,7 +57,7 @@ function setup({fail=false,cancel=false,navigator={},picker=true,pickerFail=fals
     readAsDataURL(value){assert.equal(value,blob);events.push('read');if(readFail){this.onerror();return;}this.result='data:image/png;base64,cG5n';this.onload();}
   },URL:{createObjectURL:()=> 'blob:chart',revokeObjectURL:()=>events.push('revoke')},setTimeout:(callback,delay)=>timers.push({callback,delay}),
   chartImageFileName:()=> 'chart.png',console:{error(){},warn(){}},window:{
-    navigator,
+    navigator,open:()=>null,
     devicePixelRatio:2,alert:()=>events.push('alert'),
     chartToBlob:async(node,options)=>{events.push('capture');assert.equal(node,stage);assert.equal(options.pixelRatio,2);assert.equal(options.width,undefined);assert.equal(options.height,undefined);if(fail)throw Error('capture failed');return blob;},
     showSaveFilePicker:picker?async()=>{events.push('picker');if(cancel)throw {name:'AbortError'};if(pickerFail)throw {name:'SecurityError'};return {createWritable:async()=>({write:async value=>{assert.equal(value,blob);events.push('write');},close:async()=>events.push('close')})};}:undefined
@@ -65,7 +65,7 @@ function setup({fail=false,cancel=false,navigator={},picker=true,pickerFail=fals
   vm.runInContext(helper,context);
   return {context,els,events,links,timers};
 }
-test('exports the live chart at its current layout after fonts load, then saves the completed PNG',async()=>{
+test('exports the chart at a fixed resolution after fonts load, then saves the completed PNG',async()=>{
   const {context,els,events}=setup();await context.downloadChartImage();
   assert.deepEqual(events,['fonts','capture','picker','write','close']);
   assert.equal(els.downloadChartImageBtn.disabled,false);
@@ -140,4 +140,28 @@ test('static preview registers the export renderer without Vite or module import
   vm.runInContext(readFileSync(new URL('../public/js/'+script[1],import.meta.url),'utf8'),context);
   assert.equal(typeof context.window.chartToBlob,'function');
   assert.ok(html.indexOf(script[0])<html.indexOf('./js/app.js'));
+});
+
+test('Safari reserves a preview during the tap and exposes a persistent save action',async()=>{
+  const {context,events,els}=setup({navigator:{userAgent:'Version/18.0 Safari/605.1.15'}});
+  const items=[];
+  const preview={closed:false,document:{body:{textContent:'',appendChild:item=>items.push(item),prepend:item=>items.unshift(item)},
+    createElement:()=>({style:{}})},close(){events.push('close-preview');}};
+  context.window.open=()=>{events.push('open-preview');return preview;};
+  const pending=context.downloadChartImage();
+  assert.equal(events[0],'open-preview','open before any asynchronous capture');
+  await pending;
+  assert.ok(!events.includes('picker'));
+  assert.ok(!events.includes('alert'));
+  assert.equal(items[1].download,'chart.png');
+  assert.equal(items[2].src,'data:image/png;base64,cG5n');
+  assert.equal(els.downloadChartImageBtn.disabled,false);
+});
+
+test('Safari closes its reserved preview when capture fails',async()=>{
+  const {context,events}=setup({fail:true,navigator:{userAgent:'iPhone'}});
+  context.window.open=()=>({document:{body:{}},close:()=>events.push('close-preview')});
+  await context.downloadChartImage();
+  assert.ok(events.includes('close-preview'));
+  assert.ok(events.includes('alert'));
 });

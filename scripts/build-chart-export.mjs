@@ -9,6 +9,8 @@ await build({
   format: 'iife',
   platform: 'browser',
   target: 'es2020',
-  minify: true,
+  // This bundle is checked in and reviewed directly, so preserve readable
+  // function names, indentation, and line breaks on every rebuild.
+  minify: false,
   legalComments: 'eof',
 });
