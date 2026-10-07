@@ -23,3 +23,20 @@ for(const review of [false,true])for(const collapsed of [false,true])for(const f
   assert.equal(panel.classList.contains('is-collapsed'),collapsed);
  });
 }
+
+for (const failure of [null, 'image', 'empty']) {
+ test(`mobile rasterization works without foreground animation frames (${failure || 'success'})`,async()=>{
+  const events=[],blob={size:123,type:'image/png'};
+  const canvas={width:0,height:0,getContext:()=>({
+   drawImage(){events.push('draw');},clearRect(){events.push('clear');}
+  }),toBlob(callback,type){assert.equal(type,'image/png');callback(failure==='empty'?null:blob);}};
+  const context=vm.createContext({exports:{},require:()=>({}),document:{createElement:()=>canvas},
+   Image:class {set src(value){assert.equal(value,'data:image/svg+xml,test');if(failure==='image')this.onerror();else this.onload();}},
+   requestAnimationFrame(){throw Error('A background tab cannot supply animation frames');}
+  });
+  vm.runInContext(source+'\nexports.rasterizeMobileChart=rasterizeMobileChart;',context);
+  if(failure)await assert.rejects(context.exports.rasterizeMobileChart('data:image/svg+xml,test',726,887),failure==='image'?/could not be loaded/:/empty PNG/);
+  else {assert.equal(await context.exports.rasterizeMobileChart('data:image/svg+xml,test',726,887),blob);assert.deepEqual(events,['draw','clear','draw']);}
+  assert.equal(canvas.width,0);assert.equal(canvas.height,0);
+ });
+}
