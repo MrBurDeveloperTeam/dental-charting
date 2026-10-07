@@ -158,10 +158,11 @@ test('Safari reserves a preview during the tap and exposes a persistent save act
   assert.equal(els.downloadChartImageBtn.disabled,false);
 });
 
-test('Safari closes its reserved preview when capture fails',async()=>{
+test('iPhone image failure never opens a preparation tab and restores controls',async()=>{
   const {context,events}=setup({fail:true,navigator:{userAgent:'iPhone'}});
-  context.window.open=()=>({document:{body:{}},close:()=>events.push('close-preview')});
+  context.window.open=()=>{events.push('open-preview');return null;};
   await context.downloadChartImage();
-  assert.ok(events.includes('close-preview'));
+  assert.ok(!events.includes('open-preview'));
+  assert.equal(context.els.downloadChartImageBtn.disabled,false);
   assert.ok(events.includes('alert'));
 });
