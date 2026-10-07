@@ -16,7 +16,6 @@ export default function App() {
   const [view, setView] = useState<"chart" | "records" | "review" | "edit">("chart");
   const [selectedRecord, setSelectedRecord] = useState<PatientRecord | null>(null);
   const [patientVisitRecords, setPatientVisitRecords] = useState<PatientRecord[]>([]);
-  const [reviewLayer, setReviewLayer] = useState<"existing" | "planned">("existing");
 
   useLayoutEffect(() => {
     if (!bypassAuth) return;
@@ -89,14 +88,12 @@ export default function App() {
   const openRecord = (record: PatientRecord) => {
     setSelectedRecord(record);
     setPatientVisitRecords((current) => current.some((item) => item.patient.id === record.patient.id) ? current : [record]);
-    setReviewLayer("existing");
     setView("review");
     window.setTimeout(() => document.dispatchEvent(new CustomEvent("dental-chart:open-record", { detail: { patient: record.patient, visitDate: record.visitDate, dentition: record.dentition } })), 0);
   };
 
   const editRecord = (record: PatientRecord) => {
     setSelectedRecord(record);
-    setReviewLayer("existing");
     setView("edit");
     window.setTimeout(() => document.dispatchEvent(new CustomEvent("dental-chart:open-record", { detail: { patient: record.patient, visitDate: record.visitDate, dentition: record.dentition } })), 0);
   };
@@ -191,9 +188,6 @@ export default function App() {
                 <select id="record-review-visit" value={selectedRecord.id} onChange={(event) => { const record = patientVisitRecords.find((item) => item.id === event.target.value); if (record) openRecord(record); }}>{patientVisitRecords.map((record) => <option key={record.id} value={record.id}>{new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${record.visitDate}T00:00:00`))}</option>)}</select>
               </div>
             </div>
-          </div>
-          <div className="record-review-layer-switch" aria-label="Chart layer">
-            {(["existing", "planned"] as const).map((layer) => <button key={layer} type="button" className={reviewLayer === layer ? "active" : ""} aria-pressed={reviewLayer === layer} onClick={() => { setReviewLayer(layer); (document.querySelector(`[data-chart-view="${layer}"]`) as HTMLButtonElement | null)?.click(); }}>{layer === "existing" ? "Existing" : "Planning"}</button>)}
           </div>
         </section>,
         document.getElementById("record-review-summary-root")!,
