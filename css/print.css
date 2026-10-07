@@ -1,8 +1,14 @@
 .print-chart-image{display:none}
 @media print{
   /* Keep the device-specific Safari print scales separate. */
-  body.safari-pdf-snapshot:not(.ios-pdf-snapshot) .page{zoom:.915}
+  body.safari-pdf-snapshot:not(.ios-pdf-snapshot) .page{zoom:1}
   body.ios-pdf-snapshot .page{zoom:.85}
+  /* Safari must paginate ordinary blocks, not the screen's grid items. */
+  body.safari-pdf-snapshot .layout>.chart-workspace{display:block!important}
+  body.safari-pdf-snapshot .entries-panel{
+    break-before:page!important;
+    page-break-before:always!important;
+  }
   /* Safari can rebuild its preview after afterprint. Keep one raster image,
      with explicit dimensions, rather than returning to responsive tooth DOM. */
   body.safari-pdf-snapshot .chart-card>.chart-stage-wrap{display:none!important}
