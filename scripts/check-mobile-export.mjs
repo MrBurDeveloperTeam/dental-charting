@@ -86,6 +86,20 @@ try {
   assert.equal(pdf.loaded,dimensions[0]);
   assert.equal(pdf.disabled,false);
   assert.equal(pdf.popups,0);
+  // Safari may refresh preview after afterprint while the settings panel is open.
+  for(const width of [794,1123,559]){
+    await page.setViewportSize({width,height:1123});
+    await page.emulateMedia({media:'print'});
+    const frozen=await page.evaluate(()=>{
+      const image=document.querySelector('.print-chart-image');
+      return {width:image?.naturalWidth,visible:image&&getComputedStyle(image).display,
+        live:getComputedStyle(document.querySelector('.chart-stage-wrap')).display};
+    });
+    assert.equal(frozen.width,dimensions[0]);
+    assert.equal(frozen.visible,'block');
+    assert.equal(frozen.live,'none');
+  }
+  console.log('Frozen Safari chart survives afterprint and print viewport changes');
   }
   }
 } finally {await browser.close();}

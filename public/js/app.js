@@ -889,6 +889,11 @@ async function downloadPdf(){
   if(pdfExportBusy)return;
   pdfExportBusy=true;
   const mobilePdf=isMobileChartDownload()||isSafariExport();
+  const retainSafariSnapshot=isSafariExport();
+  if(retainSafariSnapshot){
+    document.querySelectorAll('.print-chart-image').forEach(item=>item.remove());
+    document.body.classList.remove('pdf-chart-image-ready','safari-pdf-snapshot');
+  }
   // Keep iOS rendering in the foreground. Opening a tab here suspends image
   // and frame work in Safari before the chart has finished being prepared.
   const preview=!mobilePdf&&isSafariExport()?openExportWindow():null;
@@ -896,9 +901,9 @@ async function downloadPdf(){
   let image=null,url=null,exportStep="report",mobileImageUrl=null;
   const cleanup=()=>{
     window.removeEventListener("afterprint",cleanup);
-    image?.remove();
+    if(!retainSafariSnapshot)image?.remove();
     if(url)URL.revokeObjectURL(url);
-    document.body.classList.remove("pdf-chart-image-ready");
+    if(!retainSafariSnapshot)document.body.classList.remove("pdf-chart-image-ready");
     document.title=previousTitle;
     if(summaryHeading)summaryHeading.textContent=previousHeading||"Saved Entries";
     els.downloadPdfBtn.disabled=false;
@@ -925,6 +930,7 @@ async function downloadPdf(){
     else {image.src=url;await image.decode();}
     els.splitStage.closest(".chart-card").appendChild(image);
     document.body.classList.add("pdf-chart-image-ready");
+    if(retainSafariSnapshot)document.body.classList.add('safari-pdf-snapshot');
     document.title=pdfFileName();
     if(summaryHeading)summaryHeading.textContent="Summary";
     if(preview&&!preview.closed){
@@ -968,6 +974,10 @@ async function downloadPdf(){
     }else window.print();
   }catch(error){
     preview?.close();
+    if(retainSafariSnapshot){
+      image?.remove();
+      document.body.classList.remove('pdf-chart-image-ready','safari-pdf-snapshot');
+    }
     cleanup();
     console.error(`PDF chart export failed during ${exportStep}`,error);
     window.alert("The PDF chart image could not be prepared. Please try again."+(mobilePdf?`\nFailed during ${exportStep}: ${error?.message||"Unknown browser error"}`:""));
