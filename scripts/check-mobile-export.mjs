@@ -9,8 +9,8 @@ const { chromium, webkit } = require('playwright');
 const browser = process.env.EXPORT_BROWSER === 'webkit' ? await webkit.launch({headless:true}) : await chromium.launch({channel:'chrome', headless:true});
 const url = process.env.EXPORT_TEST_URL || 'http://127.0.0.1:5174/preview.html';
 try {
-  let dimensions=process.env.EXPORT_PDF_ONLY||process.env.EXPORT_IMAGE_ONLY?[1452,1774]:null;
-  for (const width of process.env.EXPORT_PDF_ONLY||process.env.EXPORT_IMAGE_ONLY?[]:[390, 1680]) {
+  let dimensions=process.env.EXPORT_PDF_ONLY||process.env.EXPORT_IMAGE_ONLY?[1681,1774]:null;
+  for (const width of process.env.EXPORT_PDF_ONLY||process.env.EXPORT_IMAGE_ONLY?[]:[390, 1280, 1920]) {
     const page = await browser.newPage({viewport:{width,height:1000},deviceScaleFactor:1});
     page.on('pageerror',error=>console.log('PAGE ERROR',error.message));
     await page.goto(url);
@@ -21,11 +21,13 @@ try {
       try {
         const blob=await window.chartToBlob(node,{pixelRatio:2});
         const image=await createImageBitmap(blob);
-        return {viewport:innerWidth,before,png:[image.width,image.height],size:blob.size};
+        return {viewport:innerWidth,before,after:node.getBoundingClientRect().toJSON(),png:[image.width,image.height],size:blob.size};
       } catch(error) {return {viewport:innerWidth,before,error:String(error),stack:error.stack};}
     });
     console.log(result);
     assert.ok(!result.error, result.error);
+    assert.deepEqual(result.after,result.before,'Export must not resize the visible chart');
+    assert.deepEqual(result.png,[1681,1774]);
     if(dimensions)assert.deepEqual(result.png,dimensions);
     dimensions=result.png;
     await page.close();

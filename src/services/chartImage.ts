@@ -9,60 +9,15 @@ export function chartToBlob(node: HTMLElement, options: Parameters<typeof toBlob
 }
 
 async function captureChartTab(node: HTMLElement, options: Parameters<typeof toBlob>[1]) {
-  const nav = window.navigator;
-  const mobile = /Android|iPhone|iPad|iPod/i.test(nav?.userAgent || "") ||
-    (nav?.platform === "MacIntel" && nav.maxTouchPoints > 1) ||
-    window.matchMedia?.("(max-width: 600px)").matches;
-  if (mobile) return captureMobileChart(node, options);
-  const body = document.body;
-  const panel = document.querySelector(".chart-workspace > .entries-panel");
-  const wasReview = body.classList.contains("patient-record-review");
-  const wasCollapsed = body.classList.contains("saved-entries-collapsed");
-  const panelWasCollapsed = panel?.classList.contains("is-collapsed") ?? false;
-  const positionMarkers = (window as Window & { positionSpacingMarkers?: (root: HTMLElement) => void }).positionSpacingMarkers;
-  const safari = /Safari/i.test(nav?.userAgent || "") && !/Chrome|Chromium|Android/i.test(nav?.userAgent || "");
-  const originalImages = safari ? Array.from(node.querySelectorAll("img,svg image")).map(image => ({
-    image, attributes: Array.from(image.attributes).map(attribute => [attribute.name, attribute.value] as const)
-  })) : [];
-  try {
-    // Use the real Chart-tab container, including its responsive dimensions.
-    // Safari's popup/save handling stays independent of chart geometry.
-    body.classList.remove("patient-record-review");
-    body.classList.add("saved-entries-collapsed");
-    panel?.classList.add("is-collapsed");
-    await document.fonts.ready;
-    await new Promise<void>(resolve => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-    positionMarkers?.(node);
-    const properties = Array.from(getComputedStyle(document.documentElement))
-      .filter(property => property !== "font-size");
-    const captureOptions = { ...options, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
-    if (safari) {
-      // Keep desktop geometry; only share the proven SVG asset/raster pipeline.
-      await inlineMobileChartImages(node);
-      const width = node.offsetWidth, height = node.offsetHeight;
-      const svg = await toSvg(node, { ...captureOptions, width, height });
-      return await rasterizeMobileChart(svg, width, height);
-    }
-    // Retain the Safari SVG/font warm-up pass without substituting a new layout.
-    await toBlob(node, captureOptions);
-    return await toBlob(node, captureOptions);
-  } finally {
-    for (const { image, attributes } of originalImages) {
-      for (const attribute of Array.from(image.attributes)) image.removeAttribute(attribute.name);
-      for (const [name, value] of attributes) image.setAttribute(name, value);
-    }
-    body.classList.toggle("patient-record-review", wasReview);
-    body.classList.toggle("saved-entries-collapsed", wasCollapsed);
-    panel?.classList.toggle("is-collapsed", panelWasCollapsed);
-    positionMarkers?.(node);
-  }
+  return captureMobileChart(node, options);
 }
 
 // Render the existing desktop CSS in its own viewport. A wide wrapper in the
 // mobile document would still inherit mobile media queries and tooth sizes.
 const EXPORT_VIEWPORT_WIDTH = 1680;
-// Width of #split-stage in the existing collapsed desktop layout at 1680px.
-const EXPORT_CHART_WIDTH = 726;
+// User-approved desktop reference, shared by every PDF and PNG export.
+const EXPORT_CHART_WIDTH = 840.5;
+const EXPORT_CHART_HEIGHT = 887;
 async function captureMobileChart(node: HTMLElement, options: Parameters<typeof toBlob>[1]) {
   const wait = async <T>(operation: Promise<T>, stage: string): Promise<T> => {
     let timer: ReturnType<typeof setTimeout>;
@@ -105,11 +60,12 @@ async function captureMobileChart(node: HTMLElement, options: Parameters<typeof 
     chart.style.width = `${EXPORT_CHART_WIDTH}px`;
     chart.style.minWidth = `${EXPORT_CHART_WIDTH}px`;
     chart.style.maxWidth = `${EXPORT_CHART_WIDTH}px`;
+    chart.style.height = `${EXPORT_CHART_HEIGHT}px`;
     await inlineMobileChartImages(chart);
     await wait(Promise.all(Array.from(chart.querySelectorAll("img")).map(image => image.decode())), "loading tooth images");
     (window as Window & { positionSpacingMarkers?: (root: HTMLElement) => void }).positionSpacingMarkers?.(chart);
     const properties = Array.from(frame.contentWindow!.getComputedStyle(doc.documentElement)).filter(property => property !== "font-size");
-    const height = chart.offsetHeight;
+    const height = EXPORT_CHART_HEIGHT;
     if (!height) throw new Error("The export chart has no visible layout.");
     const captureOptions = { ...options, width: EXPORT_CHART_WIDTH, height, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
     const svg = await wait(toSvg(chart, captureOptions), "preparing chart artwork");
