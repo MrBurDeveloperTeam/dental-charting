@@ -4,6 +4,19 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import ts from 'typescript';
 const source=ts.transpileModule(readFileSync(new URL('../src/services/chartImage.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2020}}).outputText;
+for(const fail of [false,true])test(`mobile embeds repeated SVG tooth assets without waiting for clone load events (failure=${fail})`,async()=>{
+ const makeImage=()=>({tagName:'image',attrs:{href:'teeth/11.png'},getAttribute(name){return this.attrs[name];},setAttribute(name,value){this.attrs[name]=value;},removeAttributeNS(){}});
+ const images=[makeImage(),makeImage()];let requests=0;
+ const context=vm.createContext({exports:{},require:()=>({}),URL,AbortController,setTimeout,clearTimeout,
+  fetch:async(url)=>{requests++;assert.equal(url,'https://chart.test/teeth/11.png');return {ok:!fail,status:404,blob:async()=>({size:10})};},
+  FileReader:class {readAsDataURL(){this.result='data:image/png;base64,dGVzdA==';this.onload();}}
+ });
+ vm.runInContext(source+'\nexports.inlineMobileChartImages=inlineMobileChartImages;',context);
+ const capture=context.exports.inlineMobileChartImages({ownerDocument:{baseURI:'https://chart.test/'},querySelectorAll:()=>images});
+ if(fail)await assert.rejects(capture,/Tooth artwork request failed/);
+ else {await capture;assert.ok(images.every(image=>image.attrs.href.startsWith('data:image/png')));}
+ assert.equal(requests,1);
+});
 for(const review of [false,true])for(const collapsed of [false,true])for(const fail of [false,true]){
  test(`chart geometry and restoration: review=${review}, collapsed=${collapsed}, fail=${fail}`,async()=>{
   const classes=values=>{const s=new Set(values);return {contains:k=>s.has(k),add:k=>s.add(k),remove:k=>s.delete(k),toggle:(k,v)=>v?s.add(k):s.delete(k)}};

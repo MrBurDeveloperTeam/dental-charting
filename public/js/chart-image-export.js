@@ -893,6 +893,7 @@
       chart.style.width = `${EXPORT_CHART_WIDTH}px`;
       chart.style.minWidth = `${EXPORT_CHART_WIDTH}px`;
       chart.style.maxWidth = `${EXPORT_CHART_WIDTH}px`;
+      await inlineMobileChartImages(chart);
       await wait(Promise.all(Array.from(chart.querySelectorAll("img")).map((image) => image.decode())), "loading tooth images");
       window.positionSpacingMarkers?.(chart);
       const properties = Array.from(frame.contentWindow.getComputedStyle(doc.documentElement)).filter((property) => property !== "font-size");
@@ -903,6 +904,51 @@
       return await wait(rasterizeMobileChart(svg, EXPORT_CHART_WIDTH, height), "creating the PNG");
     } finally {
       frame.remove();
+    }
+  }
+  async function inlineMobileChartImages(chart) {
+    const images = Array.from(chart.querySelectorAll("img,svg image"));
+    const resources = /* @__PURE__ */ new Map();
+    for (const image of images) {
+      const source = image.tagName.toLowerCase() === "img" ? image.currentSrc || image.getAttribute("src") : image.getAttribute("href") || image.getAttribute("xlink:href");
+      if (!source || source.startsWith("data:")) continue;
+      const url = new URL(source, chart.ownerDocument.baseURI).href;
+      resources.set(url, [...resources.get(url) || [], image]);
+    }
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 3e4);
+    const jobs = Array.from(resources);
+    const worker = async () => {
+      while (jobs.length) {
+        const [url, targets] = jobs.shift();
+        const response = await fetch(url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Tooth artwork request failed (${response.status}).`);
+        const blob = await response.blob();
+        if (!blob.size) throw new Error("A tooth artwork file was empty.");
+        const data = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("A tooth artwork file could not be read."));
+          reader.readAsDataURL(blob);
+        });
+        for (const image of targets) {
+          if (image.tagName.toLowerCase() === "img") {
+            image.removeAttribute("srcset");
+            image.setAttribute("src", data);
+          } else {
+            image.setAttribute("href", data);
+            image.removeAttributeNS("http://www.w3.org/1999/xlink", "href");
+          }
+        }
+      }
+    };
+    try {
+      await Promise.all(Array.from({ length: Math.min(4, jobs.length) }, worker));
+    } catch (error) {
+      controller.abort();
+      throw new Error(`Could not embed tooth artwork: ${error instanceof Error ? error.message : String(error)}`);
+    } finally {
+      clearTimeout(timeout);
     }
   }
   async function rasterizeMobileChart(svg, width, height) {

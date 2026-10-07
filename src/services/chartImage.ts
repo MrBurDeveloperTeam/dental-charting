@@ -90,6 +90,7 @@ async function captureMobileChart(node: HTMLElement, options: Parameters<typeof 
     chart.style.width = `${EXPORT_CHART_WIDTH}px`;
     chart.style.minWidth = `${EXPORT_CHART_WIDTH}px`;
     chart.style.maxWidth = `${EXPORT_CHART_WIDTH}px`;
+    await inlineMobileChartImages(chart);
     await wait(Promise.all(Array.from(chart.querySelectorAll("img")).map(image => image.decode())), "loading tooth images");
     (window as Window & { positionSpacingMarkers?: (root: HTMLElement) => void }).positionSpacingMarkers?.(chart);
     const properties = Array.from(frame.contentWindow!.getComputedStyle(doc.documentElement)).filter(property => property !== "font-size");
@@ -104,6 +105,54 @@ async function captureMobileChart(node: HTMLElement, options: Parameters<typeof 
   } finally {
     frame.remove();
   }
+}
+
+async function inlineMobileChartImages(chart: HTMLElement): Promise<void> {
+  const images = Array.from(chart.querySelectorAll<HTMLImageElement | SVGImageElement>("img,svg image"));
+  const resources = new Map<string, typeof images>();
+  for (const image of images) {
+    const source = image.tagName.toLowerCase() === "img"
+      ? (image as HTMLImageElement).currentSrc || image.getAttribute("src")
+      : image.getAttribute("href") || image.getAttribute("xlink:href");
+    if (!source || source.startsWith("data:")) continue;
+    const url = new URL(source, chart.ownerDocument.baseURI).href;
+    resources.set(url, [...(resources.get(url) || []), image]);
+  }
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
+  const jobs = Array.from(resources);
+  const worker = async () => {
+    while (jobs.length) {
+      const [url, targets] = jobs.shift()!;
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) throw new Error(`Tooth artwork request failed (${response.status}).`);
+      const blob = await response.blob();
+      if (!blob.size) throw new Error("A tooth artwork file was empty.");
+      const data = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = () => reject(new Error("A tooth artwork file could not be read."));
+        reader.readAsDataURL(blob);
+      });
+      for (const image of targets) {
+        if (image.tagName.toLowerCase() === "img") {
+          image.removeAttribute("srcset");
+          image.setAttribute("src", data);
+        } else {
+          image.setAttribute("href", data);
+          image.removeAttributeNS("http://www.w3.org/1999/xlink", "href");
+        }
+      }
+    }
+  };
+  try {
+    // Limit concurrent requests on phones and reuse each asset across arches.
+    // html-to-image skips its detached SVG-image load wait for data URLs.
+    await Promise.all(Array.from({ length: Math.min(4, jobs.length) }, worker));
+  } catch (error) {
+    controller.abort();
+    throw new Error(`Could not embed tooth artwork: ${error instanceof Error ? error.message : String(error)}`);
+  } finally { clearTimeout(timeout); }
 }
 
 async function rasterizeMobileChart(svg: string, width: number, height: number): Promise<Blob> {
