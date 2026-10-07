@@ -1,5 +1,8 @@
 .print-chart-image{display:none}
 @media print{
+  /* Safari's supplied A4 output scales 112px artwork to 99pt rather than
+     Chrome's 84pt. Compensate within the report, leaving Chrome untouched. */
+  body.safari-pdf-snapshot .page{zoom:.85}
   /* Safari can rebuild its preview after afterprint. Keep one raster image,
      with explicit dimensions, rather than returning to responsive tooth DOM. */
   body.safari-pdf-snapshot .chart-card>.chart-stage-wrap{display:none!important}
