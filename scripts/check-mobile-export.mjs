@@ -30,7 +30,7 @@ try {
     dimensions=result.png;
     await page.close();
   }
-  const mobileContext = await browser.newContext({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'});
+  const mobileContext = await browser.newContext({viewport:{width:process.env.EXPORT_MAC?1680:390,height:1000},userAgent:process.env.EXPORT_MAC?'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Version/18.0 Safari/605.1.15':'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'});
   const page = await mobileContext.newPage();
   await page.goto(url);
   await page.waitForFunction(()=>window.chartToBlob && document.querySelector('#split-stage .tooth'));
@@ -65,7 +65,7 @@ try {
     window.exportPopups=0;
     window.open=()=>{window.exportPopups++;throw Error('Mobile PDF must stay in the foreground');};
     // Also prove rasterization no longer needs animation frames to complete.
-    window.requestAnimationFrame=()=>0;
+    if(!/Macintosh/.test(navigator.userAgent))window.requestAnimationFrame=()=>0;
     window.print=()=>{
       window.printRequested=true;
       window.printImageWidth=document.querySelector('.print-chart-image').naturalWidth;

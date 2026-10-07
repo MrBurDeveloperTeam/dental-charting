@@ -143,22 +143,16 @@ test('static preview registers the export renderer without Vite or module import
   assert.ok(html.indexOf(script[0])<html.indexOf('./js/app.js'));
 });
 
-test('Safari reserves a preview during the tap and exposes a persistent save action',async()=>{
-  const {context,events,els}=setup({navigator:{userAgent:'Version/18.0 Safari/605.1.15'}});
-  const items=[];
-  const preview={closed:false,document:{body:{textContent:'',appendChild:item=>items.push(item),prepend:item=>items.unshift(item)},
-    createElement:()=>({style:{}})},close(){events.push('close-preview');}};
-  context.window.open=()=>{events.push('open-preview');return preview;};
-  const pending=context.downloadChartImage();
-  assert.equal(events[0],'open-preview','open before any asynchronous capture');
-  await pending;
+test('Mac Safari downloads the PNG without a preparation tab',async()=>{
+  const {context,events,els,links}=setup({navigator:{userAgent:'Version/18.0 Safari/605.1.15'}});
+  context.window.open=()=>{throw Error('Unexpected preparation tab');};
+  await context.downloadChartImage();
   assert.ok(!events.includes('picker'));
   assert.ok(!events.includes('alert'));
-  assert.equal(items[1].download,'chart.png');
-  assert.equal(items[2].src,'data:image/png;base64,cG5n');
+  assert.equal(links[0].href,'blob:chart');
+  assert.equal(links[0].download,'chart.png');
   assert.equal(els.downloadChartImageBtn.disabled,false);
 });
-
 test('iPhone image failure never opens a preparation tab and restores controls',async()=>{
   const {context,events}=setup({fail:true,navigator:{userAgent:'iPhone'}});
   context.window.open=()=>{events.push('open-preview');return null;};

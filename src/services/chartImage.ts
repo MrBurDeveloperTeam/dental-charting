@@ -20,6 +20,10 @@ async function captureChartTab(node: HTMLElement, options: Parameters<typeof toB
   const wasCollapsed = body.classList.contains("saved-entries-collapsed");
   const panelWasCollapsed = panel?.classList.contains("is-collapsed") ?? false;
   const positionMarkers = (window as Window & { positionSpacingMarkers?: (root: HTMLElement) => void }).positionSpacingMarkers;
+  const safari = /Safari/i.test(nav?.userAgent || "") && !/Chrome|Chromium|Android/i.test(nav?.userAgent || "");
+  const originalImages = safari ? Array.from(node.querySelectorAll("img,svg image")).map(image => ({
+    image, attributes: Array.from(image.attributes).map(attribute => [attribute.name, attribute.value] as const)
+  })) : [];
   try {
     // Use the real Chart-tab container, including its responsive dimensions.
     // Safari's popup/save handling stays independent of chart geometry.
@@ -32,10 +36,21 @@ async function captureChartTab(node: HTMLElement, options: Parameters<typeof toB
     const properties = Array.from(getComputedStyle(document.documentElement))
       .filter(property => property !== "font-size");
     const captureOptions = { ...options, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
+    if (safari) {
+      // Keep desktop geometry; only share the proven SVG asset/raster pipeline.
+      await inlineMobileChartImages(node);
+      const width = node.offsetWidth, height = node.offsetHeight;
+      const svg = await toSvg(node, { ...captureOptions, width, height });
+      return await rasterizeMobileChart(svg, width, height);
+    }
     // Retain the Safari SVG/font warm-up pass without substituting a new layout.
     await toBlob(node, captureOptions);
     return await toBlob(node, captureOptions);
   } finally {
+    for (const { image, attributes } of originalImages) {
+      for (const attribute of Array.from(image.attributes)) image.removeAttribute(attribute.name);
+      for (const [name, value] of attributes) image.setAttribute(name, value);
+    }
     body.classList.toggle("patient-record-review", wasReview);
     body.classList.toggle("saved-entries-collapsed", wasCollapsed);
     panel?.classList.toggle("is-collapsed", panelWasCollapsed);

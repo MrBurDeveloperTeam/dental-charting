@@ -888,7 +888,7 @@ function openExportWindow(){
 async function downloadPdf(){
   if(pdfExportBusy)return;
   pdfExportBusy=true;
-  const mobilePdf=isMobileChartDownload();
+  const mobilePdf=isMobileChartDownload()||isSafariExport();
   // Keep iOS rendering in the foreground. Opening a tab here suspends image
   // and frame work in Safari before the chart has finished being prepared.
   const preview=!mobilePdf&&isSafariExport()?openExportWindow():null;
@@ -1032,7 +1032,7 @@ async function downloadChartImage(){
   }
   const fileName=chartImageFileName();
   const originalLabel=els.downloadChartImageLabel?.textContent||"Download Chart Image";
-  const mobileDownload=isMobileChartDownload();
+  const mobileDownload=isMobileChartDownload()||isSafariExport();
   const preview=!mobileDownload&&isSafariExport()?openExportWindow():null;
   if(mobileDownload)document.querySelectorAll(".chart-image-mobile-save").forEach(link=>link.remove());
 
