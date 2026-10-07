@@ -1,7 +1,7 @@
 .print-chart-image{display:none}
 @media print{
   /* Keep the device-specific Safari print scales separate. */
-  body.safari-pdf-snapshot:not(.ios-pdf-snapshot) .page{zoom:.90}
+  body.safari-pdf-snapshot:not(.ios-pdf-snapshot) .page{zoom:.915}
   body.ios-pdf-snapshot .page{zoom:.85}
   /* Safari can rebuild its preview after afterprint. Keep one raster image,
      with explicit dimensions, rather than returning to responsive tooth DOM. */
