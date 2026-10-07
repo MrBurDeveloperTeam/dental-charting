@@ -16,7 +16,7 @@ for(const failure of [null,'capture','decode','print']){
     const context=vm.createContext({
       els:{downloadPdfBtn:button,splitStage:{closest:()=>({appendChild(value){assert.equal(value,image);events.push('append');}})}},
       document:{title:'Chart',querySelector:()=>heading,createElement:()=>image,body:{classList:{add:value=>classes.add(value),remove:value=>classes.delete(value)}}},
-      isSafariExport:()=>false,renderPrintSections:()=>{},patient:{patientId:'test'},
+      isSafariExport:()=>false,isMobileChartDownload:()=>false,renderPrintSections:()=>{},patient:{patientId:'test'},
       captureChartImage:async()=>{events.push('capture');if(failure==='capture')throw Error('capture');return {};},
       pdfFileName:()=> 'Patient_2026-10-06',URL:{createObjectURL:()=> 'blob:pdf',revokeObjectURL:()=>events.push('revoke')},console:{error(){}},
       window:{addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name),

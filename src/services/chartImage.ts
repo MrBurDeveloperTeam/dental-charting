@@ -1,4 +1,4 @@
-import { toBlob } from "html-to-image";
+import { toBlob, toSvg } from "html-to-image";
 
 let captureQueue: Promise<unknown> = Promise.resolve();
 
@@ -46,12 +46,14 @@ async function captureChartTab(node: HTMLElement, options: Parameters<typeof toB
 // Render the existing desktop CSS in its own viewport. A wide wrapper in the
 // mobile document would still inherit mobile media queries and tooth sizes.
 const EXPORT_VIEWPORT_WIDTH = 1680;
+// Width of #split-stage in the existing collapsed desktop layout at 1680px.
+const EXPORT_CHART_WIDTH = 726;
 async function captureMobileChart(node: HTMLElement, options: Parameters<typeof toBlob>[1]) {
-  const wait = async <T>(operation: Promise<T>): Promise<T> => {
+  const wait = async <T>(operation: Promise<T>, stage: string): Promise<T> => {
     let timer: ReturnType<typeof setTimeout>;
     try {
       return await Promise.race([operation, new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error("Mobile chart export timed out. Please try again.")), 30000);
+        timer = setTimeout(() => reject(new Error(`Mobile chart export timed out while ${stage}. Please try again.`)), 30000);
       })]);
     } finally { clearTimeout(timer!); }
   };
@@ -81,17 +83,52 @@ async function captureMobileChart(node: HTMLElement, options: Parameters<typeof 
     body.classList.add("saved-entries-collapsed");
     body.querySelector(".chart-workspace > .entries-panel")?.classList.add("is-collapsed");
     doc.body.replaceWith(body);
-    await wait(Promise.all(styles));
-    await wait(doc.fonts.ready);
+    await wait(Promise.all(styles), "loading styles");
+    await wait(doc.fonts.ready, "loading fonts");
     const chart = doc.getElementById(node.id)!;
     if (!chart) throw new Error("Export chart was not found.");
-    await wait(Promise.all(Array.from(chart.querySelectorAll("img")).map(image => image.decode())));
+    chart.style.width = `${EXPORT_CHART_WIDTH}px`;
+    chart.style.minWidth = `${EXPORT_CHART_WIDTH}px`;
+    chart.style.maxWidth = `${EXPORT_CHART_WIDTH}px`;
+    await wait(Promise.all(Array.from(chart.querySelectorAll("img")).map(image => image.decode())), "loading tooth images");
     (window as Window & { positionSpacingMarkers?: (root: HTMLElement) => void }).positionSpacingMarkers?.(chart);
     const properties = Array.from(frame.contentWindow!.getComputedStyle(doc.documentElement)).filter(property => property !== "font-size");
-    const captureOptions = { ...options, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
-    await wait(toBlob(chart, captureOptions));
-    return await wait(toBlob(chart, captureOptions));
+    const height = chart.offsetHeight;
+    if (!height) throw new Error("The export chart has no visible layout.");
+    const captureOptions = { ...options, width: EXPORT_CHART_WIDTH, height, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
+    const svg = await wait(toSvg(chart, captureOptions), "preparing chart artwork");
+    // html-to-image's toBlob waits for requestAnimationFrame after image decode.
+    // Opening Safari's PDF tab backgrounds the source tab, where that callback
+    // may be suspended indefinitely. Rasterize without a foreground-frame wait.
+    return await wait(rasterizeMobileChart(svg, EXPORT_CHART_WIDTH, height), "creating the PNG");
   } finally {
     frame.remove();
+  }
+}
+
+async function rasterizeMobileChart(svg: string, width: number, height: number): Promise<Blob> {
+  const canvas = document.createElement("canvas");
+  canvas.width = width * 2;
+  canvas.height = height * 2;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("The chart image canvas could not be created.");
+  const load = () => new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("The chart SVG could not be loaded."));
+    image.src = svg;
+  });
+  try {
+    // Preserve the existing Safari warm-up pass, without re-cloning the chart.
+    context.drawImage(await load(), 0, 0, canvas.width, canvas.height);
+    const image = await load();
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    return await new Promise<Blob>((resolve, reject) => canvas.toBlob(blob => {
+      if (blob?.size) resolve(blob);
+      else reject(new Error("The chart image canvas returned an empty PNG."));
+    }, "image/png"));
+  } finally {
+    canvas.width = canvas.height = 0;
   }
 }

@@ -888,9 +888,12 @@ function openExportWindow(){
 async function downloadPdf(){
   if(pdfExportBusy)return;
   pdfExportBusy=true;
-  const preview=isSafariExport()?openExportWindow():null;
+  const mobilePdf=isMobileChartDownload();
+  // Keep iOS rendering in the foreground. Opening a tab here suspends image
+  // and frame work in Safari before the chart has finished being prepared.
+  const preview=!mobilePdf&&isSafariExport()?openExportWindow():null;
   const previousTitle=document.title,summaryHeading=document.querySelector(".saved-entries-title"),previousHeading=summaryHeading?.textContent;
-  let image=null,url=null;
+  let image=null,url=null,exportStep="report",mobileImageUrl=null;
   const cleanup=()=>{
     window.removeEventListener("afterprint",cleanup);
     image?.remove();
@@ -910,18 +913,22 @@ async function downloadPdf(){
       : "Not assigned";
     renderPrintSections(dentistName);
     // Capture screen styles before print CSS can rearrange the chart.
+    exportStep="chart capture";
     const blob=await captureChartImage();
-    url=URL.createObjectURL(blob);
+    exportStep="chart image loading";
+    if(mobilePdf)mobileImageUrl=await blobDataUrl(blob);
+    else url=URL.createObjectURL(blob);
     image=document.createElement("img");
     image.className="print-chart-image";
     image.alt="Dental chart";
-    image.src=url;
-    await image.decode();
+    if(mobilePdf)await loadMobileExportImage(image,mobileImageUrl);
+    else {image.src=url;await image.decode();}
     els.splitStage.closest(".chart-card").appendChild(image);
     document.body.classList.add("pdf-chart-image-ready");
     document.title=pdfFileName();
     if(summaryHeading)summaryHeading.textContent="Summary";
     if(preview&&!preview.closed){
+      exportStep="print preview";
       const doc=preview.document;
       doc.head.innerHTML=document.head.innerHTML;
       doc.querySelectorAll("script").forEach(script=>script.remove());
@@ -940,18 +947,12 @@ async function downloadPdf(){
       const previewImage=doc.querySelector(".print-chart-image");
       previewImage.src=await blobDataUrl(blob);
       await previewImage.decode();
-      if(isMobileChartDownload()){
-        // Safari owns PDF generation through its native print/share interface.
-        // Keep the explicit button if automatic printing loses user activation.
-        await doc.fonts?.ready;
-        preview.focus();
-        preview.print();
-      }
       cleanup();
       return;
     }
-    if(isSafariExport()){
-      // Popup blocking still leaves a visible action in either source tab.
+    if(mobilePdf||isSafariExport()){
+      // Mobile stays on the chart page; desktop Safari also uses this action
+      // when its existing preview window was blocked.
       const button=document.createElement("button");
       button.className="pdf-export-save";button.textContent="PDF ready — tap to save / print";
       button.onclick=()=>window.print();
@@ -960,13 +961,32 @@ async function downloadPdf(){
       window.addEventListener("afterprint",()=>button.remove(),{once:true});
     }
     window.addEventListener("afterprint",cleanup,{once:true});
-    window.print();
+    if(mobilePdf){
+      // The visible save/print button above retains a real user gesture when
+      // Safari does not allow the automatic print request after async capture.
+      try{window.print();}catch(error){console.warn("Automatic print unavailable; use the PDF ready button.",error);}
+    }else window.print();
   }catch(error){
     preview?.close();
     cleanup();
-    console.error("PDF chart export failed",error);
-    window.alert("The PDF chart image could not be prepared. Please try again.");
+    console.error(`PDF chart export failed during ${exportStep}`,error);
+    window.alert("The PDF chart image could not be prepared. Please try again."+(mobilePdf?`\nFailed during ${exportStep}: ${error?.message||"Unknown browser error"}`:""));
   }
+}
+function loadMobileExportImage(image,src){
+  // A hidden print-only image need not be decoded for a paint frame. Safari's
+  // load event is sufficient and also works when the source tab is backgrounded.
+  return new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>finish(new Error("Chart image loading timed out.")),30000);
+    const finish=error=>{
+      clearTimeout(timer);image.onload=null;image.onerror=null;
+      if(error)reject(error);else resolve();
+    };
+    image.onload=()=>finish();
+    image.onerror=()=>finish(new Error("The generated chart PNG could not be loaded."));
+    image.src=src;
+    if(image.complete&&image.naturalWidth)finish();
+  });
 }
 function chartImageFileName(){
   const patientName=(patient.fullName||"patient").trim().toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"patient";
@@ -1016,9 +1036,8 @@ async function downloadChartImage(){
   els.downloadChartImageBtn.disabled=true;
   if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent="Preparing image…";
   try{
-    // Snapshot the live DOM and computed styles. Native SVG foreignObject
-    // rendering preserves transforms, flex/grid alignment and clip-paths;
-    // there is no export-specific tooth layout or badge repositioning.
+    // Share the PDF capture: desktop keeps its existing renderer, while mobile
+    // uses the fixed desktop export viewport instead of the visible chart.
     const blob=await captureChartImage();
     if(preview&&!preview.closed){
       const doc=preview.document;doc.body.textContent="";doc.title=fileName;
