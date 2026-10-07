@@ -8,12 +8,24 @@ const source=readFileSync(new URL('../public/js/app.js',import.meta.url),'utf8')
 const ast=ts.createSourceFile('app.js',source,ts.ScriptTarget.Latest,true,ts.ScriptKind.JS);
 const helper=ast.statements.filter(n=>ts.isFunctionDeclaration(n)&&['captureChartImage','downloadChartImage','isMobileChartDownload','downloadMobileChartImage','blobDataUrl','isSafariExport','openExportWindow'].includes(n.name.text)).map(n=>n.getText()).join('\n');
 const pdfHelper=ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='downloadPdf').getText();
+test('export feedback synchronizes chart and record-details controls and restores labels',()=>{
+  const buttons=Array.from({length:2},()=>({disabled:false,label:{textContent:''},attributes:{},
+    querySelector(){return this.label;},setAttribute(name,value){this.attributes[name]=value;}}));
+  const context=vm.createContext({document:{querySelectorAll:()=>buttons}});
+  vm.runInContext(ast.statements.find(n=>ts.isFunctionDeclaration(n)&&n.name.text==='setExportFeedback').getText(),context);
+  for(const [kind,loading,idle] of [['pdf','Preparing PDF…','Download PDF'],['image','Preparing image…','Download Chart Image']]){
+    context.setExportFeedback(kind,true);
+    for(const button of buttons){assert.equal(button.disabled,true);assert.equal(button.label.textContent,loading);assert.equal(button.attributes['aria-busy'],'true');}
+    context.setExportFeedback(kind,false);
+    for(const button of buttons){assert.equal(button.disabled,false);assert.equal(button.label.textContent,idle);assert.equal(button.attributes['aria-busy'],'false');}
+  }
+});
 for(const failure of [null,'capture','decode','print']){
   test(`PDF embeds the shared chart capture and cleans up (${failure||'success'})`,async()=>{
     const events=[],listeners=new Map(),classes=new Set();
     const heading={textContent:'Saved Entries'},button={disabled:false,setAttribute(){},removeAttribute(){}};
     const image={async decode(){events.push('decode');if(failure==='decode')throw Error('decode');},remove(){events.push('remove');}};
-    const context=vm.createContext({
+    const context=vm.createContext({setExportFeedback(){},
       els:{downloadPdfBtn:button,splitStage:{closest:()=>({appendChild(value){assert.equal(value,image);events.push('append');}})}},
       document:{title:'Chart',querySelector:()=>heading,createElement:()=>image,body:{classList:{add:value=>classes.add(value),remove:value=>classes.delete(value)}}},
       isSafariExport:()=>false,isMobileChartDownload:()=>false,renderPrintSections:()=>{},patient:{patientId:'test'},
@@ -49,7 +61,7 @@ function setup({fail=false,cancel=false,navigator={},picker=true,pickerFail=fals
   const container={insertAdjacentElement(position,link){assert.equal(position,'afterend');links.push(link);events.push('link');}};
   const reviewContainer={insertAdjacentElement(position,link){assert.equal(position,'afterend');links.push(link);events.push('review-link');}};
   const els={splitStage:stage,downloadChartImageBtn:{disabled:false,parentElement:container},downloadChartImageLabel:{textContent:'Download Chart Image'}};
-  const context=vm.createContext({els,document:{fonts:{ready:Promise.resolve().then(()=>events.push('fonts'))},
+  const context=vm.createContext({setExportFeedback(){},els,document:{fonts:{ready:Promise.resolve().then(()=>events.push('fonts'))},
     querySelector:()=>review?reviewContainer:null,querySelectorAll:()=>links.filter(link=>!link.removed),
     createElement:()=>({click(){events.push('download');},remove(){this.removed=true;}}),
     body:{appendChild:link=>links.push(link)}
@@ -137,7 +149,7 @@ test('static preview registers the export renderer without Vite or module import
   const html=readFileSync(new URL('../preview.html',import.meta.url),'utf8');
   const script=html.match(/<script src="\.\/js\/(chart-image-export\.js)[^"]*"><\/script>/);
   assert.ok(script,'static preview must load the plain JavaScript renderer');
-  const context=vm.createContext({window:{}});
+  const context=vm.createContext({setExportFeedback(){},window:{}});
   vm.runInContext(readFileSync(new URL('../public/js/'+script[1],import.meta.url),'utf8'),context);
   assert.equal(typeof context.window.chartToBlob,'function');
   assert.ok(html.indexOf(script[0])<html.indexOf('./js/app.js'));

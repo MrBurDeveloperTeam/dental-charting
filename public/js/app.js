@@ -870,6 +870,18 @@ async function captureChartImage(){
   return blob;
 }
 let pdfExportBusy=false;
+function setExportFeedback(kind,busy){
+  const pdf=kind==='pdf';
+  const selector=pdf?'#download-pdf-btn,.record-review-download':'#download-chart-image-btn,.record-review-chart-download';
+  const label=busy?(pdf?'Preparing PDF…':'Preparing image…'):(pdf?'Download PDF':'Download Chart Image');
+  document.querySelectorAll(selector).forEach(button=>{
+    button.disabled=busy;
+    button.setAttribute('aria-busy',String(busy));
+    button.setAttribute('aria-label',label);
+    const text=button.querySelector('span');
+    if(text)text.textContent=label;
+  });
+}
 function isSafariExport(){
   const nav=window.navigator||{};
   return /iPhone|iPad|iPod/i.test(nav.userAgent||"")||
@@ -892,7 +904,7 @@ async function downloadPdf(){
   const retainSafariSnapshot=isSafariExport();
   if(retainSafariSnapshot){
     document.querySelectorAll('.print-chart-image').forEach(item=>item.remove());
-    document.body.classList.remove('pdf-chart-image-ready','safari-pdf-snapshot');
+    document.body.classList.remove('pdf-chart-image-ready','safari-pdf-snapshot','ios-pdf-snapshot');
   }
   // Keep iOS rendering in the foreground. Opening a tab here suspends image
   // and frame work in Safari before the chart has finished being prepared.
@@ -909,9 +921,11 @@ async function downloadPdf(){
     els.downloadPdfBtn.disabled=false;
     els.downloadPdfBtn.removeAttribute("aria-busy");
     pdfExportBusy=false;
+    setExportFeedback('pdf',false);
   };
   els.downloadPdfBtn.disabled=true;
   els.downloadPdfBtn.setAttribute("aria-busy","true");
+  setExportFeedback('pdf',true);
   try{
     const dentistName=window.dentalCharts?.treatingDentist&&patient.patientId
       ? await window.dentalCharts.treatingDentist({patientId:patient.patientId,visitDate:visit.date||isoToday()})
@@ -931,6 +945,7 @@ async function downloadPdf(){
     els.splitStage.closest(".chart-card").appendChild(image);
     document.body.classList.add("pdf-chart-image-ready");
     if(retainSafariSnapshot)document.body.classList.add('safari-pdf-snapshot');
+    if(retainSafariSnapshot&&isMobileChartDownload())document.body.classList.add('ios-pdf-snapshot');
     document.title=pdfFileName();
     if(summaryHeading)summaryHeading.textContent="Summary";
     if(preview&&!preview.closed){
@@ -976,7 +991,7 @@ async function downloadPdf(){
     preview?.close();
     if(retainSafariSnapshot){
       image?.remove();
-      document.body.classList.remove('pdf-chart-image-ready','safari-pdf-snapshot');
+      document.body.classList.remove('pdf-chart-image-ready','safari-pdf-snapshot','ios-pdf-snapshot');
     }
     cleanup();
     console.error(`PDF chart export failed during ${exportStep}`,error);
@@ -1048,6 +1063,7 @@ async function downloadChartImage(){
 
   els.downloadChartImageBtn.disabled=true;
   if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent="Preparing image…";
+  setExportFeedback('image',true);
   try{
     // Share the PDF capture: desktop keeps its existing renderer, while mobile
     // uses the fixed desktop export viewport instead of the visible chart.
@@ -1101,6 +1117,7 @@ async function downloadChartImage(){
   }finally{
     els.downloadChartImageBtn.disabled=false;
     if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent=originalLabel;
+    setExportFeedback('image',false);
   }
 }
 function pickCategory(c){if(editingEntry?.bridgeId&&c!=="prosthetic")editingEntry=null;draft.category=c; normalizeDraft(); renderAll()}

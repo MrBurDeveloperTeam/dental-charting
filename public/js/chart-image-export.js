@@ -71,60 +71,6 @@
     const height = options.height || getNodeHeight(targetNode);
     return { width, height };
   }
-  function getPixelRatio() {
-    let ratio;
-    let FINAL_PROCESS;
-    try {
-      FINAL_PROCESS = process;
-    } catch (e) {
-    }
-    const val = FINAL_PROCESS && FINAL_PROCESS.env ? FINAL_PROCESS.env.devicePixelRatio : null;
-    if (val) {
-      ratio = parseInt(val, 10);
-      if (Number.isNaN(ratio)) {
-        ratio = 1;
-      }
-    }
-    return ratio || window.devicePixelRatio || 1;
-  }
-  var canvasDimensionLimit = 16384;
-  function checkCanvasDimensions(canvas) {
-    if (canvas.width > canvasDimensionLimit || canvas.height > canvasDimensionLimit) {
-      if (canvas.width > canvasDimensionLimit && canvas.height > canvasDimensionLimit) {
-        if (canvas.width > canvas.height) {
-          canvas.height *= canvasDimensionLimit / canvas.width;
-          canvas.width = canvasDimensionLimit;
-        } else {
-          canvas.width *= canvasDimensionLimit / canvas.height;
-          canvas.height = canvasDimensionLimit;
-        }
-      } else if (canvas.width > canvasDimensionLimit) {
-        canvas.height *= canvasDimensionLimit / canvas.width;
-        canvas.width = canvasDimensionLimit;
-      } else {
-        canvas.width *= canvasDimensionLimit / canvas.height;
-        canvas.height = canvasDimensionLimit;
-      }
-    }
-  }
-  function canvasToBlob(canvas, options = {}) {
-    if (canvas.toBlob) {
-      return new Promise((resolve) => {
-        canvas.toBlob(resolve, options.type ? options.type : "image/png", options.quality ? options.quality : 1);
-      });
-    }
-    return new Promise((resolve) => {
-      const binaryString = window.atob(canvas.toDataURL(options.type ? options.type : void 0, options.quality ? options.quality : void 0).split(",")[1]);
-      const len = binaryString.length;
-      const binaryArray = new Uint8Array(len);
-      for (let i = 0; i < len; i += 1) {
-        binaryArray[i] = binaryString.charCodeAt(i);
-      }
-      resolve(new Blob([binaryArray], {
-        type: options.type ? options.type : "image/png"
-      }));
-    });
-  }
   function createImage(url) {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -784,34 +730,6 @@
     const datauri = await nodeToDataURL(clonedNode, width, height);
     return datauri;
   }
-  async function toCanvas(node, options = {}) {
-    const { width, height } = getImageSize(node, options);
-    const svg = await toSvg(node, options);
-    const img = await createImage(svg);
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    const ratio = options.pixelRatio || getPixelRatio();
-    const canvasWidth = options.canvasWidth || width;
-    const canvasHeight = options.canvasHeight || height;
-    canvas.width = canvasWidth * ratio;
-    canvas.height = canvasHeight * ratio;
-    if (!options.skipAutoScale) {
-      checkCanvasDimensions(canvas);
-    }
-    canvas.style.width = `${canvasWidth}`;
-    canvas.style.height = `${canvasHeight}`;
-    if (options.backgroundColor) {
-      context.fillStyle = options.backgroundColor;
-      context.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    context.drawImage(img, 0, 0, canvas.width, canvas.height);
-    return canvas;
-  }
-  async function toBlob(node, options = {}) {
-    const canvas = await toCanvas(node, options);
-    const blob = await canvasToBlob(canvas);
-    return blob;
-  }
 
   // src/services/chartImage.ts
   var captureQueue = Promise.resolve();
@@ -821,50 +739,11 @@
     return capture;
   }
   async function captureChartTab(node, options) {
-    const nav = window.navigator;
-    const mobile = /Android|iPhone|iPad|iPod/i.test(nav?.userAgent || "") || nav?.platform === "MacIntel" && nav.maxTouchPoints > 1 || window.matchMedia?.("(max-width: 600px)").matches;
-    if (mobile) return captureMobileChart(node, options);
-    const body = document.body;
-    const panel = document.querySelector(".chart-workspace > .entries-panel");
-    const wasReview = body.classList.contains("patient-record-review");
-    const wasCollapsed = body.classList.contains("saved-entries-collapsed");
-    const panelWasCollapsed = panel?.classList.contains("is-collapsed") ?? false;
-    const positionMarkers = window.positionSpacingMarkers;
-    const safari = /Safari/i.test(nav?.userAgent || "") && !/Chrome|Chromium|Android/i.test(nav?.userAgent || "");
-    const originalImages = safari ? Array.from(node.querySelectorAll("img,svg image")).map((image) => ({
-      image,
-      attributes: Array.from(image.attributes).map((attribute) => [attribute.name, attribute.value])
-    })) : [];
-    try {
-      body.classList.remove("patient-record-review");
-      body.classList.add("saved-entries-collapsed");
-      panel?.classList.add("is-collapsed");
-      await document.fonts.ready;
-      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve())));
-      positionMarkers?.(node);
-      const properties = Array.from(getComputedStyle(document.documentElement)).filter((property) => property !== "font-size");
-      const captureOptions = { ...options, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
-      if (safari) {
-        await inlineMobileChartImages(node);
-        const width = node.offsetWidth, height = node.offsetHeight;
-        const svg = await toSvg(node, { ...captureOptions, width, height });
-        return await rasterizeMobileChart(svg, width, height);
-      }
-      await toBlob(node, captureOptions);
-      return await toBlob(node, captureOptions);
-    } finally {
-      for (const { image, attributes } of originalImages) {
-        for (const attribute of Array.from(image.attributes)) image.removeAttribute(attribute.name);
-        for (const [name, value] of attributes) image.setAttribute(name, value);
-      }
-      body.classList.toggle("patient-record-review", wasReview);
-      body.classList.toggle("saved-entries-collapsed", wasCollapsed);
-      panel?.classList.toggle("is-collapsed", panelWasCollapsed);
-      positionMarkers?.(node);
-    }
+    return captureMobileChart(node, options);
   }
   var EXPORT_VIEWPORT_WIDTH = 1680;
-  var EXPORT_CHART_WIDTH = 726;
+  var EXPORT_CHART_WIDTH = 840.5;
+  var EXPORT_CHART_HEIGHT = 887;
   async function captureMobileChart(node, options) {
     const wait = async (operation, stage) => {
       let timer;
@@ -908,11 +787,12 @@
       chart.style.width = `${EXPORT_CHART_WIDTH}px`;
       chart.style.minWidth = `${EXPORT_CHART_WIDTH}px`;
       chart.style.maxWidth = `${EXPORT_CHART_WIDTH}px`;
+      chart.style.height = `${EXPORT_CHART_HEIGHT}px`;
       await inlineMobileChartImages(chart);
       await wait(Promise.all(Array.from(chart.querySelectorAll("img")).map((image) => image.decode())), "loading tooth images");
       window.positionSpacingMarkers?.(chart);
       const properties = Array.from(frame.contentWindow.getComputedStyle(doc.documentElement)).filter((property) => property !== "font-size");
-      const height = chart.offsetHeight;
+      const height = EXPORT_CHART_HEIGHT;
       if (!height) throw new Error("The export chart has no visible layout.");
       const captureOptions = { ...options, width: EXPORT_CHART_WIDTH, height, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
       const svg = await wait(toSvg(chart, captureOptions), "preparing chart artwork");

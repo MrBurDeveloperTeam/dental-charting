@@ -22,7 +22,7 @@ function setup() {
 test('chart dependencies finish loading before the engine and cloud sync start', async () => {
   const { scripts, load } = setup();
   const pending = load();
-  const expected = ['tooth-silhouettes.js', 'inner-anatomy.js', 'materials.js?v=9', 'app.js?v=111', 'supabaseSync.js?v=12'];
+  const expected = ['tooth-silhouettes.js', 'inner-anatomy.js', 'materials.js?v=9', 'app.js?v=113', 'supabaseSync.js?v=12'];
   for (const [index, filename] of expected.entries()) {
     assert.equal(scripts.length, index + 1);
     assert.equal(scripts[index].src, `/chart/js/${filename}`);
