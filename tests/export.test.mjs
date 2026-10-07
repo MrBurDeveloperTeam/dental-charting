@@ -88,10 +88,10 @@ for(const [device,navigator] of Object.entries({
   test(`${device} downloads a PNG directly without opening the native picker`,async()=>{
     const {context,els,events,links,timers}=setup({navigator});
     await context.downloadChartImage();
-    assert.deepEqual(events,['fonts','capture','read','link','download']);
+    assert.deepEqual(events,['fonts','capture','link','download']);
     assert.equal(links[0].download,'chart.png');
-    assert.equal(links[0].href,'data:image/png;base64,cG5n');
-    assert.equal(links[0].target,'_blank');
+    assert.equal(links[0].href,'blob:chart');
+    assert.equal(links[0].target,'_self');
     assert.equal(links[0].removed,undefined,'retain a tappable link if the automatic download is blocked');
     assert.equal(timers.length,0,'the mobile image must not expire while a save prompt is open');
     assert.equal(els.downloadChartImageBtn.disabled,false);
@@ -111,10 +111,11 @@ test('mobile retry link appears in the patient review screen and is replaced on 
   assert.equal(links[0].removed,true);
   assert.equal(links[1].removed,undefined);
 });
-test('mobile image conversion failure restores controls and reports an error',async()=>{
-  const {context,els,events,links}=setup({navigator:{userAgent:'iPhone'},readFail:true});
+test('mobile object URL failure restores controls and reports an error',async()=>{
+  const {context,els,events,links}=setup({navigator:{userAgent:'iPhone'}});
+  context.URL.createObjectURL=()=>{throw new Error('Object URL failed');};
   await context.downloadChartImage();
-  assert.deepEqual(events,['fonts','capture','read','alert']);
+  assert.deepEqual(events,['fonts','capture','alert']);
   assert.equal(els.downloadChartImageBtn.disabled,false);
   assert.equal(links.length,0);
 });
