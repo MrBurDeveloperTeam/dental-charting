@@ -1,5 +1,25 @@
 .print-chart-image{display:none}
 @media print{
+  /* Safari can rebuild its preview after afterprint. Keep one raster image,
+     with explicit dimensions, rather than returning to responsive tooth DOM. */
+  body.safari-pdf-snapshot .chart-card>.chart-stage-wrap{display:none!important}
+  body.safari-pdf-snapshot.pdf-chart-image-ready .print-chart-image{
+    width:100%!important;
+    height:190mm!important;
+    max-height:190mm!important;
+    object-fit:contain!important;
+    object-position:top center;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  body.safari-pdf-snapshot .chart-card{
+    display:block!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
+  }
+  .pdf-export-save{display:none!important}
+}
+@media print{
   body.pdf-chart-image-ready .chart-card>.chart-stage-wrap{display:none!important}
   body.pdf-chart-image-ready .print-chart-image{
     display:block!important;
