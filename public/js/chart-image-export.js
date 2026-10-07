@@ -821,6 +821,9 @@
     return capture;
   }
   async function captureChartTab(node, options) {
+    const nav = window.navigator;
+    const mobile = /Android|iPhone|iPad|iPod/i.test(nav?.userAgent || "") || nav?.platform === "MacIntel" && nav.maxTouchPoints > 1 || window.matchMedia?.("(max-width: 600px)").matches;
+    if (mobile) return captureMobileChart(node, options);
     const body = document.body;
     const panel = document.querySelector(".chart-workspace > .entries-panel");
     const wasReview = body.classList.contains("patient-record-review");
@@ -843,6 +846,57 @@
       body.classList.toggle("saved-entries-collapsed", wasCollapsed);
       panel?.classList.toggle("is-collapsed", panelWasCollapsed);
       positionMarkers?.(node);
+    }
+  }
+  var EXPORT_VIEWPORT_WIDTH = 1680;
+  async function captureMobileChart(node, options) {
+    const wait = async (operation) => {
+      let timer;
+      try {
+        return await Promise.race([operation, new Promise((_, reject) => {
+          timer = setTimeout(() => reject(new Error("Mobile chart export timed out. Please try again.")), 3e4);
+        })]);
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+    const frame = document.createElement("iframe");
+    frame.setAttribute("aria-hidden", "true");
+    frame.tabIndex = -1;
+    frame.style.cssText = `position:fixed;left:-10000px;top:0;width:${EXPORT_VIEWPORT_WIDTH}px;height:1600px;border:0;pointer-events:none`;
+    document.body.appendChild(frame);
+    try {
+      const doc = frame.contentDocument;
+      const base = doc.createElement("base");
+      base.href = document.baseURI;
+      doc.head.appendChild(base);
+      const styles = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]')).map((source) => {
+        const copy = source.cloneNode(true);
+        const loaded = source.tagName === "LINK" ? new Promise((resolve, reject) => {
+          copy.onload = () => resolve();
+          copy.onerror = () => reject(new Error("Export stylesheet failed to load."));
+        }) : Promise.resolve();
+        doc.head.appendChild(copy);
+        return loaded;
+      });
+      const body = document.body.cloneNode(true);
+      body.querySelectorAll("iframe,script").forEach((item) => item.remove());
+      body.classList.remove("patient-record-review");
+      body.classList.add("saved-entries-collapsed");
+      body.querySelector(".chart-workspace > .entries-panel")?.classList.add("is-collapsed");
+      doc.body.replaceWith(body);
+      await wait(Promise.all(styles));
+      await wait(doc.fonts.ready);
+      const chart = doc.getElementById(node.id);
+      if (!chart) throw new Error("Export chart was not found.");
+      await wait(Promise.all(Array.from(chart.querySelectorAll("img")).map((image) => image.decode())));
+      window.positionSpacingMarkers?.(chart);
+      const properties = Array.from(frame.contentWindow.getComputedStyle(doc.documentElement)).filter((property) => property !== "font-size");
+      const captureOptions = { ...options, pixelRatio: 2, includeStyleProperties: [...properties, "font"] };
+      await wait(toBlob(chart, captureOptions));
+      return await wait(toBlob(chart, captureOptions));
+    } finally {
+      frame.remove();
     }
   }
 

@@ -866,7 +866,7 @@ async function captureChartImage(){
   const blob=await window.chartToBlob(els.splitStage,{
     pixelRatio:2
   });
-  if(!blob)throw new Error("The chart image could not be created.");
+  if(!blob||blob.size===0)throw new Error("The chart image could not be created.");
   return blob;
 }
 let pdfExportBusy=false;
@@ -940,6 +940,13 @@ async function downloadPdf(){
       const previewImage=doc.querySelector(".print-chart-image");
       previewImage.src=await blobDataUrl(blob);
       await previewImage.decode();
+      if(isMobileChartDownload()){
+        // Safari owns PDF generation through its native print/share interface.
+        // Keep the explicit button if automatic printing loses user activation.
+        await doc.fonts?.ready;
+        preview.focus();
+        preview.print();
+      }
       cleanup();
       return;
     }
@@ -995,6 +1002,7 @@ function blobDataUrl(blob){
   });
 }
 async function downloadChartImage(){
+  if(els.downloadChartImageBtn.disabled)return;
   if(!els.splitStage||typeof window.chartToBlob!=="function"){
     window.alert("Chart image export is not available yet. Please refresh and try again.");
     return;
@@ -1002,7 +1010,7 @@ async function downloadChartImage(){
   const fileName=chartImageFileName();
   const originalLabel=els.downloadChartImageLabel?.textContent||"Download Chart Image";
   const mobileDownload=isMobileChartDownload();
-  const preview=isSafariExport()?openExportWindow():null;
+  const preview=!mobileDownload&&isSafariExport()?openExportWindow():null;
   if(mobileDownload)document.querySelectorAll(".chart-image-mobile-save").forEach(link=>link.remove());
 
   els.downloadChartImageBtn.disabled=true;
