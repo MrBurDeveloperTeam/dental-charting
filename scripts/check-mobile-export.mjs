@@ -30,7 +30,8 @@ try {
     dimensions=result.png;
     await page.close();
   }
-  const page = await browser.newPage({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'});
+  const mobileContext = await browser.newContext({viewport:{width:390,height:844},userAgent:'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Version/18.0 Mobile/15E148 Safari/604.1'});
+  const page = await mobileContext.newPage();
   await page.goto(url);
   await page.waitForFunction(()=>window.chartToBlob && document.querySelector('#split-stage .tooth'));
   if(!process.env.EXPORT_PDF_ONLY){
@@ -43,6 +44,18 @@ try {
   console.log('Downloaded PNG saved for visual verification:',artifact,'bytes:',png.length);
   assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)],dimensions);
   console.log('Mobile PNG download matches desktop dimensions', dimensions);
+  const imageUrl=await page.locator('.chart-image-mobile-save').getAttribute('href');
+  assert.ok(imageUrl.startsWith('blob:'),'mobile handoff must use a persistent PNG Blob URL');
+  // Verify the resource remains readable after download. Safari's native View
+  // dialog is browser chrome and requires a separate real-iPhone check.
+  const viewed=await page.evaluate(url=>new Promise((resolve,reject)=>{
+    const image=new Image();
+    image.onload=()=>resolve([image.naturalWidth,image.naturalHeight]);
+    image.onerror=()=>reject(new Error('Downloaded resource is no longer readable'));
+    image.src=url;
+  }),imageUrl);
+  assert.deepEqual(viewed,dimensions);
+  console.log('The PNG resource remains decodable after download',viewed);
   }
   if(!process.env.EXPORT_IMAGE_ONLY){
   if(process.env.EXPORT_BASELINE)await page.addScriptTag({content:execFileSync('git',['show','HEAD:public/js/chart-image-export.js'],{encoding:'utf8'})});

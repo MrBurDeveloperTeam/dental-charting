@@ -999,14 +999,17 @@ function isMobileChartDownload(){
     (nav?.platform==="MacIntel"&&nav.maxTouchPoints>1));
 }
 async function downloadMobileChartImage(blob,fileName){
-  // A data URL keeps the PNG available while a mobile browser opens its download
-  // prompt. Revoking a temporary blob URL early can interrupt that hand-off.
-  const url=await blobDataUrl(blob);
+  // Give Safari a browser-owned PNG resource for both native View and Download.
+  // A large data: navigation can show the prompt without completing either action.
+  // Keep this URL alive for the document lifetime: revoking on click, a timer, or
+  // the next export can break a pending download or an open image preview.
+  // The browser releases these URLs when the owning document is destroyed.
+  const url=URL.createObjectURL(blob);
   const link=document.createElement("a");
   link.className="chart-image-mobile-save";
   link.href=url;
   link.download=fileName;
-  link.target="_blank";
+  link.target="_self";
   link.rel="noopener";
   link.textContent="Download ready — tap here if it didn’t start";
   const container=document.querySelector(".record-review-toolbar")||els.downloadChartImageBtn.parentElement;
