@@ -15,6 +15,8 @@ import {
 } from "lucide-react";
 import "./Landing.css";
 
+const SNABBB_APP_URL = "https://app.snabbb.com";
+
 type DentalChartingLandingPageProps = {
   onGetStarted?: () => void;
   onLogin?: () => void;
@@ -126,7 +128,13 @@ export function DentalChartingLandingPage({
   return (
     <main className="dental-landing">
       <nav className="dental-nav">
-        <a className="dental-brand" href="#top" onClick={closeMenu}>
+        <a
+          className="dental-brand"
+          href={SNABBB_APP_URL}
+          onClick={closeMenu}
+          aria-label="Back to Snabbb"
+          title="Back to Snabbb"
+        >
           {/* <span className="dental-brand-mark">
             <Activity size={20} />
           </span>
@@ -468,7 +476,12 @@ export function DentalChartingLandingPage({
       </section>
 
       <footer className="dental-footer">
-        <a className="dental-brand" href="#top">
+        <a
+          className="dental-brand"
+          href={SNABBB_APP_URL}
+          aria-label="Back to Snabbb"
+          title="Back to Snabbb"
+        >
           {/* <span className="dental-brand-mark">
             <Activity size={19} />
           </span>

@@ -807,22 +807,19 @@
   margin: 0 auto 80px;
   padding: 55px 60px;
   border-radius: 25px;
-  background: linear-gradient(120deg, #3e958b, #62b4aa, #3e958b);
-  background-size: 200% 100%;
-  animation: dental-cta-shift 12s ease-in-out infinite;
+  background: #43847d;
 }
 
 .dental-final-cta .dental-section-label {
-  display: inline-flex;
-  padding: 8px 13px;
-  border: 1px solid rgba(255, 255, 255, 0.34);
-  border-radius: 999px;
+  display: inline;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
   color: white;
-  background: rgba(255, 255, 255, 0.16);
+  background: transparent;
   font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.2em;
-  text-shadow: 0 1px 12px rgba(16, 43, 53, 0.18);
 }
 
 .dental-final-cta h2 {
