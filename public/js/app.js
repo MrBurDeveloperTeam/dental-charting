@@ -108,7 +108,7 @@ for(const [button,direction] of [[mobileToothEls.prev,"left"],[mobileToothEls.ne
   button.querySelector("small").hidden=true;
 }
 const mobileSelectMore=document.createElement("button");
-mobileSelectMore.type="button";mobileSelectMore.className="btn mobile-select-more";mobileSelectMore.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="12" height="12" rx="3"/><path d="m6 9 2 2 4-4M9 18v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1"/></svg><span>Select more teeth</span>';
+mobileSelectMore.type="button";mobileSelectMore.className="btn mobile-select-more";mobileSelectMore.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="12" height="12" rx="3"/><path d="m6 9 2 2 4-4M9 18v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1"/></svg><span>Batch Select</span>';
 mobileToothEls.done.before(mobileSelectMore);
 mobileToothEls.done.textContent="Add entry";
 mobileSelectMore.addEventListener("click",()=>startMobileTeethSelection());
