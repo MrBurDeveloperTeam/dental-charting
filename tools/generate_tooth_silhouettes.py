@@ -88,7 +88,10 @@ def main():
             size = tuple(display_size(number, file_view))
             key = f"{dentition}:{number}:{view}"
             if key not in result or "-original" not in path.name:
-                result[key] = silhouette_path(path, size, file_view == "root" and is_upper(number))
+                source = SOURCE_ROOT / "permanent" / "lower-molar-two-root.png" if file_view == "root" and number in (36, 37, 38, 46, 47, 48) else path
+                if file_view == "root" and number in (34, 35, 45):
+                    source = SOURCE_ROOT / "permanent" / f"{number}-root-repaired.png"
+                result[key] = silhouette_path(source, size, file_view == "root" and is_upper(number))
     OUTPUT.write_text("const TOOTH_SILHOUETTES=" + json.dumps(result, separators=(",", ":")) + ";\n", encoding="utf-8")
     print(f"Wrote {len(result)} silhouettes to {OUTPUT}")
 

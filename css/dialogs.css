@@ -354,3 +354,14 @@
   #editor .selected-head>.selection-field[data-multiple="false"]{display:none!important}
   #editor .selected-head>.selection-field[data-multiple="true"]{display:grid!important}
 }
+
+/* Popup teeth use one transform, without the chart's fractional CSS zoom. */
+@media(max-width:600px){
+  #mobile-tooth-modal .mobile-tooth-art .tooth,
+  #mobile-tooth-modal .mobile-tooth-art .tooth-art{overflow:visible}
+  #mobile-tooth-modal .mobile-tooth-art .art-core{zoom:1!important;overflow:visible;flex-shrink:0}
+  #mobile-tooth-modal .mobile-tooth-art.root .art-core.front.upper{transform:scale(.82,-.82)}
+  #mobile-tooth-modal .mobile-tooth-art.root .art-core.front.lower{transform:scale(.82)}
+  #mobile-tooth-modal .mobile-tooth-art.crown .art-core.occ{transform:scale(.82)}
+  #mobile-tooth-modal .mobile-tooth-art .photo-tooth-svg{display:block;overflow:visible;max-width:none;max-height:none}
+}
