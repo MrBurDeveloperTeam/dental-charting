@@ -1,10 +1,10 @@
 /** Preserve classic-script globals while loading dependencies in a fixed order. */
 export async function loadLegacyChartScripts() {
   for (const path of [
-    "js/tooth-silhouettes.js",
+    "js/tooth-silhouettes.js?v=2",
     "js/inner-anatomy.js",
     "js/materials.js?v=9",
-    "js/app.js?v=118",
+    "js/app.js?v=120",
     "js/supabaseSync.js?v=12",
   ]) {
     await new Promise<void>((resolve, reject) => {

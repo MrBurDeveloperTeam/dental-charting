@@ -624,7 +624,7 @@ function photoToothSVG(n,view){
   const dims=view==="occ"?crownDims(n):{width:toothW(n),height:toothH(n)};
   const file=view==="occ"?"crown":"root";
   const folder=isPrimaryTooth(n)?"primary":"permanent";
-  const assetName=folder==="permanent"&&n===12&&file==="root"?"12-root.PNG":`${n}-${file}.png`;
+  const assetName=file==="root"&&[34,35,45].includes(n)?`${n}-root-repaired.png`:file==="root"&&[36,37,38,46,47,48].includes(n)?"lower-molar-two-root.png":folder==="permanent"&&n===12&&file==="root"?"12-root.PNG":`${n}-${file}.png`;
   const asset=view==="occ"&&innerAnatomy(n)?innerAnatomy(n).asset:`./assets/images/teeth/${folder}/${assetName}`;
   // Mild image-only sharpening: preserve the source silhouette and keep
   // treatment overlays outside the filter. Unique IDs support repeated arches.
