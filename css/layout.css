@@ -1541,7 +1541,8 @@ button.number:focus-visible {
   .mobile-entry-content #editor .selected-head .preview{display:none}
   .mobile-entry-content #editor .selected-head .mini-preview{height:80px;min-height:80px;max-height:80px}
   .mobile-entry-content #editor .mini-preview>.mini-art,
-  .mobile-entry-content #editor .mini-preview>svg{scale:.65}
+  .mobile-entry-content #editor .mini-preview>svg{scale:.55}
+  .mobile-entry-content #editor .mini-preview>.mini-art{overflow:visible}
   .mobile-entry-content #editor .selected-batch-control>.field-title{display:block}
   .mobile-entry-content #editor .selected-batch-control{gap:6px}
   .mobile-entry-content #editor #spacing-pairs p{display:none}
@@ -1560,4 +1561,26 @@ button.number:focus-visible {
     box-sizing:border-box;
     margin:0;
   }
+}
+
+/* Mobile entry scrolls vertically only; grid children must fit the viewport. */
+@media screen and (max-width:600px){
+  #mobile-entry-modal{overflow-x:hidden;overscroll-behavior-x:none}
+  #mobile-entry-modal .mobile-entry-modal{min-width:0;max-width:100%;box-sizing:border-box}
+  #mobile-entry-content{min-width:0;max-width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-x:none;touch-action:pan-y pinch-zoom;box-sizing:border-box}
+  #mobile-entry-content #editor,
+  #mobile-entry-content .editor-fields,
+  #mobile-entry-content .selected-head{min-width:0;max-width:100%;box-sizing:border-box}
+  #mobile-entry-content .selected-main,
+  #mobile-entry-content .selection-row,
+  #mobile-entry-content .selected-teeth,
+  #mobile-entry-content #spacing-pairs{min-width:0;max-width:100%;overflow-wrap:anywhere}
+  #mobile-entry-content .selected-teeth{flex-wrap:wrap}
+}
+
+/* Allow deliberate pinch zoom without Safari's double-tap zoom gesture. */
+@media screen and (max-width:600px){
+  #mobile-entry-modal,
+  #mobile-entry-modal *{touch-action:manipulation}
+  #mobile-entry-modal #mobile-entry-content{touch-action:pan-y pinch-zoom}
 }

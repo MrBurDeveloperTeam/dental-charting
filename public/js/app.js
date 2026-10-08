@@ -1851,7 +1851,7 @@ function miniPreviewTransform(n,view){
 function renderBridgeMiniPreview(){
   const selected=[...new Set(selection.teeth.length?selection.teeth:[draft.tooth])];
   const targets=bridgeSelectionError(selected)?selected:bridgeSpan(selected);
-  const scale=Math.min(.9,3.1/Math.max(1,targets.length));
+  const scale=Math.min(.9,3.1/Math.max(1,targets.length),isMobileToothModalViewport()?100/Math.max(1,...targets.map(toothH)):Infinity);
   els.miniPreview.innerHTML=`<div class="mini-art mini-bridge-preview"><div class="mini-bridge-row" style="--bridge-count:${targets.length};--bridge-scale:${scale}">${targets.map((n,index)=>{
     const role=index===0||index===targets.length-1?'abutment':'pontic';
     const entry={...draft,treatment:'bridge',bridgeRole:role};
@@ -1867,7 +1867,7 @@ function renderSpacingMiniPreview(){
   const pairs=spacingPairs(selection.teeth);
   const targets=[...new Set(pairs.flat())];
   const teeth=targets.length?targets:(draft.tooth?[draft.tooth]:[]);
-  const scale=Math.min(.9,2.4/Math.max(1,teeth.length));
+  const scale=Math.min(.9,2.4/Math.max(1,teeth.length),isMobileToothModalViewport()?100/Math.max(1,...teeth.map(toothH)):Infinity);
   els.miniPreview.innerHTML=`<div class="mini-art mini-bridge-preview"><div class="mini-bridge-row" style="--bridge-scale:${scale}">${teeth.map((n,index)=>{
     const gap=pairs.some(pair=>pair[0]===n&&pair[1]===teeth[index+1]);
     return `<div class="mini-bridge-tooth" data-tooth="${n}"><div class="art-core ${isUpper(n)?'upper':'lower'}">${anatomySVG(n,'front',draft)}</div></div>${gap?'<svg class="mini-spacing-gap" viewBox="0 0 8 22" aria-hidden="true"><path d="M2 3V19 M6 3V19" fill="none" stroke="#55a8e8" stroke-width="1.5" stroke-linecap="round"/></svg>':''}`;
@@ -1876,7 +1876,7 @@ function renderSpacingMiniPreview(){
 }
 function renderPartialDentureMiniPreview(){
   const targets=groupedTargets(selection.teeth.length?selection.teeth:[draft.tooth],"partialDenture");
-  const scale=Math.min(.9,3.1/Math.max(1,targets.length));
+  const scale=Math.min(.9,3.1/Math.max(1,targets.length),isMobileToothModalViewport()?100/Math.max(1,...targets.map(toothH)):Infinity);
   els.miniPreview.innerHTML=`<div class="mini-art mini-bridge-preview"><div class="mini-bridge-row" style="--bridge-count:${targets.length};--bridge-scale:${scale}">${targets.map(n=>{const entry={...draft,treatment:'partialDenture',bridgeRole:'pontic'};const modeClass=`front ${isUpper(n)?'upper':'lower'}`;return `<div class="mini-bridge-tooth" data-tooth="${n}"><div class="art-core ${modeClass}">${anatomySVG(n,'front',entry)}${wholeStatusOverlaySVG(n,'front','partialDenture',draft.status==='planned'?'planned':'existing',entry)}</div></div>`}).join('')}</div></div>`;
   els.miniPreview.querySelectorAll('.mini-bridge-tooth').forEach((node,index)=>applyAnatomyClip(node.querySelector('.art-core'),targets[index],'front',{...draft,treatment:'partialDenture',bridgeRole:'pontic'}));
 }
