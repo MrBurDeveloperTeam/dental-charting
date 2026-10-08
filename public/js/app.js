@@ -1827,11 +1827,22 @@ function renderViewGrid(disabled=false){const t=treatmentFor(draft.treatment); e
 function renderSurfaceGrid(disabled=false){const t=treatmentFor(draft.treatment),show=true,interactive=!disabled&&t.mode==="surface"; els.surfaceField.style.display=show?"grid":"none"; els.surfaceGrid.innerHTML=""; if(!show){els.surfaceNote.textContent=disabled?"":"";
 return} const pad=document.createElement("div"); pad.className=`surface-pad${interactive?"":" inactive"}`; const spec=surfacePadSpec(draft.tooth,draft.view); ["top","left","center","right","bottom"].forEach(area=>{const code=spec[area]; const b=document.createElement("button"); b.className=`surface-chip${code&&draft.surfaces.includes(code)?" active":""}${code?"":" empty"}`; b.type="button"; b.dataset.area=area; if(!code){b.disabled=true; b.textContent=""; pad.appendChild(b); return} const allowed=interactive&&selectableSurfaceCodes(draft.tooth,t).includes(code); b.disabled=!allowed; b.textContent=surfaceShortLabel(code,draft.tooth,draft.view); b.title=surfaceLongLabel(code,draft.tooth,draft.view); if(allowed) b.addEventListener("click",()=>toggleSurface(code)); pad.appendChild(b)}); els.surfaceGrid.appendChild(pad); els.surfaceNote.textContent=interactive?"Select any surface here. B/F marks the root view; P/L and O/I mark the crown view.":"Surface selection is not used for this treatment, so the pad stays visible but read-only."}
 function renderTreatmentGrid(disabled=false){
+  const signature=JSON.stringify([CATEGORIES,TREATMENTS]);
+  if(els.treatmentGrid.dataset.renderSignature===signature){
+    els.treatmentGrid.querySelectorAll('[data-treatment-id]').forEach(button=>{
+      const active=button.dataset.treatmentId===draft.treatment;
+      button.classList.toggle('active',active);
+      button.setAttribute('aria-pressed',String(active));
+      button.disabled=disabled;
+    });
+    return;
+  }
+  els.treatmentGrid.dataset.renderSignature=signature;
   els.treatmentGrid.replaceChildren();
   for(const category of CATEGORIES){
     const heading=document.createElement('div');heading.className='treatment-category-label';heading.textContent=category.label;els.treatmentGrid.append(heading);
     for(const [id,t] of Object.entries(TREATMENTS).filter(([,t])=>t.category===category.id&&t.visible!==false)){
-      const b=document.createElement('button');b.type='button';b.className='chip treatment'+(draft.treatment===id?' active':'');b.disabled=disabled;b.setAttribute('aria-pressed',String(draft.treatment===id));b.setAttribute('aria-label',t.label);b.dataset.tooltip=t.label;
+      const b=document.createElement('button');b.type='button';b.className='chip treatment'+(draft.treatment===id?' active':'');b.disabled=disabled;b.setAttribute('aria-pressed',String(draft.treatment===id));b.setAttribute('aria-label',t.label);b.dataset.tooltip=t.label;b.dataset.treatmentId=id;
       const icon=document.createElement('span');icon.className='treatment-icon';icon.innerHTML=treatmentIconHTML(id);
       const text=document.createElement('span');text.className='treatment-name';text.textContent=t.label;b.append(icon,text);b.addEventListener('click',()=>pickTreatment(id));els.treatmentGrid.append(b);
     }

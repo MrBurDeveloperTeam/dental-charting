@@ -1584,3 +1584,9 @@ button.number:focus-visible {
   #mobile-entry-modal *{touch-action:manipulation}
   #mobile-entry-modal #mobile-entry-content{touch-action:pan-y pinch-zoom}
 }
+
+@media(max-width:600px){
+  #mobile-entry-modal #treatment-grid .chip.treatment{transform:none;transition:background-color .12s ease,border-color .12s ease,color .12s ease;min-width:0}
+  #mobile-entry-modal #treatment-grid .treatment-icon{max-width:100%;min-width:0}
+  #mobile-entry-modal #treatment-grid .treatment-icon svg{max-width:100%}
+}
