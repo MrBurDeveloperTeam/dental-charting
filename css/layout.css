@@ -1511,3 +1511,24 @@ button.number:focus-visible {
   .entries-panel .entry-open { grid-template-columns:68px minmax(0,1fr); }
   .entries-panel .entry-preview { width:68px; min-width:68px; height:40px; }
 }
+
+/* Put the preview and tooth details in the same grid row so their edges match. */
+@media screen and (min-width:1101px), screen and (max-width:600px){
+  #editor .selected-head{align-items:stretch}
+  #editor .selected-head .selected-side{display:contents}
+  #editor .selected-head .selected-main{grid-row:1;min-height:104px;align-content:stretch;grid-template-rows:auto auto auto 1fr}
+  #editor .selected-head .selected-name{display:block}
+  #editor .selected-head .preview{align-self:end;margin:0;max-width:none;padding:9px 10px;line-height:1.4}
+  #editor .selected-head .mini-preview{position:relative;grid-row:1;align-self:stretch;width:100%;height:auto;min-height:104px;max-height:none;box-sizing:border-box}
+  #editor .mini-preview>.mini-art{position:absolute;inset:0}
+}
+@media screen and (min-width:1101px){
+  #editor .selected-head .selected-main{grid-column:1}
+  #editor .selected-head .mini-preview{grid-column:2}
+  #editor .selected-head .form-actions{grid-column:2;grid-row:2;margin:0}
+}
+@media screen and (max-width:600px){
+  #editor .selected-head{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #editor .selected-head .selected-main{grid-column:1;min-width:0}
+  #editor .selected-head .mini-preview{grid-column:2}
+}
