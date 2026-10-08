@@ -1532,3 +1532,18 @@ button.number:focus-visible {
   #editor .selected-head .selected-main{grid-column:1;min-width:0}
   #editor .selected-head .mini-preview{grid-column:2}
 }
+
+/* Keep mobile entry choices visible, even for multi-tooth treatments. */
+@media screen and (max-width:600px){
+  .mobile-entry-content #editor .selected-head{position:static;gap:8px 12px;padding-bottom:10px;box-shadow:none}
+  .mobile-entry-content #editor .selected-head .selected-main{min-height:80px;grid-template-rows:auto auto auto;align-content:center;gap:6px}
+  .mobile-entry-content #editor .selected-head .selected-name{display:block}
+  .mobile-entry-content #editor .selected-head .preview{display:none}
+  .mobile-entry-content #editor .selected-head .mini-preview{height:80px;min-height:80px;max-height:80px}
+  .mobile-entry-content #editor .mini-preview>.mini-art,
+  .mobile-entry-content #editor .mini-preview>svg{scale:.65}
+  .mobile-entry-content #editor .selected-batch-control>.field-title{display:block}
+  .mobile-entry-content #editor .selected-batch-control{gap:6px}
+  .mobile-entry-content #editor #spacing-pairs p{display:none}
+  .mobile-entry-content #editor #spacing-pairs{margin-top:4px}
+}
