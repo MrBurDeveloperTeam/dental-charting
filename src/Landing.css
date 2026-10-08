@@ -807,9 +807,7 @@
   margin: 0 auto 80px;
   padding: 55px 60px;
   border-radius: 25px;
-  background: linear-gradient(120deg, #3e958b, #62b4aa, #3e958b);
-  background-size: 200% 100%;
-  animation: dental-cta-shift 12s ease-in-out infinite;
+  background: #43847d;
 }
 
 .dental-final-cta .dental-section-label {
