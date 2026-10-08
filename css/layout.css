@@ -1547,3 +1547,17 @@ button.number:focus-visible {
   .mobile-entry-content #editor #spacing-pairs p{display:none}
   .mobile-entry-content #editor #spacing-pairs{margin-top:4px}
 }
+
+/* Missing uses a bordered div, rather than the scaled tooth artwork. */
+@media screen and (max-width:600px){
+  .mobile-entry-content #editor .mini-preview>.missing-box{
+    position:absolute;
+    left:50%;
+    top:50%;
+    transform:translate(-50%,-50%);
+    max-width:calc(100% - 24px);
+    max-height:calc(100% - 20px);
+    box-sizing:border-box;
+    margin:0;
+  }
+}
