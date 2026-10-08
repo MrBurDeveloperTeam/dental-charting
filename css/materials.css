@@ -180,3 +180,5 @@
 .art-core.front .perio-pocket-overlay path[fill="none"] + path[fill="none"] { stroke-width:2px!important; }
 
 .impacted-root-label { overflow:visible; pointer-events:none; }
+
+.mini-preview .mini-spacing-gap{width:8px;height:22px;flex:none;margin:0 3px;align-self:center}

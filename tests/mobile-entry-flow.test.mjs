@@ -30,3 +30,18 @@ test('cancel restores original draft, teeth and gap exclusions',()=>{
  const c=context(['finishMobileTeethSelection'],{mobileSelectionSession:{draft:{tooth:16,note:'original'},selection:{multi:false,teeth:[16]},fromEntry:true,step:2},draft:{tooth:15,note:'changed'},selection:{multi:true,teeth:[15],spacingExcluded:['15-16']},renderAll(){},openMobileEntryWizard(){},renderMobileEntryWizard(){},mobileEntryStep:1});
  c.finishMobileTeethSelection(false);assert.equal(c.draft.tooth,16);assert.equal(c.draft.note,'original');assert.equal(c.selection.multi,false);assert.deepEqual(Array.from(c.selection.teeth),[16]);assert.equal(c.selection.spacingExcluded.length,0);assert.equal(c.mobileEntryStep,2);
 });
+for(const [surface,initial,expected] of [['O','front','occ'],['I','front','occ'],['L','front','occ'],['B','occ','front'],['F','occ','front'],['M','occ','occ'],['D','front','front']])test(`selecting ${surface} uses ${expected} preview and preserves other surfaces`,()=>{
+ const c=context(['toggleSurface'],{draft:{treatment:'caries',view:initial,surfaces:['M']},treatmentFor:()=>({mode:'surface',views:['front','occ']}),renderAll(){}});
+ c.toggleSurface(surface);assert.equal(c.draft.view,expected);assert.ok(c.draft.surfaces.includes(surface));assert.ok(c.draft.surfaces.includes('M'));
+});
+test('deselecting a surface does not change the preview view',()=>{
+ const c=context(['toggleSurface'],{draft:{treatment:'caries',view:'front',surfaces:['O','B']},treatmentFor:()=>({mode:'surface',views:['front','occ']}),renderAll(){}});
+ c.toggleSurface('O');assert.equal(c.draft.view,'front');assert.deepEqual(Array.from(c.draft.surfaces),['B']);
+});
+for(const tooth of [15,16])test(`tap selected tooth ${tooth} resumes closed mobile entry without changing draft`,()=>{
+ let opened=0;
+ const draft={tooth:15,treatment:'filling',material:'composite',note:'Keep me',surfaces:['O'],view:'occ',status:'planned'};
+ const before=JSON.stringify(draft);
+ const c=context(['handleToothClick'],{draft,selection:{multi:true,teeth:[15,16]},mobileSelectionSession:null,mobileEntryOpen:false,mobileToothModalOpen:false,mobileEntryStep:4,isMobileToothModalViewport:()=>true,mobileEntrySteps:()=>[2,3,1,4],openMobileEntryWizard(){opened++;c.mobileEntryStep=2;},renderMobileEntryWizard(){}});
+ c.handleToothClick(tooth,'front','existing');assert.equal(opened,1);assert.equal(c.mobileEntryStep,4);assert.equal(JSON.stringify(draft),before);assert.deepEqual(c.selection.teeth,[15,16]);
+});

@@ -1186,7 +1186,18 @@ function pickCategory(c){if(editingEntry?.bridgeId&&c!=="prosthetic")editingEntr
 function pickView(v){draft.view=v; normalizeDraft(); renderAll()}
 function pickTreatment(t){if(t!==draft.treatment)selection.spacingExcluded=[];if(editingEntry?.bridgeId&&t!==draft.treatment)editingEntry=null;if(isGroupedProsthetic(t)){selection.multi=true;if(draft.tooth&&!selection.teeth.includes(draft.tooth))selection.teeth.push(draft.tooth)}else if(isGroupedProsthetic()){selection.multi=false;selection.teeth=draft.tooth?[draft.tooth]:[]} draft.treatment=t; draft.category=treatmentFor(t).category; normalizeDraft(); renderAll(); if(mobileEntryOpen&&isMobileToothModalViewport()&&isGroupedProsthetic()&&groupedSelectionError(selection.teeth))startMobileTeethSelection()}
 function pickStatus(s){draft.status=s; if(s==="existing"||s==="planned") draft.layer=s; if(isGroupedProsthetic())renderAll();else renderSidebar()}
-function toggleSurface(s){if(treatmentFor(draft.treatment).mode!=="surface")return;const set=new Set(draft.surfaces); if(set.has(s)) set.delete(s); else set.add(s); draft.surfaces=[...set]; if(!draft.surfaces.length) draft.surfaces=[s]; renderAll()}
+function toggleSurface(s){
+  const treatment=treatmentFor(draft.treatment);
+  if(treatment.mode!=="surface")return;
+  const surfaces=new Set(draft.surfaces);
+  if(surfaces.has(s))surfaces.delete(s);else surfaces.add(s);
+  draft.surfaces=surfaces.size?[...surfaces]:[s];
+  if(draft.surfaces.includes(s)){
+    const view=["O","I","L"].includes(s)?"occ":["B","F"].includes(s)?"front":null;
+    if(view&&treatment.views.includes(view))draft.view=view;
+  }
+  renderAll();
+}
 function toggleMultiMode(){if(isMobileToothModalViewport()){startMobileTeethSelection();return}if(isGroupedProsthetic())return;selection.multi=!selection.multi; selection.teeth=draft.tooth?[draft.tooth]:[]; renderAll()}
 function isMobileToothModalViewport(){return window.matchMedia("(max-width: 600px)").matches}
 function closeMobileToothModal(){
@@ -1262,7 +1273,7 @@ function renderMobileEntryWizard(){
   mobileEntryEls.progress.dataset.hasMaterial=String(needsMaterial);
   mobileEntryEls.progress.style.gridTemplateColumns=`repeat(${steps.length},minmax(0,1fr))`;
   steps.forEach(step=>mobileEntryEls.progress.appendChild(mobileEntryEls.progress.querySelector(`[data-entry-stage="${step}"]`)));
-  els.multiToggleBtn.textContent="Change teeth";
+  els.multiToggleBtn.textContent="Change teeth / Batch Select";
   els.multiToggleBtn.setAttribute("aria-disabled","false");
   els.multiToggleBtn.removeAttribute("aria-pressed");
   mobileEntryEls.progress
@@ -1400,6 +1411,13 @@ function handleToothClick(n,v,statusContext="existing"){
     selection.teeth=selection.teeth.includes(n)?selection.teeth.filter(tooth=>tooth!==n):[...selection.teeth,n];
     draft.tooth=selection.teeth.includes(draft.tooth)?draft.tooth:selection.teeth.at(-1)||null;
     renderAll();return;
+  }
+if(isMobileToothModalViewport()&&!mobileEntryOpen&&!mobileToothModalOpen&&draft.tooth&&(draft.tooth===n||selection.teeth.includes(n))){
+    const resumeStep=mobileEntryStep;
+    openMobileEntryWizard();
+    if(mobileEntrySteps().includes(resumeStep))mobileEntryStep=resumeStep;
+    renderMobileEntryWizard();
+    return;
   }
 if(!selection.multi){if(isMobileToothModalViewport())mobileToothModalOpen=true;openTooth(n,v,null,false,statusContext); return} if(selection.teeth.includes(n)){selection.teeth=selection.teeth.filter(i=>i!==n); if(draft.tooth===n){draft.tooth=selection.teeth.length?selection.teeth[selection.teeth.length-1]:null} renderAll(); return} openTooth(n,v,null,selection.teeth.length>0||isGroupedProsthetic(),statusContext)}
 function openEntry(tooth,id){selection.spacingExcluded=[];const entry=activeState()[tooth].entries.find(item=>item.id===id); if(!entry)return; editingEntry={tooth,id,bridgeId:entry.bridgeId}; if(chartMode==="primary"&&isPrimaryOptionalMolar(tooth)) primaryOptionalActive.add(tooth); selection.multi=isGroupedProsthetic(entry.treatment); selection.teeth=entry.bridgeId?flatEntries().filter(e=>e.bridgeId===entry.bridgeId).map(e=>e.tooth):[tooth]; draft.tooth=tooth; draft.category=entry.category; draft.treatment=entry.treatment; draft.material=entry.material||null; draft.view=entry.view; draft.status=entry.status; draft.layer=entryLayer(entry); draft.surfaces=[...entry.surfaces]; draft.note=entry.note||""; els.noteInput.value=draft.note; normalizeDraft(); renderAll(); if(isMobileToothModalViewport())openMobileEntryWizard()}
@@ -1804,7 +1822,7 @@ function ensureFourArchRows(){
 }
 function renderChart(){ensureFourArchRows();els.combinedStage.classList.add("hidden"); els.splitStage.classList.remove("hidden"); renderSplitChart(); renderSplitChartView(); scheduleBridgeConnectors()}
 function renderEntryPreview(entry){const treatment=treatmentFor(entry.treatment),icon=treatment.icon||defaultTreatmentIcon(entry.treatment),color=entryColor(entry),badge=entry.status==="watch"?'<span class="review-badge summary-review-badge">R</span>':"";return `<span class="summary-treatment-icon">${treatmentIconMarkup(icon,color)}</span>${badge}`}
-function renderSelectedTeeth(){els.selectedTeeth.innerHTML=""; renderBridgeSelectionHint(); renderSpacingPairs(); if(!selection.teeth.length){els.selectedTeeth.innerHTML='<span class="tooth-tag">No teeth selected</span>'; return} selection.teeth.forEach(n=>{const tag=document.createElement("span"); tag.className="tooth-tag"; tag.textContent=n;if(selection.multi){const remove=document.createElement("button");remove.type="button";remove.className="tooth-tag-remove";remove.textContent="−";remove.setAttribute("aria-label",`Deselect tooth ${n}`);remove.addEventListener("click",()=>{selection.teeth=selection.teeth.filter(tooth=>tooth!==n);if(draft.tooth===n)draft.tooth=selection.teeth.at(-1)||null;renderAll()});tag.appendChild(remove)}els.selectedTeeth.appendChild(tag)})}
+function renderSelectedTeeth(){const title=els.selectedTeeth.closest(".selection-field").querySelector(".selection-title-text");if(title)title.textContent=isMobileToothModalViewport()?"Selected teeth":"Selection";els.selectedTeeth.closest(".selection-field").dataset.multiple=String(selection.teeth.length>1);els.selectedTeeth.innerHTML=""; renderBridgeSelectionHint(); renderSpacingPairs(); if(!selection.teeth.length){els.selectedTeeth.innerHTML='<span class="tooth-tag">No teeth selected</span>'; return} selection.teeth.forEach(n=>{const tag=document.createElement("span"); tag.className="tooth-tag"; tag.textContent=n;if(selection.multi){const remove=document.createElement("button");remove.type="button";remove.className="tooth-tag-remove";remove.textContent="−";remove.setAttribute("aria-label",`Deselect tooth ${n}`);remove.addEventListener("click",()=>{selection.teeth=selection.teeth.filter(tooth=>tooth!==n);if(draft.tooth===n)draft.tooth=selection.teeth.at(-1)||null;renderAll()});tag.appendChild(remove)}els.selectedTeeth.appendChild(tag)})}
 function renderDentitionSwitch(){els.dentitionSwitch.querySelectorAll("[data-mode]").forEach(btn=>btn.classList.toggle("active",btn.dataset.mode===chartMode)); els.dentitionHint.textContent=chartMode==="primary"?(isMobileToothModalViewport()?"Hint: Tap a faded permanent 6/7 molar to activate it. Use Deactivate permanent molar in the tooth panel to hide it again.":"Hint: Double-click baby teeth to swap with permanent successors. Double-click faded 6/7 slots to add, and double-click active 6/7 molars to hide them."):""}
 function renderSidebar(){if(!canStartCharting()){els.sidebarEmpty.style.display="grid";els.sidebarEmpty.innerHTML=`<h3>Charting unavailable</h3><p>${chartPrerequisiteMessage()}</p>`;els.editor.style.display="none";return}const has=Boolean(draft.tooth); els.sidebarEmpty.style.display="none"; els.sidebarEmpty.innerHTML=""; els.editor.style.display=""; els.editor.classList.add("show"); els.multiToggleBtn.textContent=isMobileToothModalViewport()?"Change teeth":`Batch select: ${selection.multi?"On":"Off"}`; els.multiToggleBtn.classList.toggle("batch-active",selection.multi); els.multiToggleBtn.setAttribute("aria-pressed",String(selection.multi)); els.multiToggleBtn.setAttribute("aria-disabled",String(!isMobileToothModalViewport()&&isGroupedProsthetic())); renderSelectedTeeth(); els.clearCurrentBtn.disabled=false; els.resetBtn.disabled=!has; els.saveBtn.disabled=!has||Boolean(surfaceSelectionError())||Boolean(materialSelectionError())||(isGroupedProsthetic()&&Boolean(groupedSelectionError(selection.teeth))); els.noteInput.disabled=!has; els.saveBtn.textContent=!isGroupedProsthetic()&&selection.multi&&selection.teeth.length>1?"Apply to selected":"Done"; if(!has){els.selectedCode.textContent="--"; els.selectedName.textContent=`Select a ${chartMode} tooth to start charting`; els.noteInput.value=""; els.noteInput.placeholder="Select a tooth to add a note"; els.miniPreview.classList.add("empty"); els.miniPreview.innerHTML="🦷"; renderCategoryGrid(true); renderViewGrid(true); renderSurfaceGrid(true); renderMaterialGrid(true); renderTreatmentGrid(true); renderStatusGrid(true); els.previewBox.innerHTML="<strong>Ready</strong><br>Select any tooth or surface on the left to begin."; return} normalizeDraft(); els.selectedCode.textContent=draft.tooth; els.selectedName.textContent=selection.multi&&selection.teeth.length>1?`${currentToothName(draft.tooth)} · ${selection.teeth.length} teeth selected · ${selectionSummary()}`:`${currentToothName(draft.tooth)} · ${selectionSummary()}`; els.noteInput.disabled=false; els.noteInput.placeholder="Optional note for this tooth"; els.noteInput.value=draft.note; renderMiniPreview(); renderCategoryGrid(false); renderViewGrid(false); renderSurfaceGrid(false); renderMaterialGrid(false); renderTreatmentGrid(false); renderStatusGrid(false); renderPreview()}
 function renderCategoryGrid(disabled=false){els.categoryGrid.innerHTML=""; CATEGORIES.forEach(c=>{const b=document.createElement("button"); b.className=`chip${draft.category===c.id?" active":""}`; b.type="button"; b.textContent=c.label; b.disabled=disabled; if(!disabled) b.addEventListener("click",()=>pickCategory(c.id)); els.categoryGrid.appendChild(b)})}
@@ -1848,14 +1866,31 @@ function renderBridgeMiniPreview(){
     applyAnatomyClip(node.querySelector('.art-core'),n,'front',entry);
   });
 }
+function renderSpacingMiniPreview(){
+  const pairs=spacingPairs(selection.teeth);
+  const targets=[...new Set(pairs.flat())];
+  const teeth=targets.length?targets:(draft.tooth?[draft.tooth]:[]);
+  const scale=Math.min(.9,2.4/Math.max(1,teeth.length));
+  els.miniPreview.innerHTML=`<div class="mini-art mini-bridge-preview"><div class="mini-bridge-row" style="--bridge-scale:${scale}">${teeth.map((n,index)=>{
+    const gap=pairs.some(pair=>pair[0]===n&&pair[1]===teeth[index+1]);
+    return `<div class="mini-bridge-tooth" data-tooth="${n}"><div class="art-core ${isUpper(n)?'upper':'lower'}">${anatomySVG(n,'front',draft)}</div></div>${gap?'<svg class="mini-spacing-gap" viewBox="0 0 8 22" aria-hidden="true"><path d="M2 3V19 M6 3V19" fill="none" stroke="#55a8e8" stroke-width="1.5" stroke-linecap="round"/></svg>':''}`;
+  }).join('')}</div></div>`;
+  els.miniPreview.querySelectorAll('.mini-bridge-tooth').forEach(node=>applyAnatomyClip(node.querySelector('.art-core'),Number(node.dataset.tooth),'front',draft));
+}
 function renderPartialDentureMiniPreview(){
   const targets=groupedTargets(selection.teeth.length?selection.teeth:[draft.tooth],"partialDenture");
   const scale=Math.min(.9,3.1/Math.max(1,targets.length));
   els.miniPreview.innerHTML=`<div class="mini-art mini-bridge-preview"><div class="mini-bridge-row" style="--bridge-count:${targets.length};--bridge-scale:${scale}">${targets.map(n=>{const entry={...draft,treatment:'partialDenture',bridgeRole:'pontic'};const modeClass=`front ${isUpper(n)?'upper':'lower'}`;return `<div class="mini-bridge-tooth" data-tooth="${n}"><div class="art-core ${modeClass}">${anatomySVG(n,'front',entry)}${wholeStatusOverlaySVG(n,'front','partialDenture',draft.status==='planned'?'planned':'existing',entry)}</div></div>`}).join('')}</div></div>`;
   els.miniPreview.querySelectorAll('.mini-bridge-tooth').forEach((node,index)=>applyAnatomyClip(node.querySelector('.art-core'),targets[index],'front',{...draft,treatment:'partialDenture',bridgeRole:'pontic'}));
 }
-function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=treatmentFor(draft.treatment),whole=t.mode==="whole",missing=draft.treatment==="missing"; if(draft.treatment==="bridge"){renderBridgeMiniPreview();return} if(missing){els.miniPreview.innerHTML=missingSVG(draft.tooth,draft.view); return} const previewView=draft.treatment==="impacted"?"occ":["perioPocket","abrasion"].includes(draft.treatment)?"front":draft.view; const baseSVG=anatomySVG(draft.tooth,previewView,draft); let html=baseSVG; if(draft.treatment==="impacted")html+=impactedOverlaySVG(draft.tooth,previewView); if(draft.treatment==="abrasion")html+=abrasionOverlaySVG(draft.tooth,previewView); if(draft.treatment==="perioPocket")html+=perioPocketOverlaySVG(draft.tooth,previewView); if(whole) html+=wholeStatusOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status==="planned"?"planned":draft.status==="watch"?"watch":"existing"); if(t.mode==="root") html+=rctOverlayHTML(draft.tooth); if(t.mode==="surface"){const map={}; draft.surfaces.forEach(s=>map[s]={...draft}); html+=renderSurfaceOverlay(draft.tooth,draft.view,{complete:draft.status==="existing"?map:{},planned:draft.status==="planned"?map:{},review:draft.status==="watch"?map:{},selected:new Set(),previewColor:null,preview:false,clipKey:"draft-mini"})} const modeClass=previewView==="front"?`front ${isUpper(draft.tooth)?"upper":"lower"}`:"occ"; const reviewBadge=draft.status==="watch"?reviewBadgeHTML(draft.tooth,previewView):""; const conditionBadge=t.mode==="label"&&!["perioPocket","abrasion","impacted"].includes(draft.treatment)?conditionBadgeHTML(draft,'mini-condition-badge'):""; els.miniPreview.innerHTML=`<div class="mini-art ${modeClass}"><div class="art-core ${modeClass}" style="transform:${miniPreviewTransform(draft.tooth,previewView)}">${html}</div>${reviewBadge}${conditionBadge}</div>`; applyAnatomyClip(els.miniPreview.querySelector(".art-core"),draft.tooth,previewView,draft)}
-function renderPreview(){const t=treatmentFor(draft.treatment),surfaceText=t.mode==="surface"?draft.surfaces.join(""):(t.mode==="root"?"Root":"Whole tooth"),status=(STATUSES.find(i=>i.id===draft.status)?.label||"Legacy review"),targetText=selection.multi&&selection.teeth.length>1?`${selection.teeth.length} teeth`: `Tooth ${draft.tooth}`; els.previewBox.innerHTML=`<strong>${t.label}</strong><br>${targetText} · ${draft.view==="occ"?"Crown + inner view":"Root view"} · ${surfaceText}<br>Status: ${status}`}
+function renderMiniPreview(){els.miniPreview.classList.remove("empty"); const t=treatmentFor(draft.treatment),whole=t.mode==="whole",missing=draft.treatment==="missing"; if(draft.treatment==="spacing"){renderSpacingMiniPreview();return} if(draft.treatment==="bridge"){renderBridgeMiniPreview();return} if(missing){els.miniPreview.innerHTML=missingSVG(draft.tooth,draft.view); return} const previewView=draft.treatment==="impacted"?"occ":["perioPocket","abrasion"].includes(draft.treatment)?"front":draft.view; const baseSVG=anatomySVG(draft.tooth,previewView,draft); let html=baseSVG; if(draft.treatment==="impacted")html+=impactedOverlaySVG(draft.tooth,previewView); if(draft.treatment==="abrasion")html+=abrasionOverlaySVG(draft.tooth,previewView); if(draft.treatment==="perioPocket")html+=perioPocketOverlaySVG(draft.tooth,previewView); if(whole) html+=wholeStatusOverlaySVG(draft.tooth,draft.view,draft.treatment,draft.status==="planned"?"planned":draft.status==="watch"?"watch":"existing"); if(t.mode==="root") html+=rctOverlayHTML(draft.tooth); if(t.mode==="surface"){const map={}; draft.surfaces.forEach(s=>map[s]={...draft}); html+=renderSurfaceOverlay(draft.tooth,draft.view,{complete:draft.status==="existing"?map:{},planned:draft.status==="planned"?map:{},review:draft.status==="watch"?map:{},selected:new Set(),previewColor:null,preview:false,clipKey:"draft-mini"})} const modeClass=previewView==="front"?`front ${isUpper(draft.tooth)?"upper":"lower"}`:"occ"; const reviewBadge=draft.status==="watch"?reviewBadgeHTML(draft.tooth,previewView):""; const conditionBadge=t.mode==="label"&&!["perioPocket","abrasion","impacted"].includes(draft.treatment)?conditionBadgeHTML(draft,'mini-condition-badge'):""; els.miniPreview.innerHTML=`<div class="mini-art ${modeClass}"><div class="art-core ${modeClass}" style="transform:${miniPreviewTransform(draft.tooth,previewView)}">${html}</div>${reviewBadge}${conditionBadge}</div>`; applyAnatomyClip(els.miniPreview.querySelector(".art-core"),draft.tooth,previewView,draft)}
+function renderPreview(){
+  const t=treatmentFor(draft.treatment);
+  const surfaceText=t.mode==="surface"?draft.surfaces.join(""):(t.mode==="root"?"Root":"Whole tooth");
+  const status=STATUSES.find(item=>item.id===draft.status)?.label||"Legacy review";
+  const targetText=selection.multi&&selection.teeth.length>1?`${selection.teeth.length} teeth`:`Tooth ${draft.tooth}`;
+  els.previewBox.innerHTML=`<strong>${escapeChartText(t.label)}</strong><br>${targetText} · ${draft.view==="occ"?"Crown + inner view":"Root view"} · ${surfaceText}<br>Status: ${status}`;
+}
 const renderSingleToothMiniPreview=renderMiniPreview;
 renderMiniPreview=function(){if(draft.treatment==="partialDenture"){els.miniPreview.classList.remove("empty");renderPartialDentureMiniPreview();return}renderSingleToothMiniPreview()};
 function savedEntryGroups(items){
@@ -2078,9 +2113,10 @@ window.addEventListener("afterprint",scheduleBridgeConnectors);
   batch.before(batchAnchor);
   const oldBatch=editor.querySelector('.selected-batch-control');
   const selectionTitle=selectionField.querySelector('.selection-title-text');
-  const originalSelectionTitle=selectionTitle?.textContent;
   const media=window.matchMedia('(min-width:1101px)');
+  const mobileMedia=window.matchMedia("(max-width:600px)");
   function arrange(){
+    if(oldBatch)(mobileMedia.matches?selectedHead:selectedMain).append(oldBatch);
     if(media.matches){
       selectedHead.append(selectionField);
       if(selectionTitle)selectionTitle.textContent='Selection';
@@ -2088,13 +2124,14 @@ window.addEventListener("afterprint",scheduleBridgeConnectors);
       selectionField.querySelector('.selection-row').prepend(batch);
       if(oldBatch)oldBatch.hidden=true;
     }else{
-      selectionAnchor.after(selectionField);
-      if(selectionTitle)selectionTitle.textContent=originalSelectionTitle;
+      if(mobileMedia.matches)selectedHead.append(selectionField);else selectionAnchor.after(selectionField);
+      if(selectionTitle)selectionTitle.textContent=mobileMedia.matches?"Selected teeth":"Selection";
       batchAnchor.after(batch);
       selectionField.classList.remove('desktop-batch-selection');
       if(oldBatch)oldBatch.hidden=false;
     }
   }
   media.addEventListener('change',arrange);
+  mobileMedia.addEventListener('change',arrange);
   arrange();
 })();
