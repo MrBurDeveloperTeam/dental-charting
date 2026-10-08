@@ -1535,7 +1535,7 @@ button.number:focus-visible {
 
 /* Keep mobile entry choices visible, even for multi-tooth treatments. */
 @media screen and (max-width:600px){
-  .mobile-entry-content #editor .selected-head{position:static;gap:8px 12px;padding-bottom:10px;box-shadow:none}
+  .mobile-entry-content #editor .selected-head{position:sticky;top:0;z-index:12;gap:8px 12px;padding-bottom:10px;background:var(--panel);box-shadow:0 8px 10px -12px rgba(15,23,42,.45)}
   .mobile-entry-content #editor .selected-head .selected-main{min-height:80px;grid-template-rows:auto auto auto;align-content:center;gap:6px}
   .mobile-entry-content #editor .selected-head .selected-name{display:block}
   .mobile-entry-content #editor .selected-head .preview{display:none}
