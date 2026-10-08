@@ -76,7 +76,7 @@ const mobileToothEls = {
   name: document.getElementById("mobile-tooth-modal-name"),
   root: document.getElementById("mobile-tooth-root"),
   crown: document.getElementById("mobile-tooth-crown"),
-  selection: document.getElementById("mobile-tooth-selection"),
+  // selection: document.getElementById("mobile-tooth-selection"),
   optionalMolar: document.getElementById("mobile-optional-molar-btn"),
   primarySwap: document.getElementById("mobile-primary-swap-btn"),
   prev: document.getElementById("mobile-tooth-prev-btn"),
@@ -93,8 +93,69 @@ const treatmentManagerEls={openBtn:document.getElementById("manage-treatments-bt
 let treatmentManagerDraft=[];
 let mobileToothModalOpen=false;
 let mobileEntryOpen=false;
-let mobileEntryStep=1;
+let mobileEntryStep=2;
+let mobileSelectionSession=null;
 let editingEntry=null;
+// Keep navigation centred on the tooth panels, independent of footer content.
+const mobileToothViewer=document.createElement("div");
+mobileToothViewer.className="mobile-tooth-viewer";
+const mobileToothViews=mobileToothEls.modal.querySelector(".mobile-tooth-views");
+const mobileToothNavigation=mobileToothEls.modal.querySelector(".mobile-tooth-navigation");
+mobileToothNavigation.before(mobileToothViewer);
+mobileToothViewer.append(mobileToothNavigation,mobileToothViews);
+for(const [button,direction] of [[mobileToothEls.prev,"left"],[mobileToothEls.next,"right"]]){
+  button.querySelector("span").innerHTML=`<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${direction==="left"?"m15 6-6 6 6 6":"m9 6 6 6-6 6"}"/></svg>`;
+  button.querySelector("small").hidden=true;
+}
+const mobileSelectMore=document.createElement("button");
+mobileSelectMore.type="button";mobileSelectMore.className="btn mobile-select-more";mobileSelectMore.innerHTML='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="12" height="12" rx="3"/><path d="m6 9 2 2 4-4M9 18v1a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2h-1"/></svg><span>Select more teeth</span>';
+mobileToothEls.done.before(mobileSelectMore);
+mobileToothEls.done.textContent="Add entry";
+mobileSelectMore.addEventListener("click",()=>startMobileTeethSelection());
+const mobileSelectionBar=document.createElement("section");
+mobileSelectionBar.className="mobile-selection-bar";mobileSelectionBar.hidden=true;
+mobileSelectionBar.setAttribute("aria-label","Select teeth for chart entry");
+mobileSelectionBar.innerHTML='<strong aria-live="polite"></strong><p></p><div class="mobile-selection-gaps"></div><div class="mobile-selection-actions"><button type="button" class="btn secondary">Cancel</button><button type="button" class="btn primary">Use these teeth</button></div>';
+document.body.appendChild(mobileSelectionBar);
+mobileSelectionBar.querySelectorAll("button")[0].addEventListener("click",()=>finishMobileTeethSelection(false));
+mobileSelectionBar.querySelectorAll("button")[1].addEventListener("click",()=>finishMobileTeethSelection(true));
+function startMobileTeethSelection(){
+  if(mobileSelectionSession)return;
+  mobileSelectionSession={draft:structuredClone(draft),selection:structuredClone(selection),fromEntry:mobileEntryOpen,step:mobileEntryStep};
+  closeMobileToothModal();closeMobileEntryWizard();
+  selection.multi=true;
+  if(draft.tooth&&!selection.teeth.includes(draft.tooth))selection.teeth.push(draft.tooth);
+  renderAll();
+  els.splitStage.scrollIntoView({block:"start",behavior:"smooth"});
+}
+function finishMobileTeethSelection(accept){
+  const session=mobileSelectionSession;if(!session)return;
+  if(accept&&(!selection.teeth.length||groupedSelectionError(selection.teeth)))return;
+  mobileSelectionSession=null;
+  if(!accept){Object.assign(draft,session.draft);Object.assign(selection,session.selection);selection.spacingExcluded=session.selection.spacingExcluded||[];}
+  else {selection.multi=isGroupedProsthetic()||selection.teeth.length>1;normalizeDraft();}
+  renderAll();
+  if(session.fromEntry||accept){openMobileEntryWizard();mobileEntryStep=session.fromEntry?session.step:2;renderMobileEntryWizard();}
+  else {mobileToothModalOpen=true;renderMobileToothModal();}
+}
+function renderMobileTeethSelection(){
+  const active=Boolean(mobileSelectionSession);
+  mobileSelectionBar.hidden=!active;
+  document.body.classList.toggle("mobile-selecting-teeth",active);
+  if(!active)return;
+  const error=groupedSelectionError(selection.teeth),targets=groupedTargets(selection.teeth);
+  mobileSelectionBar.querySelector("strong").textContent=`${targets.length} ${targets.length===1?"tooth":"teeth"} selected${targets.length?": "+targets.join(", "):""}`;
+  const instructions={bridge:"Select bridge endpoints; inner teeth are included.",partialDenture:"Select consecutive teeth in one arch.",spacing:"Select neighbours, then choose gaps."};
+  mobileSelectionBar.querySelector("p").textContent=error||(instructions[draft.treatment]||"Tap teeth to select or deselect.");
+  const gaps=mobileSelectionBar.querySelector(".mobile-selection-gaps");gaps.replaceChildren();
+  if(draft.treatment==="spacing")for(const pair of spacingPairs(selection.teeth,true)){
+    const key=pair.join("-"),enabled=!selection.spacingExcluded?.includes(key),button=document.createElement("button");
+    button.type="button";button.className=`chip${enabled?" active":""}`;button.textContent=pair.join("–");button.setAttribute("aria-pressed",String(enabled));
+    button.onclick=()=>{const excluded=new Set(selection.spacingExcluded||[]);enabled?excluded.add(key):excluded.delete(key);selection.spacingExcluded=[...excluded];renderAll();};gaps.appendChild(button);
+  }
+  const confirm=mobileSelectionBar.querySelector(".mobile-selection-actions .primary");
+  confirm.disabled=!selection.teeth.length||Boolean(error);confirm.textContent=mobileSelectionSession.fromEntry?"Use these teeth":"Add entry";
+}
 const selectedEntryIds=new Set();
 let chartEntriesLoadState="ready";
 function setChartEntriesLoadState(state){chartEntriesLoadState=state;renderEntries()}
@@ -129,7 +190,7 @@ savedEntriesToggle?.addEventListener("click",()=>{
 els.entriesList.addEventListener("mouseover",e=>{const entry=e.target.closest?.(".entry-open");if(entry&&!entry.title)entry.title="Click to edit this saved entry"});
 document.getElementById("entries-delete-selected")?.addEventListener("click",()=>{const ids=[...selectedEntryIds];if(!ids.length)return;openDeleteEntryModal(`Delete ${savedEntryGroups(flatEntries().filter(entry=>ids.includes(entry.id))).length} selected entries? Grouped treatments are deleted together. This cannot be undone.`,()=>removeSelectedEntries(ids))});
 treatmentManagerEls.openBtn.addEventListener("click",openMaterialManager); treatmentManagerEls.closeBtn.addEventListener("click",closeMaterialManager); treatmentManagerEls.cancelBtn.addEventListener("click",closeMaterialManager); treatmentManagerEls.saveBtn.addEventListener("click",saveMaterialManager); treatmentManagerEls.addForm.addEventListener("submit",addMaterial);    treatmentManagerEls.modal.addEventListener("click",e=>{if(e.target===treatmentManagerEls.modal) closeMaterialManager()});
-mobileToothEls.prev.addEventListener("click",()=>navigateMobileTooth(-1)); mobileToothEls.next.addEventListener("click",()=>navigateMobileTooth(1)); mobileToothEls.optionalMolar.addEventListener("click",toggleMobileOptionalMolar); mobileToothEls.close.addEventListener("click",closeMobileToothModal); mobileToothEls.bottomClose.addEventListener("click",closeMobileToothModal); mobileToothEls.done.addEventListener("click",finishMobileToothSelection); mobileToothEls.modal.addEventListener("click",e=>{if(e.target===mobileToothEls.modal) closeMobileToothModal()});
+mobileToothEls.prev.addEventListener("click",()=>navigateMobileTooth(-1)); mobileToothEls.next.addEventListener("click",()=>navigateMobileTooth(1)); mobileToothEls.optionalMolar.addEventListener("click",toggleMobileOptionalMolar); mobileToothEls.close.addEventListener("click",closeMobileToothModal); mobileToothEls.bottomClose?.addEventListener("click",closeMobileToothModal); mobileToothEls.done.addEventListener("click",finishMobileToothSelection); mobileToothEls.modal.addEventListener("click",e=>{if(e.target===mobileToothEls.modal) closeMobileToothModal()});
 mobileEntryEls.trigger.addEventListener("click",openMobileEntryWizard); mobileEntryEls.close.addEventListener("click",closeMobileEntryWizard); mobileEntryEls.back.addEventListener("click",()=>moveMobileEntryStep(-1)); mobileEntryEls.next.addEventListener("click",()=>moveMobileEntryStep(1)); mobileEntryEls.done.addEventListener("click",completeMobileEntryWizard); mobileEntryEls.modal.addEventListener("click",e=>{if(e.target===mobileEntryEls.modal)closeMobileEntryWizard()});
 mobileEntryEls.progress.addEventListener("click",e=>{const stage=e.target.closest("[data-entry-stage]");if(stage)setMobileEntryStep(Number(stage.dataset.entryStage))});
 mobileToothEls.primarySwap.addEventListener(
@@ -138,7 +199,7 @@ mobileToothEls.primarySwap.addEventListener(
 );
 els.dentitionSwitch.addEventListener("click",e=>{const btn=e.target.closest("[data-mode]"); if(!btn) return; setChartMode(btn.dataset.mode)});
 els.chartViewToggle.addEventListener("click",e=>{const btn=e.target.closest("[data-chart-view]");if(!btn)return;setSplitChartView(btn.dataset.chartView)});
-els.splitStage.addEventListener("click",e=>{if(isMobileToothModalViewport()&&e.target.closest("[data-surface]")) mobileToothModalOpen=true},true);
+els.splitStage.addEventListener("click",e=>{if(!mobileSelectionSession&&isMobileToothModalViewport()&&e.target.closest("[data-surface]")) mobileToothModalOpen=true},true);
 els.patientDobText?.addEventListener("input", event => {
   event.target.value = formatDateWhileTyping(event.target.value);
   clearDateFieldError("dob");
@@ -174,8 +235,9 @@ els.datePopoverTodayBtn.addEventListener("click",()=>selectDateValue(isoToday())
 els.datePopoverCloseBtn.addEventListener("click",closeDatePopover);
 document.addEventListener("click",e=>{if(!datePicker.open) return; if(els.datePopover.contains(e.target)) return; if(e.target.closest&&e.target.closest(".date-picker-btn")) return; closeDatePopover()});
 window.addEventListener("resize",positionDatePopover);
+window.addEventListener("resize",()=>{if(mobileSelectionSession&&!isMobileToothModalViewport())finishMobileTeethSelection(false)});
 window.addEventListener("scroll",positionDatePopover,true);
-document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(datePicker.open){closeDatePopover(); return} if(mobileEntryOpen){closeMobileEntryWizard(); return} if(mobileToothModalOpen){closeMobileToothModal(); return} if(treatmentManagerEls.modal.classList.contains("show")){closeMaterialManager(); return} if(els.patientModal?.classList.contains("show")) closePatientModal(); if(els.dateModal.classList.contains("show")) closeDateModal()}});
+document.addEventListener("keydown",e=>{if(e.key==="Escape"){if(mobileSelectionSession){finishMobileTeethSelection(false);return}if(datePicker.open){closeDatePopover(); return} if(mobileEntryOpen){closeMobileEntryWizard(); return} if(mobileToothModalOpen){closeMobileToothModal(); return} if(treatmentManagerEls.modal.classList.contains("show")){closeMaterialManager(); return} if(els.patientModal?.classList.contains("show")) closePatientModal(); if(els.dateModal.classList.contains("show")) closeDateModal()}});
 function uid(){return `${Date.now()}-${Math.random().toString(36).slice(2,9)}`}
 function isPrimaryTooth(n){return Math.floor(n/10)>=5}
 function isUpper(n){return [1,2,5,6].includes(Math.floor(n/10))}
@@ -1122,10 +1184,10 @@ async function downloadChartImage(){
 }
 function pickCategory(c){if(editingEntry?.bridgeId&&c!=="prosthetic")editingEntry=null;draft.category=c; normalizeDraft(); renderAll()}
 function pickView(v){draft.view=v; normalizeDraft(); renderAll()}
-function pickTreatment(t){if(t!==draft.treatment)selection.spacingExcluded=[];if(editingEntry?.bridgeId&&t!==draft.treatment)editingEntry=null;if(isGroupedProsthetic(t)){selection.multi=true;if(draft.tooth&&!selection.teeth.includes(draft.tooth))selection.teeth.push(draft.tooth)}else if(isGroupedProsthetic()){selection.multi=false;selection.teeth=draft.tooth?[draft.tooth]:[]} draft.treatment=t; draft.category=treatmentFor(t).category; normalizeDraft(); renderAll()}
+function pickTreatment(t){if(t!==draft.treatment)selection.spacingExcluded=[];if(editingEntry?.bridgeId&&t!==draft.treatment)editingEntry=null;if(isGroupedProsthetic(t)){selection.multi=true;if(draft.tooth&&!selection.teeth.includes(draft.tooth))selection.teeth.push(draft.tooth)}else if(isGroupedProsthetic()){selection.multi=false;selection.teeth=draft.tooth?[draft.tooth]:[]} draft.treatment=t; draft.category=treatmentFor(t).category; normalizeDraft(); renderAll(); if(mobileEntryOpen&&isMobileToothModalViewport()&&isGroupedProsthetic()&&groupedSelectionError(selection.teeth))startMobileTeethSelection()}
 function pickStatus(s){draft.status=s; if(s==="existing"||s==="planned") draft.layer=s; if(isGroupedProsthetic())renderAll();else renderSidebar()}
 function toggleSurface(s){if(treatmentFor(draft.treatment).mode!=="surface")return;const set=new Set(draft.surfaces); if(set.has(s)) set.delete(s); else set.add(s); draft.surfaces=[...set]; if(!draft.surfaces.length) draft.surfaces=[s]; renderAll()}
-function toggleMultiMode(){if(isGroupedProsthetic())return;selection.multi=!selection.multi; selection.teeth=draft.tooth?[draft.tooth]:[]; renderAll()}
+function toggleMultiMode(){if(isMobileToothModalViewport()){startMobileTeethSelection();return}if(isGroupedProsthetic())return;selection.multi=!selection.multi; selection.teeth=draft.tooth?[draft.tooth]:[]; renderAll()}
 function isMobileToothModalViewport(){return window.matchMedia("(max-width: 600px)").matches}
 function closeMobileToothModal(){
   mobileToothModalOpen=false;
@@ -1149,7 +1211,7 @@ function openMobileEntryWizard(){
   if(!canStartCharting()||!isMobileToothModalViewport()||!draft.tooth||isGhostPrimarySlot(draft.tooth))return;
   closeMobileToothModal();
   mobileEntryOpen=true;
-  mobileEntryStep=1;
+  mobileEntryStep=2;
   mobileEntryEls.content.appendChild(els.editor);
   renderMobileEntryWizard();
 }
@@ -1159,12 +1221,19 @@ function closeMobileEntryWizard(){
   mobileEntryEls.modal.setAttribute("aria-hidden","true");
   if(els.editor.parentElement!==editorHome)editorHome.appendChild(els.editor);
 }
-function mobileEntrySteps(){return shouldShowMaterialField(draft.treatment)?[1,2,3,4]:[1,2,4]}
+function mobileEntrySteps(){return [2,...(shouldShowMaterialField(draft.treatment)?[3]:[]),...(treatmentFor(draft.treatment).mode==="surface"?[1]:[]),4]}
 function moveMobileEntryStep(direction){const steps=mobileEntrySteps(),index=steps.indexOf(mobileEntryStep);setMobileEntryStep(steps[Math.max(0,Math.min(steps.length-1,index+direction))])}
 function setMobileEntryStep(step){
   const steps=mobileEntrySteps();
   if(!steps.includes(step))return;
-  if(step===4&&materialSelectionError()){mobileEntryStep=3;renderMobileEntryWizard();showChartValidation(materialSelectionError());return;}
+  const forward=steps.indexOf(step)>steps.indexOf(mobileEntryStep);
+  if(forward&&isGroupedProsthetic()&&groupedSelectionError(selection.teeth)){startMobileTeethSelection();return;}
+  if(forward&&steps.indexOf(step)>steps.indexOf(3)&&steps.includes(3)&&materialSelectionError()){
+    mobileEntryStep=3;renderMobileEntryWizard();showChartValidation(materialSelectionError());return;
+  }
+  if(forward&&steps.indexOf(step)>steps.indexOf(1)&&steps.includes(1)&&surfaceSelectionError()){
+    mobileEntryStep=1;renderMobileEntryWizard();showChartValidation(surfaceSelectionError());return;
+  }
   mobileEntryStep=step;
   renderMobileEntryWizard();
   mobileEntryEls.content.scrollTop=0;
@@ -1191,12 +1260,18 @@ function renderMobileEntryWizard(){
   mobileEntryEls.content.dataset.step=String(mobileEntryStep);
   mobileEntryEls.title.textContent=titles[mobileEntryStep];
   mobileEntryEls.progress.dataset.hasMaterial=String(needsMaterial);
+  mobileEntryEls.progress.style.gridTemplateColumns=`repeat(${steps.length},minmax(0,1fr))`;
+  steps.forEach(step=>mobileEntryEls.progress.appendChild(mobileEntryEls.progress.querySelector(`[data-entry-stage="${step}"]`)));
+  els.multiToggleBtn.textContent="Change teeth";
+  els.multiToggleBtn.setAttribute("aria-disabled","false");
+  els.multiToggleBtn.removeAttribute("aria-pressed");
   mobileEntryEls.progress
   .querySelectorAll("[data-entry-stage]")
   .forEach(stage => {
     const number = Number(stage.dataset.entryStage);
     const displayNumber = steps.indexOf(number)+1;
-    stage.hidden=number===3&&!needsMaterial;
+    stage.hidden=!steps.includes(number);
+    stage.disabled=false;
 
     stage.classList.toggle(
       "current",
@@ -1211,8 +1286,9 @@ function renderMobileEntryWizard(){
     stage.querySelector("span").textContent =
       displayNumber < steps.indexOf(mobileEntryStep)+1 ? "✓" : displayNumber;
   });
-  mobileEntryEls.back.disabled=mobileEntryStep===1;
+  mobileEntryEls.back.disabled=mobileEntryStep===steps[0];
   mobileEntryEls.next.hidden=mobileEntryStep===4;
+  mobileEntryEls.next.disabled=mobileEntryStep===1&&Boolean(surfaceSelectionError());
   mobileEntryEls.done.hidden=mobileEntryStep!==4;
   mobileEntryEls.done.disabled=Boolean(surfaceSelectionError())||Boolean(materialSelectionError())||isGroupedProsthetic()&&Boolean(groupedSelectionError(selection.teeth));
 }
@@ -1279,7 +1355,7 @@ function navigateMobileTooth(direction){
   openTooth(next,draft.view,null,false,draft.layer);
 }
 function renderMobileToothModal(){
-  const shouldShow=mobileToothModalOpen&&isMobileToothModalViewport()&&Boolean(draft.tooth);
+  const shouldShow=!mobileSelectionSession&&mobileToothModalOpen&&isMobileToothModalViewport()&&Boolean(draft.tooth);
   mobileToothEls.modal.classList.toggle("show",shouldShow);
   mobileToothEls.modal.setAttribute("aria-hidden",shouldShow?"false":"true");
   if(!shouldShow)return;
@@ -1309,15 +1385,23 @@ function renderMobileToothModal(){
   const neighbors=mobileToothNeighbors(draft.tooth);
   mobileToothEls.prev.disabled=!neighbors.previous;
   mobileToothEls.next.disabled=!neighbors.next;
-  mobileToothEls.prevNumber.textContent="Previous tooth";
-  mobileToothEls.nextNumber.textContent="Next tooth";
+  mobileToothEls.prevNumber.textContent="Previous";
+  mobileToothEls.nextNumber.textContent="Next";
   mobileToothEls.prev.setAttribute("aria-label",neighbors.previous?`Select tooth ${neighbors.previous}, to the left`:`No tooth to the left`);
   mobileToothEls.next.setAttribute("aria-label",neighbors.next?`Select tooth ${neighbors.next}, to the right`:`No tooth to the right`);
-  const viewLabel=draft.view==="occ"?"Crown + inner":"Root";
-  const surfaceLabel=draft.surfaces.length?draft.surfaces.join(" / "):"whole tooth";
-  mobileToothEls.selection.textContent=optionalMolar&&!optionalMolarActive?"This permanent molar is inactive.":`Current selection: ${viewLabel} view · ${surfaceLabel}`;
+  // Current selection summary hidden along with its HTML container.
+  // const viewLabel=draft.view==="occ"?"Crown + inner":"Root";
+  // const surfaceLabel=draft.surfaces.length?draft.surfaces.join(" / "):"whole tooth";
+  // mobileToothEls.selection.textContent=optionalMolar&&!optionalMolarActive?"This permanent molar is inactive.":`Current selection: ${viewLabel} view · ${surfaceLabel}`;
 }
-function handleToothClick(n,v,statusContext="existing"){if(!selection.multi){if(isMobileToothModalViewport())mobileToothModalOpen=true;openTooth(n,v,null,false,statusContext); return} if(selection.teeth.includes(n)){selection.teeth=selection.teeth.filter(i=>i!==n); if(draft.tooth===n){draft.tooth=selection.teeth.length?selection.teeth[selection.teeth.length-1]:null} renderAll(); return} openTooth(n,v,null,selection.teeth.length>0||isGroupedProsthetic(),statusContext)}
+function handleToothClick(n,v,statusContext="existing"){
+  if(mobileSelectionSession){
+    if(isGhostPrimarySlot(n))return;
+    selection.teeth=selection.teeth.includes(n)?selection.teeth.filter(tooth=>tooth!==n):[...selection.teeth,n];
+    draft.tooth=selection.teeth.includes(draft.tooth)?draft.tooth:selection.teeth.at(-1)||null;
+    renderAll();return;
+  }
+if(!selection.multi){if(isMobileToothModalViewport())mobileToothModalOpen=true;openTooth(n,v,null,false,statusContext); return} if(selection.teeth.includes(n)){selection.teeth=selection.teeth.filter(i=>i!==n); if(draft.tooth===n){draft.tooth=selection.teeth.length?selection.teeth[selection.teeth.length-1]:null} renderAll(); return} openTooth(n,v,null,selection.teeth.length>0||isGroupedProsthetic(),statusContext)}
 function openEntry(tooth,id){selection.spacingExcluded=[];const entry=activeState()[tooth].entries.find(item=>item.id===id); if(!entry)return; editingEntry={tooth,id,bridgeId:entry.bridgeId}; if(chartMode==="primary"&&isPrimaryOptionalMolar(tooth)) primaryOptionalActive.add(tooth); selection.multi=isGroupedProsthetic(entry.treatment); selection.teeth=entry.bridgeId?flatEntries().filter(e=>e.bridgeId===entry.bridgeId).map(e=>e.tooth):[tooth]; draft.tooth=tooth; draft.category=entry.category; draft.treatment=entry.treatment; draft.material=entry.material||null; draft.view=entry.view; draft.status=entry.status; draft.layer=entryLayer(entry); draft.surfaces=[...entry.surfaces]; draft.note=entry.note||""; els.noteInput.value=draft.note; normalizeDraft(); renderAll(); if(isMobileToothModalViewport())openMobileEntryWizard()}
 function removeEntry(tooth,id){
   const toothState=activeState()[tooth];
@@ -1722,7 +1806,7 @@ function renderChart(){ensureFourArchRows();els.combinedStage.classList.add("hid
 function renderEntryPreview(entry){const treatment=treatmentFor(entry.treatment),icon=treatment.icon||defaultTreatmentIcon(entry.treatment),color=entryColor(entry),badge=entry.status==="watch"?'<span class="review-badge summary-review-badge">R</span>':"";return `<span class="summary-treatment-icon">${treatmentIconMarkup(icon,color)}</span>${badge}`}
 function renderSelectedTeeth(){els.selectedTeeth.innerHTML=""; renderBridgeSelectionHint(); renderSpacingPairs(); if(!selection.teeth.length){els.selectedTeeth.innerHTML='<span class="tooth-tag">No teeth selected</span>'; return} selection.teeth.forEach(n=>{const tag=document.createElement("span"); tag.className="tooth-tag"; tag.textContent=n;if(selection.multi){const remove=document.createElement("button");remove.type="button";remove.className="tooth-tag-remove";remove.textContent="−";remove.setAttribute("aria-label",`Deselect tooth ${n}`);remove.addEventListener("click",()=>{selection.teeth=selection.teeth.filter(tooth=>tooth!==n);if(draft.tooth===n)draft.tooth=selection.teeth.at(-1)||null;renderAll()});tag.appendChild(remove)}els.selectedTeeth.appendChild(tag)})}
 function renderDentitionSwitch(){els.dentitionSwitch.querySelectorAll("[data-mode]").forEach(btn=>btn.classList.toggle("active",btn.dataset.mode===chartMode)); els.dentitionHint.textContent=chartMode==="primary"?(isMobileToothModalViewport()?"Hint: Tap a faded permanent 6/7 molar to activate it. Use Deactivate permanent molar in the tooth panel to hide it again.":"Hint: Double-click baby teeth to swap with permanent successors. Double-click faded 6/7 slots to add, and double-click active 6/7 molars to hide them."):""}
-function renderSidebar(){if(!canStartCharting()){els.sidebarEmpty.style.display="grid";els.sidebarEmpty.innerHTML=`<h3>Charting unavailable</h3><p>${chartPrerequisiteMessage()}</p>`;els.editor.style.display="none";return}const has=Boolean(draft.tooth); els.sidebarEmpty.style.display="none"; els.sidebarEmpty.innerHTML=""; els.editor.style.display=""; els.editor.classList.add("show"); els.multiToggleBtn.textContent=`Batch select: ${selection.multi?"On":"Off"}`; els.multiToggleBtn.classList.toggle("batch-active",selection.multi); els.multiToggleBtn.setAttribute("aria-pressed",String(selection.multi)); els.multiToggleBtn.setAttribute("aria-disabled",String(isGroupedProsthetic())); renderSelectedTeeth(); els.clearCurrentBtn.disabled=false; els.resetBtn.disabled=!has; els.saveBtn.disabled=!has||Boolean(surfaceSelectionError())||Boolean(materialSelectionError())||(isGroupedProsthetic()&&Boolean(groupedSelectionError(selection.teeth))); els.noteInput.disabled=!has; els.saveBtn.textContent=!isGroupedProsthetic()&&selection.multi&&selection.teeth.length>1?"Apply to selected":"Done"; if(!has){els.selectedCode.textContent="--"; els.selectedName.textContent=`Select a ${chartMode} tooth to start charting`; els.noteInput.value=""; els.noteInput.placeholder="Select a tooth to add a note"; els.miniPreview.classList.add("empty"); els.miniPreview.innerHTML="🦷"; renderCategoryGrid(true); renderViewGrid(true); renderSurfaceGrid(true); renderMaterialGrid(true); renderTreatmentGrid(true); renderStatusGrid(true); els.previewBox.innerHTML="<strong>Ready</strong><br>Select any tooth or surface on the left to begin."; return} normalizeDraft(); els.selectedCode.textContent=draft.tooth; els.selectedName.textContent=selection.multi&&selection.teeth.length>1?`${currentToothName(draft.tooth)} · ${selection.teeth.length} teeth selected · ${selectionSummary()}`:`${currentToothName(draft.tooth)} · ${selectionSummary()}`; els.noteInput.disabled=false; els.noteInput.placeholder="Optional note for this tooth"; els.noteInput.value=draft.note; renderMiniPreview(); renderCategoryGrid(false); renderViewGrid(false); renderSurfaceGrid(false); renderMaterialGrid(false); renderTreatmentGrid(false); renderStatusGrid(false); renderPreview()}
+function renderSidebar(){if(!canStartCharting()){els.sidebarEmpty.style.display="grid";els.sidebarEmpty.innerHTML=`<h3>Charting unavailable</h3><p>${chartPrerequisiteMessage()}</p>`;els.editor.style.display="none";return}const has=Boolean(draft.tooth); els.sidebarEmpty.style.display="none"; els.sidebarEmpty.innerHTML=""; els.editor.style.display=""; els.editor.classList.add("show"); els.multiToggleBtn.textContent=isMobileToothModalViewport()?"Change teeth":`Batch select: ${selection.multi?"On":"Off"}`; els.multiToggleBtn.classList.toggle("batch-active",selection.multi); els.multiToggleBtn.setAttribute("aria-pressed",String(selection.multi)); els.multiToggleBtn.setAttribute("aria-disabled",String(!isMobileToothModalViewport()&&isGroupedProsthetic())); renderSelectedTeeth(); els.clearCurrentBtn.disabled=false; els.resetBtn.disabled=!has; els.saveBtn.disabled=!has||Boolean(surfaceSelectionError())||Boolean(materialSelectionError())||(isGroupedProsthetic()&&Boolean(groupedSelectionError(selection.teeth))); els.noteInput.disabled=!has; els.saveBtn.textContent=!isGroupedProsthetic()&&selection.multi&&selection.teeth.length>1?"Apply to selected":"Done"; if(!has){els.selectedCode.textContent="--"; els.selectedName.textContent=`Select a ${chartMode} tooth to start charting`; els.noteInput.value=""; els.noteInput.placeholder="Select a tooth to add a note"; els.miniPreview.classList.add("empty"); els.miniPreview.innerHTML="🦷"; renderCategoryGrid(true); renderViewGrid(true); renderSurfaceGrid(true); renderMaterialGrid(true); renderTreatmentGrid(true); renderStatusGrid(true); els.previewBox.innerHTML="<strong>Ready</strong><br>Select any tooth or surface on the left to begin."; return} normalizeDraft(); els.selectedCode.textContent=draft.tooth; els.selectedName.textContent=selection.multi&&selection.teeth.length>1?`${currentToothName(draft.tooth)} · ${selection.teeth.length} teeth selected · ${selectionSummary()}`:`${currentToothName(draft.tooth)} · ${selectionSummary()}`; els.noteInput.disabled=false; els.noteInput.placeholder="Optional note for this tooth"; els.noteInput.value=draft.note; renderMiniPreview(); renderCategoryGrid(false); renderViewGrid(false); renderSurfaceGrid(false); renderMaterialGrid(false); renderTreatmentGrid(false); renderStatusGrid(false); renderPreview()}
 function renderCategoryGrid(disabled=false){els.categoryGrid.innerHTML=""; CATEGORIES.forEach(c=>{const b=document.createElement("button"); b.className=`chip${draft.category===c.id?" active":""}`; b.type="button"; b.textContent=c.label; b.disabled=disabled; if(!disabled) b.addEventListener("click",()=>pickCategory(c.id)); els.categoryGrid.appendChild(b)})}
 function renderViewGrid(disabled=false){const t=treatmentFor(draft.treatment); els.viewGrid.innerHTML=""; [{id:"occ",label:"Crown + inner view"},{id:"front",label:"Root view"}].forEach(v=>{const b=document.createElement("button"); b.className=`chip${draft.view===v.id?" active":""}`; b.type="button"; b.textContent=v.label; const blocked=disabled||!t.views.includes(v.id); b.disabled=blocked; if(!blocked) b.addEventListener("click",()=>pickView(v.id)); if(!t.views.includes(v.id)) b.style.opacity=".38"; els.viewGrid.appendChild(b)}); els.viewNote.textContent=disabled?"Select a tooth first.":(t.mode==="surface"?"Surface treatments color only the selected region.":(t.mode==="root"?"Root canal and root findings use the root view only.":"Whole-tooth treatments cover the whole tooth representation."))}
 function renderSurfaceGrid(disabled=false){const t=treatmentFor(draft.treatment),show=true,interactive=!disabled&&t.mode==="surface"; els.surfaceField.style.display=show?"grid":"none"; els.surfaceGrid.innerHTML=""; if(!show){els.surfaceNote.textContent=disabled?"":"";
@@ -1816,7 +1900,7 @@ function renderEntries(){
     section.appendChild(heading);entries.forEach(members=>section.appendChild(createEntryRow(members[0],members)));els.entriesList.appendChild(section);
   });
 }
-function renderAll(){syncDateField("dob"); syncDateField("visit"); updateChartPrerequisiteState(); renderDentitionSwitch(); renderPatientHeader(); renderVisitHeader(); renderPrintSections(); renderChart(); renderEntries(); renderSidebar(); renderMobileToothModal(); renderMobileEntryWizard()}
+function renderAll(){syncDateField("dob"); syncDateField("visit"); updateChartPrerequisiteState(); renderDentitionSwitch(); renderPatientHeader(); renderVisitHeader(); renderPrintSections(); renderChart(); renderEntries(); renderSidebar(); renderMobileToothModal(); renderMobileEntryWizard(); renderMobileTeethSelection()}
 renderAll();
 
 function resetChartSession(){

@@ -285,3 +285,59 @@
   .mobile-entry-footer .btn{width:100%;min-height:46px}
   .mobile-entry-footer [hidden]{display:none}
 }
+.mobile-selection-bar[hidden]{display:none}
+.mobile-selection-bar{display:none}
+@media(max-width:600px){
+  .mobile-selection-bar{display:grid;gap:8px;position:fixed;bottom:0;left:0;right:0;z-index:1000;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--panel,#fff);border-top:1px solid var(--line);box-shadow:0 -4px 18px #0002;max-height:45dvh;overflow:auto}
+  .mobile-selection-bar p{margin:0;font-size:12px;line-height:1.45}
+  .mobile-selection-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .mobile-selection-actions .btn,.mobile-selection-gaps .chip{min-height:44px}
+  .mobile-selection-gaps{display:flex;flex-wrap:wrap;gap:8px}
+  body.mobile-selecting-teeth{padding-bottom:260px}
+  .mobile-selecting-teeth .mobile-entry-trigger,.mobile-selecting-teeth .mobile-entry-hint{visibility:hidden}
+  .mobile-entry-content #multi-toggle-btn{min-height:44px}
+}
+
+@media(max-width:600px){
+  .mobile-tooth-actions .btn.mobile-select-more{display:flex;align-items:center;justify-content:center;gap:10px;min-height:48px;padding:12px 16px;background:#e6efff;color:#174ea6;border:2px solid #6599ec;box-shadow:0 2px 5px rgba(23,78,166,.14);font-size:14px;font-weight:800}
+  .mobile-tooth-actions .mobile-select-more svg{flex:none}
+  .mobile-tooth-actions .btn.mobile-select-more:hover{background:#d7e6ff;border-color:#286bd3}
+  .mobile-tooth-actions .btn.mobile-select-more:active{background:#c6dcff;transform:translateY(1px)}
+  .mobile-tooth-actions .btn.mobile-select-more:focus-visible{outline:3px solid #174ea6;outline-offset:3px}
+}
+
+/* Keep the mobile popup focused on tooth selection and adding an entry. */
+@media(max-width:600px){
+  #mobile-tooth-modal .mobile-tooth-kicker{display:none}
+  #mobile-tooth-modal .mobile-tooth-navigation{gap:8px;margin-bottom:8px}
+  #mobile-tooth-modal .mobile-tooth-nav-btn{min-height:44px;padding:6px 10px;background:transparent;border-color:transparent;color:var(--muted);box-shadow:none}
+  #mobile-tooth-modal .mobile-tooth-nav-btn:disabled{opacity:.4}
+  #mobile-tooth-modal .mobile-tooth-nav-btn:focus-visible{outline:2px solid #64748b;outline-offset:2px}
+  #mobile-tooth-modal .mobile-primary-swap-btn{min-height:44px;margin-top:6px;background:transparent;border-color:transparent;color:#52647c;font-weight:600;text-decoration:underline;text-underline-offset:3px}
+  #mobile-tooth-modal .mobile-tooth-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin:8px 0 0;padding:12px 46px 0;box-sizing:border-box;box-shadow:none;background:transparent}
+  #mobile-tooth-modal .mobile-tooth-actions .btn{grid-column:auto;min-width:0;width:100%;height:auto;min-height:48px;padding:10px 6px;white-space:normal;line-height:1.3;box-sizing:border-box}
+}
+
+@media(max-width:600px){
+  #mobile-tooth-modal .mobile-tooth-viewer{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;gap:6px;width:100%;min-width:0;padding:0;box-sizing:border-box}
+  #mobile-tooth-modal .mobile-tooth-navigation{display:contents}
+  #mobile-tooth-modal .mobile-tooth-nav-btn{position:static;grid-row:1;width:40px;height:40px;min-width:40px;min-height:40px;padding:0;border:1px solid var(--line);border-radius:50%;background:#fff;color:var(--ink);box-shadow:none;box-sizing:border-box;transform:none}
+  #mobile-tooth-prev-btn{grid-column:1}
+  #mobile-tooth-next-btn{grid-column:3}
+  #mobile-tooth-modal .mobile-tooth-nav-btn span{display:flex;align-items:center;justify-content:center}
+  #mobile-tooth-modal .mobile-tooth-nav-btn small{display:none}
+  #mobile-tooth-modal .mobile-tooth-nav-btn:hover:not(:disabled){background:#f8fafc;border-color:var(--line)}
+  #mobile-tooth-modal .mobile-tooth-nav-btn:active:not(:disabled){background:#f1f5f9;border-color:var(--line)}
+  #mobile-tooth-modal .mobile-tooth-views{grid-column:2;grid-row:1;grid-template-columns:repeat(2,minmax(0,1fr));width:100%;min-width:0;gap:6px}
+  #mobile-tooth-modal .mobile-tooth-view{min-width:0;padding:10px 3px;box-sizing:border-box}
+  #mobile-tooth-modal .mobile-tooth-art{height:140px}
+  #mobile-tooth-modal .mobile-tooth-nav-btn svg{display:block;width:22px;height:22px}
+  #mobile-tooth-modal .mobile-tooth-actions .btn.mobile-select-more{gap:6px;padding:10px 6px;font-size:12px;line-height:1.3}
+  #mobile-tooth-modal .mobile-select-more svg{width:16px;height:16px}
+}
+
+@media(max-width:600px){
+  #mobile-tooth-modal .mobile-tooth-nav-btn{ -webkit-tap-highlight-color:transparent; }
+  #mobile-tooth-modal .mobile-tooth-nav-btn:focus{box-shadow:none}
+  #mobile-tooth-modal .mobile-tooth-nav-btn:focus:not(:focus-visible){outline:none}
+}
