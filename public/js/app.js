@@ -1413,10 +1413,7 @@ function handleToothClick(n,v,statusContext="existing"){
     renderAll();return;
   }
 if(isMobileToothModalViewport()&&!mobileEntryOpen&&!mobileToothModalOpen&&draft.tooth&&(draft.tooth===n||selection.teeth.includes(n))){
-    const resumeStep=mobileEntryStep;
     openMobileEntryWizard();
-    if(mobileEntrySteps().includes(resumeStep))mobileEntryStep=resumeStep;
-    renderMobileEntryWizard();
     return;
   }
 if(!selection.multi){if(isMobileToothModalViewport())mobileToothModalOpen=true;openTooth(n,v,null,false,statusContext); return} if(selection.teeth.includes(n)){selection.teeth=selection.teeth.filter(i=>i!==n); if(draft.tooth===n){draft.tooth=selection.teeth.length?selection.teeth[selection.teeth.length-1]:null} renderAll(); return} openTooth(n,v,null,selection.teeth.length>0||isGroupedProsthetic(),statusContext)}

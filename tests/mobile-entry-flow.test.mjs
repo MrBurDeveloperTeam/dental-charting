@@ -38,10 +38,10 @@ test('deselecting a surface does not change the preview view',()=>{
  const c=context(['toggleSurface'],{draft:{treatment:'caries',view:'front',surfaces:['O','B']},treatmentFor:()=>({mode:'surface',views:['front','occ']}),renderAll(){}});
  c.toggleSurface('O');assert.equal(c.draft.view,'front');assert.deepEqual(Array.from(c.draft.surfaces),['B']);
 });
-for(const tooth of [15,16])test(`tap selected tooth ${tooth} resumes closed mobile entry without changing draft`,()=>{
+for(const tooth of [15,16])test(`tap selected tooth ${tooth} reopens closed mobile entry at first step without changing draft`,()=>{
  let opened=0;
  const draft={tooth:15,treatment:'filling',material:'composite',note:'Keep me',surfaces:['O'],view:'occ',status:'planned'};
  const before=JSON.stringify(draft);
  const c=context(['handleToothClick'],{draft,selection:{multi:true,teeth:[15,16]},mobileSelectionSession:null,mobileEntryOpen:false,mobileToothModalOpen:false,mobileEntryStep:4,isMobileToothModalViewport:()=>true,mobileEntrySteps:()=>[2,3,1,4],openMobileEntryWizard(){opened++;c.mobileEntryStep=2;},renderMobileEntryWizard(){}});
- c.handleToothClick(tooth,'front','existing');assert.equal(opened,1);assert.equal(c.mobileEntryStep,4);assert.equal(JSON.stringify(draft),before);assert.deepEqual(c.selection.teeth,[15,16]);
+ c.handleToothClick(tooth,'front','existing');assert.equal(opened,1);assert.equal(c.mobileEntryStep,2);assert.equal(JSON.stringify(draft),before);assert.deepEqual(c.selection.teeth,[15,16]);
 });
