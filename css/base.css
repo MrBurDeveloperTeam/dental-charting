@@ -126,10 +126,10 @@ body:has(.modal-backdrop.show) .profile-settings-fallback{z-index:90;pointer-eve
 .contextbar>.topbar-actions{margin:0;padding:0 28px;align-items:center;justify-content:flex-end;flex:none;flex-wrap:nowrap}
 .contextbar>.topbar-actions .btn{height:42px;border-radius:var(--button-radius)!important;padding:0 22px;font-size:14px;font-weight:700}
 .contextbar>.topbar-actions #finish-visit-btn,.contextbar>.topbar-actions #download-pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;line-height:1}
-.contextbar>.topbar-actions #finish-visit-btn .context-action-icon{align-self:center;transform:translateY(1px)}
+.contextbar>.topbar-actions .context-action-icon{align-self:center;transform:none}
 .pdf-icon-btn{padding:0 24px;display:inline-flex;align-items:center;justify-content:center;gap:10px;white-space:nowrap}
 .context-action-icon{display:block;width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
-.contextbar>.topbar-actions .btn>span{display:block;line-height:1}
+.contextbar>.topbar-actions .btn>span{display:flex;align-items:center;justify-content:center;align-self:stretch;line-height:1.2;margin:0;padding:0}
 .pdf-download-icon{display:block;width:25px;height:25px;object-fit:contain;flex:none}
 .btn.secondary{background:#fff;border-color:rgba(26,120,232,.2);color:#64748b}
 #clear-current-btn:hover{color:#dc2626;border-color:#fca5a5;background:#fff5f5;box-shadow:0 4px 12px rgba(220,38,38,.06);transform:translateY(-1px)}
