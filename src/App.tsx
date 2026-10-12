@@ -11,16 +11,6 @@ import { DentalChartingLandingPage } from "./Landing";
 import { pagePathForView, setActivePage } from "./services/activityLog";
 import "./components/patient/recordDetails.css";
 
-function patientAge(dob?: string) {
-  if (!dob) return null;
-  const birth = new Date(`${dob}T00:00:00`);
-  const today = new Date();
-  if (Number.isNaN(birth.getTime()) || birth > today) return null;
-  const birthdayPending = today.getMonth() < birth.getMonth()
-    || (today.getMonth() === birth.getMonth() && today.getDate() < birth.getDate());
-  return today.getFullYear() - birth.getFullYear() - Number(birthdayPending);
-}
-
 export default function App() {
   // Local-only UI review switch. The DEV guard keeps this unavailable in production.
   const bypassAuth = import.meta.env.DEV && import.meta.env.VITE_BYPASS_AUTH === "true";
@@ -180,9 +170,6 @@ export default function App() {
               <div className="record-details-demographics">
                 <span>{selectedRecord.patient.gender ? String(selectedRecord.patient.gender).charAt(0).toUpperCase() + String(selectedRecord.patient.gender).slice(1) : "Gender not set"}</span>
                 <span>{selectedRecord.patient.dob ? new Intl.DateTimeFormat("en-MY", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(`${selectedRecord.patient.dob}T00:00:00`)) : "DOB not set"}</span>
-                {patientAge(selectedRecord.patient.dob) !== null && <span>{patientAge(selectedRecord.patient.dob)} years</span>}
-              </div>
-              <div className="record-details-contact">
                 <span>{String(selectedRecord.patient.phone || "Phone not set")}</span>
                 <span>{String(selectedRecord.patient.email || "Email not set")}</span>
               </div>
