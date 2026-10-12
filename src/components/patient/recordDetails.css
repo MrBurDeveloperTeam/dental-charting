@@ -15,6 +15,7 @@
 .record-details-identity { min-width: 0; }
 .record-details-identity h2 { margin: 0; color: var(--ink); font-size: 24px; letter-spacing: -.025em; overflow-wrap: anywhere; }
 .record-details-demographics { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; color: var(--muted); font-size: 12px; }
+.record-details-demographics > span { white-space: nowrap; }
 .record-details-demographics > span + span::before { content: '·'; margin-right: 8px; color: #9aabc1; }
 .record-details-contact { display: flex; flex-wrap: wrap; gap: 6px 18px; color: var(--muted); font-size: 12px; overflow-wrap: anywhere; }
 .record-details-meta { display: grid; grid-template-columns: repeat(3,minmax(120px,1fr)); gap: 28px; border-left: 1px solid var(--line); padding-left: 28px; flex-shrink: 0; max-width: 60%; }
