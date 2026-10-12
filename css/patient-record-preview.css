@@ -1,0 +1,32 @@
+/* Preview shell only: chart, entries, editor and buttons use existing styles. */
+.record-local-preview [hidden]{display:none!important}
+.record-local-preview .record-review-panel{padding:20px 18px 0}
+.record-local-preview .record-review-toolbar{margin-bottom:18px}
+.preview-patient-card{display:flex;justify-content:space-between;align-items:center;gap:28px;padding:24px;background:var(--panel);border:1px solid var(--line);border-radius:16px;box-shadow:0 5px 16px rgba(18,35,57,.04)}
+.preview-patient-identity{display:flex;align-items:center;gap:18px;min-width:0}
+.preview-avatar{display:grid;place-items:center;flex:0 0 60px;width:60px;height:60px;border-radius:14px;background:var(--primary-tint);color:var(--primary);font-size:21px;font-weight:750}
+.preview-patient-name{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.preview-patient-name h2{font-size:24px;letter-spacing:-.025em;margin:0;color:var(--ink)}
+.preview-patient-name>span{padding:4px 8px;border-radius:6px;background:var(--primary-tint);color:var(--primary);font-size:11px;font-weight:650}
+.preview-patient-identity p{margin:8px 0;color:var(--muted);font-size:12px}
+.preview-patient-identity p span{margin:0 8px;color:#9aabc1}
+.preview-contact{display:flex;gap:18px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.preview-patient-meta{display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:28px;border-left:1px solid var(--line);padding-left:28px}
+.preview-patient-meta small,.preview-patient-meta label{display:block;color:var(--muted);font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;margin-bottom:9px}
+.preview-patient-meta strong{color:var(--ink);font-size:14px;font-weight:700}
+.preview-patient-meta select{max-width:100%;border:0;background:transparent;color:var(--primary);font:inherit;font-size:14px;font-weight:750;cursor:pointer;padding:0 20px 0 0}
+.preview-visit-caption{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:16px;color:var(--muted);font-size:11px}
+.preview-visit-caption>span:first-child{font-weight:650;color:var(--primary)}
+.record-local-preview.patient-record-review .entries-panel{min-height:100%}
+.record-local-preview.patient-record-review .entry-open:disabled{opacity:1;color:inherit}
+.record-local-preview.patient-record-review .chart-workspace{grid-template-columns:minmax(0,1.55fr) minmax(340px,1fr)}
+.record-local-preview.patient-record-review .chart-card{min-width:0}
+.preview-patient-result{border:1px solid var(--line);border-radius:14px;background:white;overflow:hidden}
+.preview-patient-result>button{display:flex;align-items:center;gap:18px;width:100%;border:0;background:white;padding:20px;text-align:left;color:var(--ink);cursor:pointer;font:inherit}
+.preview-patient-result>button:hover{background:var(--panel-soft)}
+.preview-patient-result small{display:block;margin-top:6px;color:var(--muted)}
+.preview-patient-result>button>span:last-child{margin-left:auto;color:var(--primary)}
+.preview-patient-result>p{padding:20px;color:var(--muted)}
+@media(max-width:1100px){.preview-patient-card{align-items:stretch;flex-direction:column;gap:20px}.preview-patient-meta{border-left:0;border-top:1px solid var(--line);padding:20px 0 0}.record-local-preview.patient-record-review .chart-workspace{grid-template-columns:minmax(0,1fr)}.record-local-preview.patient-record-review .entries-panel{grid-column:1;grid-row:auto}}
+@media(max-width:600px){.record-local-preview .record-review-panel{padding:14px 10px 0}.record-local-preview .record-review-toolbar{flex-wrap:wrap;gap:12px}.record-local-preview .record-review-actions{justify-content:flex-start}.preview-patient-card{padding:18px 14px}.preview-avatar{width:46px;height:46px;flex-basis:46px;font-size:17px}.preview-patient-identity{gap:12px}.preview-patient-name h2{font-size:21px}.preview-patient-meta{grid-template-columns:1fr 1fr;gap:20px}.preview-patient-meta>div:last-child{grid-column:1/-1}.preview-contact{gap:6px;font-size:11px}.preview-visit-caption{font-size:9px}}
+@media print{.preview-visit-caption,#preview-record-list{display:none!important}}
