@@ -120,6 +120,7 @@
   height: 40px;
   flex: 0 0 1px;
   background: #d8e2e3;
+  transform: translateX(-6px);
 }
 
 .dental-brand-product {
