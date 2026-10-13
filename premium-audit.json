@@ -12,7 +12,7 @@
     {
       "category": "unresolved",
       "file": "src/App.tsx",
-      "line": 191,
+      "line": 188,
       "message": "Native select is used without an explicit ownership decision.",
       "remediation": "Record Select/Listbox as native or reuse the authored canonical owner.",
       "ruleId": "ownership.native-select-undecided",
@@ -110,7 +110,7 @@
     }
   ],
   "mode": "strict",
-  "projectRoot": "C:\\Users\\USER\\Documents\\mrbur\\dental-charting",
+  "projectRoot": "C:\\Users\\user\\dental-charting",
   "schemaVersion": 1,
   "summary": {
     "errors": 12,

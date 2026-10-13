@@ -944,6 +944,53 @@ function setExportFeedback(kind,busy){
     if(text)text.textContent=label;
   });
 }
+function showExportToast(kind,message,detail=""){
+  let region=document.getElementById("export-toast-region");
+  if(!region){
+    region=document.createElement("div");
+    region.id="export-toast-region";
+    region.className="export-toast-region";
+    region.setAttribute("aria-label","Download notifications");
+    document.body.appendChild(region);
+  }
+  const toast=document.createElement("div");
+  toast.className=`export-toast export-toast-${kind}`;
+  toast.setAttribute("role",kind==="error"?"alert":"status");
+  const icon=document.createElement("span");
+  icon.className="export-toast-icon";
+  icon.setAttribute("aria-hidden","true");
+  const iconPaths={
+    success:'<path d="m7 12 3.2 3.2L17.5 8"/>',
+    warning:'<path d="M12 4.5 20 19H4l8-14.5Z"/><path d="M12 9.5v4M12 16.5h.01"/>',
+    error:'<circle cx="12" cy="12" r="8.5"/><path d="m9.5 9.5 5 5M14.5 9.5l-5 5"/>'
+  };
+  icon.innerHTML=`<svg viewBox="0 0 24 24" focusable="false">${iconPaths[kind]||iconPaths.warning}</svg>`;
+  toast.appendChild(icon);
+  const copy=document.createElement("div");
+  copy.className="export-toast-copy";
+  const title=document.createElement("strong");
+  title.textContent=message;
+  copy.appendChild(title);
+  if(detail){
+    const description=document.createElement("span");
+    description.textContent=detail;
+    copy.appendChild(description);
+  }
+  toast.appendChild(copy);
+  const dismiss=document.createElement("button");
+  dismiss.type="button";
+  dismiss.className="export-toast-dismiss";
+  dismiss.setAttribute("aria-label","Dismiss notification");
+  dismiss.innerHTML='<svg viewBox="0 0 24 24" focusable="false"><path d="m7 7 10 10M17 7 7 17"/></svg>';
+  dismiss.addEventListener("click",()=>toast.remove());
+  toast.appendChild(dismiss);
+  const progress=document.createElement("span");
+  progress.className="export-toast-progress";
+  progress.setAttribute("aria-hidden","true");
+  toast.appendChild(progress);
+  region.replaceChildren(toast);
+  window.setTimeout(()=>{if(toast.isConnected)toast.remove()},5000);
+}
 function isSafariExport(){
   const nav=window.navigator||{};
   return /iPhone|iPad|iPod/i.test(nav.userAgent||"")||
@@ -1030,6 +1077,7 @@ async function downloadPdf(){
       const previewImage=doc.querySelector(".print-chart-image");
       previewImage.src=await blobDataUrl(blob);
       await previewImage.decode();
+      window.showExportToast?.("success","PDF ready to save","Use Save PDF / Print in the print preview.");
       cleanup();
       return;
     }
@@ -1049,6 +1097,7 @@ async function downloadPdf(){
       // Safari does not allow the automatic print request after async capture.
       try{window.print();}catch(error){console.warn("Automatic print unavailable; use the PDF ready button.",error);}
     }else window.print();
+    window.showExportToast?.("success","PDF ready to save","Use the print dialog to finish downloading it.");
   }catch(error){
     preview?.close();
     if(retainSafariSnapshot){
@@ -1057,7 +1106,7 @@ async function downloadPdf(){
     }
     cleanup();
     console.error(`PDF chart export failed during ${exportStep}`,error);
-    window.alert("The PDF chart image could not be prepared. Please try again."+(mobilePdf?`\nFailed during ${exportStep}: ${error?.message||"Unknown browser error"}`:""));
+    window.showExportToast?.("error","PDF download failed","The chart could not be prepared. Please try again.");
   }
 }
 function loadMobileExportImage(image,src){
@@ -1114,7 +1163,7 @@ function blobDataUrl(blob){
 async function downloadChartImage(){
   if(els.downloadChartImageBtn.disabled)return;
   if(!els.splitStage||typeof window.chartToBlob!=="function"){
-    window.alert("Chart image export is not available yet. Please refresh and try again.");
+    window.showExportToast?.("warning","Chart image is not ready","Refresh the page and try again.");
     return;
   }
   const fileName=chartImageFileName();
@@ -1138,10 +1187,12 @@ async function downloadChartImage(){
       const image=doc.createElement("img");image.src=url;image.alt="Dental chart";
       image.style.cssText="display:block;max-width:100%;height:auto";doc.body.appendChild(image);
       const hint=doc.createElement("p");hint.textContent="Tap Save chart image, or touch and hold the chart to save it to Photos.";doc.body.prepend(hint);
+      window.showExportToast?.("success","Chart image ready to save","Use Save chart image in the new tab.");
       return;
     }
     if(mobileDownload){
       await downloadMobileChartImage(blob,fileName);
+      window.showExportToast?.("success","Chart image download started","If it does not appear, use the download link below the toolbar.");
       return;
     }
     let fileHandle=null;
@@ -1154,7 +1205,10 @@ async function downloadChartImage(){
           types:[{description:"PNG image",accept:{"image/png":[".png"]}}]
         });
       }catch(error){
-        if(error?.name==="AbortError")return;
+        if(error?.name==="AbortError"){
+          window.showExportToast?.("warning","Chart image download cancelled","No file was saved.");
+          return;
+        }
         console.warn("Native save picker unavailable; using browser download instead.",error);
       }
     }
@@ -1162,6 +1216,7 @@ async function downloadChartImage(){
       const writable=await fileHandle.createWritable();
       await writable.write(blob);
       await writable.close();
+      window.showExportToast?.("success","Chart image downloaded",fileName);
     }else{
       const url=URL.createObjectURL(blob);
       const link=document.createElement("a");
@@ -1171,11 +1226,12 @@ async function downloadChartImage(){
       link.click();
       link.remove();
       setTimeout(()=>URL.revokeObjectURL(url),1000);
+      window.showExportToast?.("success","Chart image download started",fileName);
     }
   }catch(error){
     preview?.close();
     console.error("Chart image export failed",error);
-    window.alert("The chart image could not be downloaded. Please try again.");
+    window.showExportToast?.("error","Chart image download failed","The image could not be prepared or saved. Please try again.");
   }finally{
     els.downloadChartImageBtn.disabled=false;
     if(els.downloadChartImageLabel)els.downloadChartImageLabel.textContent=originalLabel;
