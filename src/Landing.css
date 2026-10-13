@@ -124,7 +124,7 @@
 
 .dental-brand-product {
   color: #3f7f78;
-  font-size: 18px;
+  font-size: 16px;
   white-space: nowrap;
 }
 
@@ -196,6 +196,18 @@
   color: white;
   background: var(--dental-teal);
   box-shadow: 0 12px 25px rgba(11, 159, 145, 0.2);
+}
+
+.dental-nav-cta {
+  gap: 7px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 14px;
+}
+
+.dental-nav-cta svg {
+  width: 16px;
+  height: 16px;
 }
 
 .dental-nav-cta:hover,
