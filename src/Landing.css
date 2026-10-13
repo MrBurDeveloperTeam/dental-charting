@@ -91,7 +91,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 92px;
+  min-height: 76px;
   padding: 0 20px;
   border-top: 2px solid #3f4140;
   border-bottom: 1px solid var(--dental-line);
@@ -124,13 +124,13 @@
 
 .dental-brand-product {
   color: #3f7f78;
-  font-size: 20px;
+  font-size: 18px;
   white-space: nowrap;
 }
 
 .dental-brand-product strong {
   color: #3f7f78;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .dental-brand-mark {
