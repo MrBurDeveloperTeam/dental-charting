@@ -101,7 +101,7 @@
 .dental-brand {
   display: inline-flex;
   align-items: center;
-  gap: 20px;
+  column-gap: clamp(18px, 2.15vw, 32px);
   color: var(--dental-navy);
   font-size: 28px;
   font-weight: 700;
@@ -116,7 +116,8 @@
 
 .dental-brand-divider {
   width: 1px;
-  height: 46px;
+  height: 48px;
+  flex: 0 0 1px;
   background: #d8e2e3;
 }
 
@@ -1082,7 +1083,7 @@
   }
 
   .dental-brand {
-  gap: 12px;
+  column-gap: 14px;
   font-size: 18px;
 }
 
@@ -1092,6 +1093,6 @@
 }
 
 .dental-brand-divider {
-  height: 32px;
+  height: 34px;
 }
 }
