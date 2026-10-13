@@ -31,20 +31,21 @@ for(const failure of [null,'capture','decode','print']){
       isSafariExport:()=>false,isMobileChartDownload:()=>false,renderPrintSections:()=>{},patient:{patientId:'test'},
       captureChartImage:async()=>{events.push('capture');if(failure==='capture')throw Error('capture');return {};},
       pdfFileName:()=> 'Patient_2026-10-06',URL:{createObjectURL:()=> 'blob:pdf',revokeObjectURL:()=>events.push('revoke')},console:{error(){}},
-      window:{addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name),
+      window:{showExportToast:(...args)=>events.push(['toast',...args]),addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name),
         print(){events.push('print');assert.ok(classes.has('pdf-chart-image-ready'));assert.equal(image.src,'blob:pdf');if(failure==='print')throw Error('print');},
         alert:()=>events.push('alert')}
     });
     vm.runInContext('let pdfExportBusy=false;\n'+pdfHelper,context);
     await context.downloadPdf();
     if(!failure){
-      assert.deepEqual(events,['capture','decode','append','print']);
+      assert.deepEqual(events.slice(0,4),['capture','decode','append','print']);
+      assert.deepEqual(events[4],['toast','success','PDF ready to save','Use the print dialog to finish downloading it.']);
       assert.equal(button.disabled,true);
       await context.downloadPdf();
       assert.equal(events.filter(event=>event==='capture').length,1);
       listeners.get('afterprint')(); // Also fired when the print dialog is cancelled.
     }else{
-      assert.ok(events.includes('alert'));
+      assert.ok(events.some(event=>event[0]==='toast'&&event[1]==='error'));
       if(failure!=='print')assert.ok(!events.includes('print'));
     }
     assert.equal(context.document.title,'Chart');
@@ -68,7 +69,7 @@ function setup({fail=false,cancel=false,navigator={},picker=true,pickerFail=fals
   },FileReader:class{
     readAsDataURL(value){assert.equal(value,blob);events.push('read');if(readFail){this.onerror();return;}this.result='data:image/png;base64,cG5n';this.onload();}
   },URL:{createObjectURL:()=> 'blob:chart',revokeObjectURL:()=>events.push('revoke')},setTimeout:(callback,delay)=>timers.push({callback,delay}),
-  chartImageFileName:()=> 'chart.png',console:{error(){},warn(){}},window:{
+  chartImageFileName:()=> 'chart.png',console:{error(){},warn(){}},window:{showExportToast:(...args)=>events.push(['toast',...args]),
     navigator,open:()=>null,
     devicePixelRatio:2,alert:()=>events.push('alert'),
     chartToBlob:async(node,options)=>{events.push('capture');assert.equal(node,stage);assert.equal(options.pixelRatio,2);assert.equal(options.width,undefined);assert.equal(options.height,undefined);if(fail)throw Error('capture failed');return blob;},
@@ -79,17 +80,18 @@ function setup({fail=false,cancel=false,navigator={},picker=true,pickerFail=fals
 }
 test('exports the chart at a fixed resolution after fonts load, then saves the completed PNG',async()=>{
   const {context,els,events}=setup();await context.downloadChartImage();
-  assert.deepEqual(events,['fonts','capture','picker','write','close']);
+  assert.deepEqual(events.slice(0,5),['fonts','capture','picker','write','close']);
+  assert.deepEqual(events[5],['toast','success','Chart image downloaded','chart.png']);
   assert.equal(els.downloadChartImageBtn.disabled,false);
   assert.equal(els.downloadChartImageLabel.textContent,'Download Chart Image');
 });
 test('capture failure does not open a picker and restores export controls',async()=>{
   const {context,els,events}=setup({fail:true});await context.downloadChartImage();
-  assert.deepEqual(events,['fonts','capture','alert']);assert.equal(els.downloadChartImageBtn.disabled,false);
+  assert.deepEqual(events,['fonts','capture',['toast','error','Chart image download failed','The image could not be prepared or saved. Please try again.']]);assert.equal(els.downloadChartImageBtn.disabled,false);
 });
-test('cancelling save does not write a file or show an error',async()=>{
+test('cancelling save does not write a file and shows a warning',async()=>{
   const {context,els,events}=setup({cancel:true});await context.downloadChartImage();
-  assert.deepEqual(events,['fonts','capture','picker']);assert.equal(els.downloadChartImageBtn.disabled,false);
+  assert.deepEqual(events,['fonts','capture','picker',['toast','warning','Chart image download cancelled','No file was saved.']]);assert.equal(els.downloadChartImageBtn.disabled,false);
 });
 for(const [device,navigator] of Object.entries({
   Android:{userAgent:'Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile'},
@@ -100,7 +102,8 @@ for(const [device,navigator] of Object.entries({
   test(`${device} downloads a PNG directly without opening the native picker`,async()=>{
     const {context,els,events,links,timers}=setup({navigator});
     await context.downloadChartImage();
-    assert.deepEqual(events,['fonts','capture','link','download']);
+    assert.deepEqual(events.slice(0,4),['fonts','capture','link','download']);
+    assert.deepEqual(events[4],['toast','success','Chart image download started','If it does not appear, use the download link below the toolbar.']);
     assert.equal(links[0].download,'chart.png');
     assert.equal(links[0].href,'blob:chart');
     assert.equal(links[0].target,'_self');
@@ -113,7 +116,8 @@ for(const [device,navigator] of Object.entries({
 test('a touch-enabled Windows laptop keeps the desktop picker',async()=>{
   const {context,events}=setup({navigator:{userAgent:'Windows',platform:'Win32',maxTouchPoints:10}});
   await context.downloadChartImage();
-  assert.deepEqual(events,['fonts','capture','picker','write','close']);
+  assert.deepEqual(events.slice(0,5),['fonts','capture','picker','write','close']);
+  assert.deepEqual(events[5],['toast','success','Chart image downloaded','chart.png']);
 });
 test('mobile retry link appears in the patient review screen and is replaced on the next export',async()=>{
   const {context,events,links}=setup({navigator:{userAgent:'Android'},review:true});
@@ -127,7 +131,7 @@ test('mobile object URL failure restores controls and reports an error',async()=
   const {context,els,events,links}=setup({navigator:{userAgent:'iPhone'}});
   context.URL.createObjectURL=()=>{throw new Error('Object URL failed');};
   await context.downloadChartImage();
-  assert.deepEqual(events,['fonts','capture','alert']);
+  assert.deepEqual(events,['fonts','capture',['toast','error','Chart image download failed','The image could not be prepared or saved. Please try again.']]);
   assert.equal(els.downloadChartImageBtn.disabled,false);
   assert.equal(links.length,0);
 });
@@ -171,5 +175,5 @@ test('iPhone image failure never opens a preparation tab and restores controls',
   await context.downloadChartImage();
   assert.ok(!events.includes('open-preview'));
   assert.equal(context.els.downloadChartImageBtn.disabled,false);
-  assert.ok(events.includes('alert'));
+  assert.ok(events.some(event=>event[0]==='toast'&&event[1]==='error'));
 });
