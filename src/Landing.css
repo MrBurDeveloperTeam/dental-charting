@@ -200,10 +200,10 @@
 }
 
 .dental-nav-cta {
-  gap: 7px;
-  min-width: 142px;
+  gap: 6px;
+  min-width: 0;
   min-height: 44px;
-  padding: 0 16px;
+  padding: 0 12px;
   border-radius: 14px;
   font-size: 16px;
   font-weight: 500;
