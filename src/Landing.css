@@ -200,18 +200,18 @@
 }
 
 .dental-nav-cta {
-  gap: 10px;
-  min-width: 166px;
-  min-height: 56px;
-  padding: 0 22px;
-  border-radius: 18px;
-  font-size: 20px;
+  gap: 7px;
+  min-width: 142px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 14px;
+  font-size: 16px;
   font-weight: 500;
 }
 
 .dental-nav-cta svg {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
 }
 
 .dental-nav-cta:hover,
