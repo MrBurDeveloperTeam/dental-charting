@@ -156,7 +156,7 @@
   margin-right: 35px;
   color: var(--dental-muted);
   font-size: 13px;
-  font-weight: 700;
+  font-weight: 400;
 }
 
 .dental-nav-links a:hover,
@@ -200,15 +200,18 @@
 }
 
 .dental-nav-cta {
-  gap: 7px;
-  padding: 10px 14px;
-  border-radius: 10px;
-  font-size: 14px;
+  gap: 6px;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 12px;
+  border-radius: 14px;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .dental-nav-cta svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
 }
 
 .dental-nav-cta:hover,
@@ -1005,7 +1008,7 @@
     border-radius: 10px;
     color: var(--dental-navy);
     background: var(--dental-white);
-    font-weight: 800;
+    font-weight: 500;
     text-align: left;
   }
 
