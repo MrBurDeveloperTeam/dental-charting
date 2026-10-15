@@ -158,8 +158,23 @@ export function ProfileSettings() {
       const app = destination === "reward" ? "reward" : destination === "channel" ? "e-learning" : "snabbb";
       const result = await createAppLink(app);
       const id = result?.result?.supabase_user_id ?? result?.data?.result?.supabase_user_id ?? result?.supabase_user_id ?? user.id;
+      // Reward signs in through the one-time SSO link from the API (supabase_user_id can be null for it).
+      // The section hint rides along as a query param and a short-lived shared cookie so the reward app
+      // can scroll to the credit section after the SSO redirect chain.
+      let rewardUrl = "https://reward.snabbb.com/?section=credit";
+      if (destination === "reward") {
+        const ssoUrl = result?.result?.url ?? result?.data?.result?.url;
+        if (ssoUrl) {
+          try {
+            document.cookie = "snabbb_reward_section=credit; domain=.snabbb.com; path=/; max-age=300; SameSite=Lax; Secure";
+          } catch { /* cookie is only a backup hint */ }
+          const target = new URL(ssoUrl);
+          target.searchParams.set("section", "credit");
+          rewardUrl = target.toString();
+        }
+      }
       const url = destination === "reward"
-        ? "https://reward.snabbb.com"
+        ? rewardUrl
         : destination === "channel"
           ? id ? `https://e-learning.snabbb.com/channel/${encodeURIComponent(id)}` : "https://e-learning.snabbb.com"
           : `${SNABBB_APP_URL}/profile-settings`;
