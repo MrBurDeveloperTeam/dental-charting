@@ -87,7 +87,7 @@ const mobileToothEls = {
   bottomClose: document.getElementById("mobile-tooth-bottom-close-btn"),
   done: document.getElementById("mobile-tooth-done-btn")
 };
-const mobileEntryEls={modal:document.getElementById("mobile-entry-modal"),content:document.getElementById("mobile-entry-content"),title:document.getElementById("mobile-entry-title"),progress:document.getElementById("mobile-entry-progress"),trigger:document.getElementById("mobile-entry-trigger"),hint:document.getElementById("mobile-entry-hint"),close:document.getElementById("mobile-entry-close-btn"),back:document.getElementById("mobile-entry-back-btn"),next:document.getElementById("mobile-entry-next-btn"),done:document.getElementById("mobile-entry-done-btn")};
+const mobileEntryEls={modal:document.getElementById("mobile-entry-modal"),content:document.getElementById("mobile-entry-content"),title:document.getElementById("mobile-entry-title"),progress:document.getElementById("mobile-entry-progress"),hint:document.getElementById("mobile-entry-hint"),close:document.getElementById("mobile-entry-close-btn"),back:document.getElementById("mobile-entry-back-btn"),next:document.getElementById("mobile-entry-next-btn"),done:document.getElementById("mobile-entry-done-btn")};
 const editorHome=els.editor.parentElement;
 const treatmentManagerEls={openBtn:document.getElementById("manage-treatments-btn"),modal:document.getElementById("treatment-manager-modal"),closeBtn:document.getElementById("treatment-manager-close-btn"),cancelBtn:document.getElementById("treatment-manager-cancel-btn"),saveBtn:document.getElementById("treatment-manager-save-btn"),list:document.getElementById("treatment-method-list"),addForm:document.getElementById("add-treatment-form"),newIcon:document.getElementById("new-treatment-icon")};
 let treatmentManagerDraft=[];
@@ -96,6 +96,104 @@ let mobileEntryOpen=false;
 let mobileEntryStep=2;
 let mobileSelectionSession=null;
 let editingEntry=null;
+// Touch listeners stay on document because chart rendering replaces tooth nodes.
+let mobileDrag=null;
+let mobileDragClickUntil=0;
+let mobileTouchHover=null;
+function setMobileTouchHover(tooth){
+  if(mobileTouchHover===tooth)return;
+  mobileTouchHover?.classList.remove('touch-hover');
+  mobileTouchHover=tooth;
+  mobileTouchHover?.classList.add('touch-hover');
+}
+function mobileDragTooth(target){
+  const tooth=target?.closest?.('.tooth[data-drag-tooth]');
+  return tooth&&!tooth.classList.contains('ghost')&&(els.splitStage.contains(tooth)||els.combinedStage.contains(tooth))?tooth:null;
+}
+function mobileDragToothAt(x,y){
+  // Use the original layout boxes, never the enlarged artwork's hit area.
+  return mobileDrag?.targets.find(({rect})=>x>=rect.left&&x<rect.right&&y>=rect.top&&y<rect.bottom)?.tooth||null;
+}
+function beginMobileDragSelection(tooth){
+  if(mobileSelectionSession)return;
+  selection.multi=false;
+  selection.spacingExcluded=[];
+  editingEntry=null;
+  Object.assign(draft,{category:'condition',treatment:'caries',material:null,note:'',surfaces:[]});
+  visitMobileDragTooth(tooth);
+}
+function visitMobileDragTooth(tooth){
+  if(!tooth||!mobileDrag?.active)return;
+  const n=Number(tooth.dataset.dragTooth);
+  selection.multi=false;
+  selection.teeth=[n];
+  draft.tooth=n;
+  draft.view=tooth.dataset.dragView;
+  draft.layer=draft.status=tooth.dataset.dragLayer;
+  for(const stage of [els.splitStage,els.combinedStage])for(const node of stage.querySelectorAll('[data-drag-tooth]')){
+    node.classList.remove('batch-selected');
+    node.classList.toggle('active',Number(node.dataset.dragTooth)===n);
+  }
+}
+function endMobileDrag(cancel=false){
+  setMobileTouchHover(null);
+  const gesture=mobileDrag;if(!gesture)return;
+  clearTimeout(gesture.timer);mobileDrag=null;
+  document.body.classList.remove('mobile-drag-selecting');
+  if(!gesture.active)return;
+  mobileDragClickUntil=Date.now()+700;
+  if(cancel){Object.assign(draft,gesture.draft);Object.assign(selection,gesture.selection);}
+  else selection.multi=false;
+  renderAll();
+  if(!cancel&&selection.teeth.length){
+    openMobileEntryWizard();
+  }
+}
+document.addEventListener('touchstart',event=>{
+  if(mobileDrag)endMobileDrag(true);
+  if(event.touches.length!==1||!isMobileToothModalViewport()||!canStartCharting()||mobileEntryOpen||mobileToothModalOpen||mobileSelectionSession)return;
+  const tooth=mobileDragTooth(event.target);if(!tooth)return;
+  const targets=[els.splitStage,els.combinedStage].flatMap(stage=>Array.from(stage.querySelectorAll('.tooth[data-drag-tooth]:not(.ghost)')).map(tooth=>({tooth,rect:tooth.getBoundingClientRect()}))).filter(({rect})=>rect.width>0&&rect.height>0);
+  setMobileTouchHover(tooth);
+  const touch=event.touches[0];
+  const gesture=mobileDrag={id:touch.identifier,x:touch.clientX,y:touch.clientY,targets,active:false,draft:structuredClone(draft),selection:structuredClone(selection)};
+  gesture.timer=setTimeout(()=>{
+    if(mobileDrag!==gesture)return;
+    gesture.active=true;
+    document.body.classList.add('mobile-drag-selecting');
+    beginMobileDragSelection(tooth);
+  },150);
+},{passive:true,capture:true});
+document.addEventListener('touchmove',event=>{
+  if(!mobileDrag)return;
+  const touch=Array.from(event.touches).find(item=>item.identifier===mobileDrag.id);
+  if(!touch||event.touches.length!==1){endMobileDrag(true);return;}
+  if(!mobileDrag.active){
+    if(Math.hypot(touch.clientX-mobileDrag.x,touch.clientY-mobileDrag.y)>10)endMobileDrag(true);
+    return;
+  }
+  // Cancel the native pan only after the hold has activated.
+  if(event.cancelable)event.preventDefault();
+  visitMobileDragTooth(mobileDragToothAt(touch.clientX,touch.clientY));
+  setMobileTouchHover(mobileDragToothAt(touch.clientX,touch.clientY));
+  mobileDrag.x=touch.clientX;mobileDrag.y=touch.clientY;
+},{passive:false,capture:true});
+document.addEventListener('touchend',event=>{
+  if(!mobileDrag)return;
+  const touch=Array.from(event.changedTouches).find(item=>item.identifier===mobileDrag.id);
+  if(mobileDrag.active&&touch)visitMobileDragTooth(mobileDragToothAt(touch.clientX,touch.clientY));
+  if(mobileDrag.active&&event.cancelable)event.preventDefault();
+  endMobileDrag();
+},{passive:false,capture:true});
+document.addEventListener('touchcancel',()=>endMobileDrag(true),true);
+document.addEventListener('click',event=>{
+  if(Date.now()<mobileDragClickUntil&&event.detail!==0){event.preventDefault();event.stopImmediatePropagation();}
+},true);
+document.addEventListener('contextmenu',event=>{
+  if(mobileDrag&&mobileDragTooth(event.target))event.preventDefault();
+},true);
+window.addEventListener('blur',()=>endMobileDrag(true));
+window.addEventListener('resize',()=>{if(!isMobileToothModalViewport())endMobileDrag(true);});
 // Keep navigation centred on the tooth panels, independent of footer content.
 const mobileToothViewer=document.createElement("div");
 mobileToothViewer.className="mobile-tooth-viewer";
@@ -191,7 +289,7 @@ els.entriesList.addEventListener("mouseover",e=>{const entry=e.target.closest?.(
 document.getElementById("entries-delete-selected")?.addEventListener("click",()=>{const ids=[...selectedEntryIds];if(!ids.length)return;openDeleteEntryModal(`Delete ${savedEntryGroups(flatEntries().filter(entry=>ids.includes(entry.id))).length} selected entries? Grouped treatments are deleted together. This cannot be undone.`,()=>removeSelectedEntries(ids))});
 treatmentManagerEls.openBtn.addEventListener("click",openMaterialManager); treatmentManagerEls.closeBtn.addEventListener("click",closeMaterialManager); treatmentManagerEls.cancelBtn.addEventListener("click",closeMaterialManager); treatmentManagerEls.saveBtn.addEventListener("click",saveMaterialManager); treatmentManagerEls.addForm.addEventListener("submit",addMaterial);    treatmentManagerEls.modal.addEventListener("click",e=>{if(e.target===treatmentManagerEls.modal) closeMaterialManager()});
 mobileToothEls.prev.addEventListener("click",()=>navigateMobileTooth(-1)); mobileToothEls.next.addEventListener("click",()=>navigateMobileTooth(1)); mobileToothEls.optionalMolar.addEventListener("click",toggleMobileOptionalMolar); mobileToothEls.close.addEventListener("click",closeMobileToothModal); mobileToothEls.bottomClose?.addEventListener("click",closeMobileToothModal); mobileToothEls.done.addEventListener("click",finishMobileToothSelection); mobileToothEls.modal.addEventListener("click",e=>{if(e.target===mobileToothEls.modal) closeMobileToothModal()});
-mobileEntryEls.trigger.addEventListener("click",openMobileEntryWizard); mobileEntryEls.close.addEventListener("click",closeMobileEntryWizard); mobileEntryEls.back.addEventListener("click",()=>moveMobileEntryStep(-1)); mobileEntryEls.next.addEventListener("click",()=>moveMobileEntryStep(1)); mobileEntryEls.done.addEventListener("click",completeMobileEntryWizard); mobileEntryEls.modal.addEventListener("click",e=>{if(e.target===mobileEntryEls.modal)closeMobileEntryWizard()});
+mobileEntryEls.close.addEventListener("click",closeMobileEntryWizard); mobileEntryEls.back.addEventListener("click",()=>moveMobileEntryStep(-1)); mobileEntryEls.next.addEventListener("click",()=>moveMobileEntryStep(1)); mobileEntryEls.done.addEventListener("click",completeMobileEntryWizard); mobileEntryEls.modal.addEventListener("click",e=>{if(e.target===mobileEntryEls.modal)closeMobileEntryWizard()});
 mobileEntryEls.progress.addEventListener("click",e=>{const stage=e.target.closest("[data-entry-stage]");if(stage)setMobileEntryStep(Number(stage.dataset.entryStage))});
 mobileToothEls.primarySwap.addEventListener(
   "click",
@@ -199,7 +297,7 @@ mobileToothEls.primarySwap.addEventListener(
 );
 els.dentitionSwitch.addEventListener("click",e=>{const btn=e.target.closest("[data-mode]"); if(!btn) return; setChartMode(btn.dataset.mode)});
 els.chartViewToggle.addEventListener("click",e=>{const btn=e.target.closest("[data-chart-view]");if(!btn)return;setSplitChartView(btn.dataset.chartView)});
-els.splitStage.addEventListener("click",e=>{if(!mobileSelectionSession&&isMobileToothModalViewport()&&e.target.closest("[data-surface]")) mobileToothModalOpen=true},true);
+
 els.patientDobText?.addEventListener("input", event => {
   event.target.value = formatDateWhileTyping(event.target.value);
   clearDateFieldError("dob");
@@ -427,11 +525,10 @@ function chartPrerequisiteMessage(){
   return "Set a valid visit date before starting the dental chart.";
 }
 function updateChartPrerequisiteState(){
-  const locked=!canStartCharting(),workspace=document.querySelector(".chart-workspace"),mobileTrigger=document.getElementById("mobile-entry-trigger");
+  const locked=!canStartCharting(),workspace=document.querySelector(".chart-workspace");
   workspace?.classList.toggle("chart-locked",locked);
   workspace?.removeAttribute("aria-disabled");
   workspace?.querySelectorAll(".chart-stage").forEach(stage=>stage.setAttribute("aria-disabled",String(locked)));
-  if(mobileTrigger)mobileTrigger.disabled=locked;
 }
 function formatInputDate(value){const date=parseIsoDate(value); if(!date) return ""; const day=`${date.getDate()}`.padStart(2,"0"); const month=`${date.getMonth()+1}`.padStart(2,"0"); return `${day}/${month}/${date.getFullYear()}`}
 function formatHeaderDate(value){const date=parseIsoDate(value); if(!date) return "Date not set"; return `${`${date.getDate()}`.padStart(2,"0")} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`}
@@ -1314,8 +1411,7 @@ function completeMobileEntryWizard(){
 }
 function renderMobileEntryWizard(){
   const hasTooth=Boolean(draft.tooth)&&!isGhostPrimarySlot(draft.tooth);
-  mobileEntryEls.trigger.disabled=!hasTooth;
-  mobileEntryEls.hint.textContent=hasTooth?`Tooth ${draft.tooth} selected. Tap to add its entry.`:"Tap a tooth, then add its chart entry.";
+  mobileEntryEls.hint.textContent="Tap a tooth for options. Hold and drag to choose one tooth.";
   const shouldShow=mobileEntryOpen&&isMobileToothModalViewport()&&hasTooth;
   mobileEntryEls.modal.classList.toggle("show",shouldShow);
   mobileEntryEls.modal.setAttribute("aria-hidden",shouldShow?"false":"true");
@@ -1468,11 +1564,15 @@ function handleToothClick(n,v,statusContext="existing"){
     draft.tooth=selection.teeth.includes(draft.tooth)?draft.tooth:selection.teeth.at(-1)||null;
     renderAll();return;
   }
-if(isMobileToothModalViewport()&&!mobileEntryOpen&&!mobileToothModalOpen&&draft.tooth&&(draft.tooth===n||selection.teeth.includes(n))){
-    openMobileEntryWizard();
+  if(isMobileToothModalViewport()){
+    if(!canStartCharting()||isGhostPrimarySlot(n))return;
+    selection.multi=false;
+    selection.spacingExcluded=[];
+    mobileToothModalOpen=true;
+    openTooth(n,v,null,draft.tooth===n,statusContext);
     return;
   }
-if(!selection.multi){if(isMobileToothModalViewport())mobileToothModalOpen=true;openTooth(n,v,null,false,statusContext); return} if(selection.teeth.includes(n)){selection.teeth=selection.teeth.filter(i=>i!==n); if(draft.tooth===n){draft.tooth=selection.teeth.length?selection.teeth[selection.teeth.length-1]:null} renderAll(); return} openTooth(n,v,null,selection.teeth.length>0||isGroupedProsthetic(),statusContext)}
+if(!selection.multi){openTooth(n,v,null,false,statusContext); return} if(selection.teeth.includes(n)){selection.teeth=selection.teeth.filter(i=>i!==n); if(draft.tooth===n){draft.tooth=selection.teeth.length?selection.teeth[selection.teeth.length-1]:null} renderAll(); return} openTooth(n,v,null,selection.teeth.length>0||isGroupedProsthetic(),statusContext)}
 function openEntry(tooth,id){selection.spacingExcluded=[];const entry=activeState()[tooth].entries.find(item=>item.id===id); if(!entry)return; editingEntry={tooth,id,bridgeId:entry.bridgeId}; if(chartMode==="primary"&&isPrimaryOptionalMolar(tooth)) primaryOptionalActive.add(tooth); selection.multi=isGroupedProsthetic(entry.treatment); selection.teeth=entry.bridgeId?flatEntries().filter(e=>e.bridgeId===entry.bridgeId).map(e=>e.tooth):[tooth]; draft.tooth=tooth; draft.category=entry.category; draft.treatment=entry.treatment; draft.material=entry.material||null; draft.view=entry.view; draft.status=entry.status; draft.layer=entryLayer(entry); draft.surfaces=[...entry.surfaces]; draft.note=entry.note||""; els.noteInput.value=draft.note; normalizeDraft(); renderAll(); if(isMobileToothModalViewport())openMobileEntryWizard()}
 function removeEntry(tooth,id){
   const toothState=activeState()[tooth];
@@ -1728,7 +1828,7 @@ function surfaceOverlaySVG(n,v,preview=false){
   const previewColor=preview?entryColor(draft):null;
   return renderSurfaceOverlay(n,v,{complete,planned,review,selected,previewColor,preview,clipKey:preview?"draft":"chart"});
 }
-function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=isToothMissing(n),selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; if(!isPrimaryTooth(n)&&n%10>=1&&n%10<=5)holder.classList.add("mobile-inner-tooth"); if([53,52,51,61,62,63,83,82,81,71,72,73].includes(n))holder.classList.add("mobile-primary-inner-tooth"); /* Tooth hover messages disabled; retain tooltip setup for reuse.
+function buildToothElement(n,v,layer="combined"){const ghost=isGhostPrimarySlot(n),showExisting=layer!=="planned",showPlanned=layer!=="existing",reviewLayer=layer==="planned"?"planned":(layer==="existing"?"existing":null),wholeExisting=showExisting?latestWhole(n,"existing"):null,wholePlanned=showPlanned?latestWhole(n,"planned"):null,wholeReview=latestWhole(n,"watch",reviewLayer),rootExisting=showExisting?latestRoot(n,"existing"):null,rootPlanned=showPlanned?latestRoot(n,"planned"):null,rootReview=latestRoot(n,"watch",reviewLayer),watch=latestWatch(n,reviewLayer),missing=isToothMissing(n),selected=!ghost&&!selection.multi&&draft.tooth===n,statusContext=layer==="planned"?"planned":"existing"; const holder=document.createElement("div"); holder.dataset.dragTooth=String(n); holder.dataset.dragView=v; holder.dataset.dragLayer=statusContext; holder.className=`tooth${selection.multi&&selection.teeth.includes(n)?" batch-selected":""}${selected?" active":""}${ghost?" ghost":""}`; if(!isPrimaryTooth(n)&&n%10>=1&&n%10<=5)holder.classList.add("mobile-inner-tooth"); if([53,52,51,61,62,63,83,82,81,71,72,73].includes(n))holder.classList.add("mobile-primary-inner-tooth"); /* Tooth hover messages disabled; retain tooltip setup for reuse.
 const tooltip=toothTooltipText(n); if(tooltip){holder.classList.add("has-tooltip"); holder.dataset.tooltip=tooltip; if(tooltipOnLeft(n)) holder.classList.add("tooltip-left")}
 */ const art=document.createElement("div"); art.className="tooth-art"; const core=document.createElement("div"); core.className=`art-core ${v==="front"?`front ${isUpper(n)?"upper":"lower"}`:"occ"}`; if(missing){core.innerHTML=missingSVG(n,v)} else {const split=layer!=="combined"; const fill="#F5F2EC"; const anatomyEntry=wholePlanned||wholeExisting||wholeReview; const baseSVG=anatomySVG(n,v,anatomyEntry); core.innerHTML=baseSVG; if(!ghost){if(wholeExisting) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeExisting.treatment,"existing",wholeExisting)); if((split||!wholeExisting)&&wholePlanned) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholePlanned.treatment,"planned",wholePlanned)); if((split||!wholeExisting&&!wholePlanned)&&wholeReview) core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,wholeReview.treatment,"watch",wholeReview)); if(selection.multi&&selection.teeth.includes(n)&&draft.treatment==="veneer"&&layer==="combined") core.insertAdjacentHTML("beforeend",wholeStatusOverlaySVG(n,v,draft.treatment,"preview")); if(layer==="combined") core.insertAdjacentHTML("beforeend",surfaceOverlaySVG(n,v)); else if(layer==="existing") core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{complete:surfaceMap(n,v,"existing"),review:surfaceMap(n,v,"watch","existing"),selected:selectedSurfaces(n,v),previewColor:null,preview:false,clipKey:`existing-${n}-${v}`})); else core.insertAdjacentHTML("beforeend",renderSurfaceOverlay(n,v,{planned:surfaceMap(n,v,"planned"),review:surfaceMap(n,v,"watch","planned"),selected:selectedSurfaces(n,v),previewColor:null,preview:false,clipKey:`planned-${n}-${v}`})); if(v==="front"&&((layer==="planned"&&(rootPlanned||rootReview))||(layer==="existing"&&(rootExisting||rootReview))||(layer==="combined"&&(rootExisting||rootReview)))) core.insertAdjacentHTML("beforeend",rctOverlayHTML(n))}} if(layer!=="combined"){const dims=v==="front"?{width:toothW(n),height:toothH(n)}:crownDims(n);core.style.zoom=String(.82*toothW(n)/dims.width);}
 applyAnatomyClip(core,n,v,wholePlanned||wholeExisting||wholeReview); if(n===53||n===63){core.style.scale="1.12";} art.appendChild(core); if(layer==="combined"){if(!ghost&&wholeExisting&&!missing&&!isVeneer(wholeExisting.treatment)&&!hideWholeRing(wholeExisting.treatment)) art.insertAdjacentHTML("beforeend",`<div class="status-ring" style="--ring-color:${COLORS[wholeExisting.treatment]}"></div>`); if(!ghost&&((wholePlanned||(rootPlanned&&!wholeExisting))&&!(wholePlanned&&isVeneer(wholePlanned.treatment)))){const t=wholePlanned?wholePlanned.treatment:rootPlanned.treatment; if(!hideWholeRing(t)) art.insertAdjacentHTML("beforeend",`<div class="plan-ring" style="--ring-color:${COLORS[t]}"></div>`)} if(!ghost&&v==="front"&&latestWatch(n,"existing")) art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} else if(!ghost&&v==="front"&&watch){art.insertAdjacentHTML("beforeend",reviewBadgeHTML(n,v))} holder.appendChild(art); if(!ghost)appendConditionBadges(holder,n,layer,v); if(ghost){holder.addEventListener("click",e=>{if(!isMobileToothModalViewport())return;e.preventDefault();e.stopPropagation();activatePrimaryOptionalTooth(n)});holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); activatePrimaryOptionalTooth(n)}); return holder} holder.addEventListener("click",()=>handleToothClick(n,v,statusContext)); if(chartMode==="primary"&&isPrimaryOptionalMolar(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); deactivatePrimaryOptionalTooth(n)}); else if(swapPrimaryToothNumber(n)) holder.addEventListener("dblclick",e=>{e.preventDefault(); e.stopPropagation(); togglePrimaryTooth(n,v)});

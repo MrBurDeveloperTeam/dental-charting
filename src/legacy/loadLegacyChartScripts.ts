@@ -4,7 +4,7 @@ export async function loadLegacyChartScripts() {
     "js/tooth-silhouettes.js?v=2",
     "js/inner-anatomy.js",
     "js/materials.js?v=9",
-    "js/app.js?v=120",
+    "js/app.js?v=124",
     "js/supabaseSync.js?v=12",
   ]) {
     await new Promise<void>((resolve, reject) => {

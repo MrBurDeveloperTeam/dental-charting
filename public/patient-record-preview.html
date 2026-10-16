@@ -8,10 +8,10 @@
 <link rel="stylesheet" href="../css/base.css?v=17">
 <link rel="stylesheet" href="../css/chart.css?v=24">
 <link rel="stylesheet" href="../css/editor.css?v=6">
-<link rel="stylesheet" href="../css/dialogs.css?v=26">
-<link rel="stylesheet" href="../css/layout.css?v=85">
+<link rel="stylesheet" href="../css/dialogs.css?v=28">
+<link rel="stylesheet" href="../css/layout.css?v=87">
 <link rel="stylesheet" href="../css/print.css?v=21">
-<link rel="stylesheet" href="../css/materials.css?v=16">
+<link rel="stylesheet" href="../css/materials.css?v=17">
 <link rel="stylesheet" href="../css/patient-records.css?v=12">
 <link rel="stylesheet" href="../css/patient-record-preview.css">
 </head>
@@ -26,7 +26,7 @@
       </div>
       <nav class="app-nav" aria-label="Dental chart navigation">
         <button class="app-nav-item active" id="chart-nav-item" type="button" aria-current="page">Chart</button>
-        <button class="app-nav-item" id="patient-record-nav-item" type="button" onclick="window.location.href='./patient-record-preview.html'">Patient record</button>
+        <button class="app-nav-item" id="patient-record-nav-item" type="button" onclick="window.location.href='./patient-record-preview.html'">Patient Record</button>
       </nav>
       <div id="profile-settings-root">
         <div class="profile-settings profile-settings-fallback">
@@ -124,8 +124,7 @@
             <button class="chart-layer-btn active" type="button" data-chart-view="existing" aria-pressed="true">Existing</button>
             <button class="chart-layer-btn" type="button" data-chart-view="planned" aria-pressed="false">Planning</button>
           </div>
-          <button class="mobile-entry-trigger" id="mobile-entry-trigger" type="button">+ Chart Entry</button>
-          <small class="mobile-entry-hint" id="mobile-entry-hint">Hint: Tap a tooth and add its chart entry.</small>
+          <small class="mobile-entry-hint" id="mobile-entry-hint">Tap a tooth for options. Hold and drag to choose one tooth.</small>
         </div>
       </div>
 
@@ -503,7 +502,7 @@
 <script defer src="./js/tooth-silhouettes.js?v=2"></script>
 <script defer src="./js/inner-anatomy.js"></script>
 <script defer src="./js/materials.js?v=9"></script>
-<script defer src="./js/app.js?v=120"></script>
+<script defer src="./js/app.js?v=124"></script>
 <script defer src="./js/patient-record-preview.js"></script>
 </body>
 </html>

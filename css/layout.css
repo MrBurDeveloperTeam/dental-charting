@@ -1590,3 +1590,22 @@ button.number:focus-visible {
   #mobile-entry-modal #treatment-grid .treatment-icon{max-width:100%;min-width:0}
   #mobile-entry-modal #treatment-grid .treatment-icon svg{max-width:100%}
 }
+/* Enlarge only the tooth currently under the finger, like desktop hover. */
+@media screen and (max-width:600px){
+  #split-stage .tooth:is(:hover,.active,.batch-selected) .tooth-art,
+  #combined-stage .tooth:is(:hover,.active,.batch-selected) .tooth-art{
+    transform:none;
+    filter:none;
+  }
+  #split-stage .tooth.touch-hover,
+  #combined-stage .tooth.touch-hover{z-index:7}
+  #split-stage .tooth.touch-hover .tooth-art,
+  #combined-stage .tooth.touch-hover .tooth-art{
+    scale:1.22;
+  }
+  /* Keep hit targets in their original columns while artwork is enlarged. */
+  body.mobile-drag-selecting #split-stage .tooth-art,
+  body.mobile-drag-selecting #combined-stage .tooth-art,
+  #split-stage .tooth.touch-hover .tooth-art,
+  #combined-stage .tooth.touch-hover .tooth-art{pointer-events:none}
+}
