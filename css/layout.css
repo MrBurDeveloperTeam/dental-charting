@@ -1442,7 +1442,8 @@ button.number:focus-visible {
     transform:none;
   }
   #split-stage .tooth {width:100%;min-width:0}
-  #split-stage .tooth-art {zoom:.47}
+  /* Base transform stays independent of active/hover states and is refined below. */
+  #split-stage .tooth-art {zoom:.47;transform:none}
   #split-stage .number {position:relative;z-index:3;min-width:0;font-size:8px;line-height:1}
   #split-stage .lower-number-row {z-index:4}
   /* Mobile sizes for teeth 15–25 and 45–35; molars stay unchanged. */
@@ -1594,9 +1595,9 @@ button.number:focus-visible {
 @media screen and (max-width:600px){
   #split-stage .tooth:is(:hover,.active,.batch-selected) .tooth-art,
   #combined-stage .tooth:is(:hover,.active,.batch-selected) .tooth-art{
-    transform:none;
     filter:none;
   }
+  #combined-stage .tooth:is(:hover,.active,.batch-selected) .tooth-art{transform:none}
   #split-stage .tooth.touch-hover,
   #combined-stage .tooth.touch-hover{z-index:7}
   #split-stage .tooth.touch-hover .tooth-art,
