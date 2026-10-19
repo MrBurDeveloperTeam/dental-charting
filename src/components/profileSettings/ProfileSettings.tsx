@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { getSupabaseClient } from "../../lib/supabaseClient";
+import { useProfileImage } from "../../../hooks/useProfileImage";
 
 const SNABBB_APP_URL = "https://app.snabbb.com";
 
@@ -63,11 +64,16 @@ function Icon({ type }: { type: Destination | "logout" }) {
 }
 
 export function ProfileSettings() {
+  // AuthGate only mounts this component for an authenticated session.
+  const { profileImageUrl } = useProfileImage(true);
+  const [failedImageUrl, setFailedImageUrl] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
   const [user, setUser] = useState<ProfileUser>({});
   const [credits, setCredits] = useState<string>("Loading…");
   const [busy, setBusy] = useState<Destination | "logout" | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const initials = (user.name?.trim() || user.email?.split("@")[0] || "U")
+    .split(/\s+/).filter(Boolean).slice(0, 2).map((part) => Array.from(part)[0]).join("").toUpperCase();
 
   useEffect(() => {
     document.querySelectorAll(".profile-settings-fallback").forEach((fallback) => fallback.remove());
@@ -207,7 +213,11 @@ export function ProfileSettings() {
   return (
     <div className="profile-settings" ref={containerRef}>
       <button className="profile-settings-trigger" type="button" aria-label="Open profile settings" aria-haspopup="menu" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20v-2a6.5 6.5 0 0 1 13 0v2"/></svg>
+        {profileImageUrl && failedImageUrl !== profileImageUrl ? (
+          <img src={profileImageUrl} alt="" onError={() => setFailedImageUrl(profileImageUrl)} />
+        ) : (
+          <span className="profile-settings-initials" aria-hidden="true">{initials}</span>
+        )}
       </button>
       {open && (
         <section className="profile-settings-menu" role="menu" aria-label="Profile settings">
