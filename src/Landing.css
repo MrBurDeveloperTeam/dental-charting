@@ -252,22 +252,6 @@
   box-shadow: 0 0 0 3px rgba(11, 159, 145, 0.22), 0 12px 25px rgba(11, 159, 145, 0.2);
 }
 
-[data-signup-button][aria-busy="true"] svg {
-  animation: dental-signup-spin 0.8s linear infinite;
-}
-
-@keyframes dental-signup-spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  [data-signup-button][aria-busy="true"] svg {
-    animation: none;
-  }
-}
-
 .dental-primary-button:hover {
   transform: translateY(-2px);
   background: #478d85;
@@ -926,7 +910,7 @@
 
 .light-button {
   flex: 0 0 auto;
-  color: var(--dental-teal-dark);
+  color: var(--dental-teal-dark) !important;
   background: white;
 }
 
