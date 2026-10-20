@@ -81,6 +81,12 @@
   cursor: pointer;
 }
 
+.dental-landing button:focus-visible,
+.dental-landing a:focus-visible {
+  outline: 3px solid rgba(11, 159, 145, 0.4);
+  outline-offset: 3px;
+}
+
 .dental-landing a {
   color: inherit;
   text-decoration: none;
@@ -233,6 +239,17 @@
 .dental-nav-cta:hover {
   transform: translateY(-2px);
   background: var(--dental-teal-dark);
+}
+
+.dental-nav-cta:active,
+.dental-primary-button:active,
+.mobile-nav-signup:active {
+  transform: translateY(0) scale(0.98);
+}
+
+[data-signup-button][aria-busy="true"] {
+  cursor: wait;
+  box-shadow: 0 0 0 3px rgba(11, 159, 145, 0.22), 0 12px 25px rgba(11, 159, 145, 0.2);
 }
 
 .dental-primary-button:hover {
@@ -893,14 +910,14 @@
 
 .light-button {
   flex: 0 0 auto;
-  color: var(--dental-teal-dark);
+  color: var(--dental-teal-dark) !important;
   background: white;
 }
 
 .light-button:hover,
 .light-button:active,
 .light-button:focus-visible {
-  color: white;
+  color: white !important;
   background: var(--dental-teal-dark);
 }
 
@@ -1047,6 +1064,14 @@
     color: var(--dental-teal-dark);
     background: var(--dental-teal-light);
   }
+
+.mobile-nav-signup:active,
+.mobile-nav-signup:focus-visible,
+.mobile-nav-signup:hover {
+  color: var(--dental-teal-dark);
+  background: #c8eee8;
+  border-color: var(--dental-teal);
+}
 
   .dental-hero {
     padding: 60px 5vw 70px;
