@@ -917,7 +917,7 @@
 .light-button:hover,
 .light-button:active,
 .light-button:focus-visible {
-  color: white;
+  color: white !important;
   background: var(--dental-teal-dark);
 }
 
