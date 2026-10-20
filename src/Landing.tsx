@@ -102,6 +102,7 @@ export function DentalChartingLandingPage({
 }: DentalChartingLandingPageProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isSigningUp, setIsSigningUp] = useState(false);
 
   const handleLogin = () => {
     if (onLogin) {
@@ -113,6 +114,10 @@ export function DentalChartingLandingPage({
   };
 
   const handleGetStarted = () => {
+    if (isSigningUp) return;
+
+    setIsSigningUp(true);
+
     if (onGetStarted) {
       onGetStarted();
       return;
@@ -181,6 +186,9 @@ export function DentalChartingLandingPage({
 
             <button
               className="mobile-nav-signup"
+              type="button"
+              data-signup-button
+              aria-busy={isSigningUp}
               onClick={() => {
                 closeMenu();
                 handleGetStarted();
@@ -196,7 +204,13 @@ export function DentalChartingLandingPage({
             Log In
           </button>
 
-          <button className="dental-nav-cta" onClick={handleGetStarted}>
+          <button
+            className="dental-nav-cta"
+            type="button"
+            data-signup-button
+            aria-busy={isSigningUp}
+            onClick={handleGetStarted}
+          >
             Sign Up
             <ArrowRight size={17} />
           </button>
@@ -232,6 +246,9 @@ export function DentalChartingLandingPage({
           <div className="dental-hero-actions">
             <button
               className="dental-primary-button"
+              type="button"
+              data-signup-button
+              aria-busy={isSigningUp}
               onClick={handleGetStarted}
             >
               <span>Sign Up</span>
@@ -468,6 +485,9 @@ export function DentalChartingLandingPage({
 
         <button
           className="dental-primary-button light-button"
+          type="button"
+          data-signup-button
+          aria-busy={isSigningUp}
           onClick={handleGetStarted}
         >
           <span>Sign Up</span>
