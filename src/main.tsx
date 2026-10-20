@@ -20,6 +20,7 @@ declare global {
     dentalCharts: typeof dentalCharts;
     dentalMaterials: typeof dentalMaterials;
     chartToBlob: typeof chartToBlob;
+    __dentalChartLegacyReady?: boolean;
   }
 }
 
@@ -40,6 +41,12 @@ flushSync(() => {
   createRoot(rootElement).render(<App />);
 });
 // Classic scripts share globals and must bind after React mounts the patient form.
-void loadLegacyChartScripts().catch((error: unknown) => {
-  console.error("Unable to initialize the dental chart", error);
-});
+void loadLegacyChartScripts()
+  .catch((error: unknown) => {
+    console.error("Unable to initialize the dental chart", error);
+  })
+  .finally(() => {
+    // Lets the launch screen (AuthGate) know the chart scripts are ready.
+    window.__dentalChartLegacyReady = true;
+    document.dispatchEvent(new CustomEvent("dental-chart:legacy-ready"));
+  });

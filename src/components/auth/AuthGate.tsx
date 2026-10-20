@@ -95,6 +95,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { LaunchScreen } from "./LaunchScreen";
 
 const SNABBB_APP_URL = "https://app.snabbb.com";
 const VERIFY_URL = `${SNABBB_APP_URL}/api/verify-token`;
@@ -117,6 +118,28 @@ export function AuthGate({
   unauthenticatedFallback,
 }: AuthGateProps) {
   const [authState, setAuthState] = useState<AuthState>("checking");
+  // The chart's classic scripts load after React mounts (see main.tsx). Keep the launch
+  // screen up, with its own status line, until they are ready (or 10s at most).
+  const [legacyReady, setLegacyReady] = useState<boolean>(
+    () => window.__dentalChartLegacyReady === true,
+  );
+
+  // Hand over from the static #ls-splash in index.html to the React-rendered screen
+  // (identical markup/styles) in the same frame, so there is no visible switch.
+  useLayoutEffect(() => {
+    document.getElementById("ls-splash")?.remove();
+  }, []);
+
+  useEffect(() => {
+    if (legacyReady) return;
+    const onReady = () => setLegacyReady(true);
+    document.addEventListener("dental-chart:legacy-ready", onReady);
+    const timer = window.setTimeout(onReady, 10000);
+    return () => {
+      document.removeEventListener("dental-chart:legacy-ready", onReady);
+      window.clearTimeout(timer);
+    };
+  }, [legacyReady]);
 
   useLayoutEffect(() => {
     const isAuthenticated = authState === "authenticated";
@@ -190,17 +213,7 @@ export function AuthGate({
   }, [verifySession]);
 
   if (authState === "checking") {
-    return (
-      <main className="auth-gate" aria-busy="true">
-        <section className="auth-gate-dialog" role="status">
-          <div className="auth-gate-icon">…</div>
-          <h1>Checking your session</h1>
-          <p>
-            Please wait while we confirm your Snabbb account.
-          </p>
-        </section>
-      </main>
-    );
+    return <LaunchScreen status="Signing you in…" />;
   }
 
   if (authState === "authenticated") {
@@ -208,6 +221,7 @@ export function AuthGate({
       <>
         {children}
         {authenticatedChrome}
+        {!legacyReady && <LaunchScreen status="Loading your chart…" />}
       </>
     );
   }
