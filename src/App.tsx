@@ -20,6 +20,7 @@ export default function App() {
 
   useLayoutEffect(() => {
     if (!bypassAuth) return;
+    document.getElementById("ls-splash")?.remove();
     document.body.classList.remove("auth-session-gated");
     const renderFrame = window.requestAnimationFrame(() => {
       document.dispatchEvent(new CustomEvent("dental-chart:auth-ready"));
