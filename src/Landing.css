@@ -179,10 +179,13 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
+  gap: 12px;
   border-radius: 12px;
   font-weight: 500;
-  transition: 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .dental-login {
@@ -196,14 +199,20 @@
 .dental-nav-cta,
 .dental-primary-button {
   padding: 14px 20px;
+}
+
+.dental-nav-cta {
   border: 0;
-  color: white;
+  color: #ffffff;
   background: var(--dental-teal);
   box-shadow: 0 12px 25px rgba(11, 159, 145, 0.2);
 }
 
 .dental-primary-button {
-  gap: 8px;
+  color: #ffffff !important;
+  background: #55a39a;
+  border: 0;
+  box-shadow: 0 12px 25px rgba(85, 163, 154, 0.2);
 }
 
 .dental-nav-cta {
@@ -221,24 +230,28 @@
   height: 18px;
 }
 
-.dental-nav-cta:hover,
-.dental-primary-button:hover {
+.dental-nav-cta:hover {
   transform: translateY(-2px);
   background: var(--dental-teal-dark);
 }
 
+.dental-primary-button:hover {
+  transform: translateY(-2px);
+  background: #478d85;
+}
+
 .dental-secondary-button {
   padding: 14px 20px;
-  border: 1px solid var(--dental-line);
-  border-radius: 13px;
-  color: var(--dental-teal-dark);
-  background: white;
+  border: 1px solid #dcebea;
+  color: #102b35;
+  background: #ffffff;
 }
 
 .dental-secondary-button:hover {
-  border-color: #aadbd5;
+  color: #102b35;
+  background: #f7fbfa;
+  border-color: #55a39a;
   transform: translateY(-2px);
-  background: var(--dental-teal-light);
 }
 
 .dental-menu-button {
