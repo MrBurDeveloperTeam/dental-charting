@@ -245,6 +245,17 @@
   #patient-preferred-dentist option {
     font-size: 16px;
   }
+
+  #patient-source,
+  #patient-preferred-dentist,
+  #patient-source option,
+  #patient-preferred-dentist option {
+    font-size: 12px;
+  }
+
+  .patient-search-result-action {
+    display: none;
+  }
 }
   .mobile-entry-stage{appearance:none;position:relative;display:grid;justify-items:center;gap:4px;min-width:0;padding:0;border:0;background:transparent;color:#9aa6b2;font:inherit;font-size:9px;font-weight:800;text-align:center;cursor:pointer;touch-action:manipulation}
   .mobile-entry-stage[hidden]{display:none}

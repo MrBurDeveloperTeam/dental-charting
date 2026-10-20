@@ -14,6 +14,9 @@ for (const [, path] of loader.matchAll(/"(js\/[^"?]+(?:\?v=[^"]+)?)"/g)) {
 }
 const synced = live
   .replace('<head>', '<head><base href="./public/">')
+  // The static preview uses local fixtures, not the React auth bootstrap that
+  // dismisses this splash. Do not copy its blocking overlay into the preview.
+  .replace(/<div class="ls" id="ls-splash"[\s\S]*?(?=<div class="page">)/, '')
   .replaceAll('href="./css/', 'href="../css/')
   .replace('saved-entries-collapsed auth-session-gated', 'saved-entries-collapsed')
   .replace('id="patient-record-nav-item" type="button"', 'id="patient-record-nav-item" type="button" onclick="window.location.href=\'./patient-record-preview.html\'"')
