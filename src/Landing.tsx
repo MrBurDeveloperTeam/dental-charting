@@ -234,8 +234,8 @@ export function DentalChartingLandingPage({
               className="dental-primary-button"
               onClick={handleGetStarted}
             >
-              Sign Up
-              <ArrowRight size={18} />
+              <span>Sign Up</span>
+              <ArrowRight size={22} strokeWidth={2.5} />
             </button>
 
             <a className="dental-secondary-button" href="#features">
@@ -470,8 +470,8 @@ export function DentalChartingLandingPage({
           className="dental-primary-button light-button"
           onClick={handleGetStarted}
         >
-          Sign Up
-          <ArrowRight size={18} />
+          <span>Sign Up</span>
+          <ArrowRight size={22} strokeWidth={2.5} />
         </button>
       </section>
 
