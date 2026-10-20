@@ -180,8 +180,8 @@
   align-items: center;
   justify-content: center;
   gap: 9px;
-  border-radius: 13px;
-  font-weight: 800;
+  border-radius: 12px;
+  font-weight: 500;
   transition: 0.2s ease;
 }
 
@@ -190,6 +190,7 @@
   border: 0;
   color: var(--dental-navy);
   background: transparent;
+  font-weight: 400;
 }
 
 .dental-nav-cta,
@@ -199,6 +200,10 @@
   color: white;
   background: var(--dental-teal);
   box-shadow: 0 12px 25px rgba(11, 159, 145, 0.2);
+}
+
+.dental-primary-button {
+  gap: 8px;
 }
 
 .dental-nav-cta {
@@ -223,13 +228,15 @@
 }
 
 .dental-secondary-button {
-  padding: 13px 18px;
-  border: 1px solid #a7dad5;
+  padding: 14px 20px;
+  border: 1px solid var(--dental-line);
+  border-radius: 13px;
   color: var(--dental-teal-dark);
-  background: transparent;
+  background: white;
 }
 
 .dental-secondary-button:hover {
+  border-color: #aadbd5;
   transform: translateY(-2px);
   background: var(--dental-teal-light);
 }
@@ -316,6 +323,9 @@
 .dental-hero-actions,
 .dental-trust-row {
   display: flex;
+}
+
+.dental-trust-row {
   flex-wrap: wrap;
 }
 
@@ -352,35 +362,40 @@
   justify-content: center;
   min-width: 0;
   min-height: 470px;
-  transform: translateY(10px);
 }
 
 .preview-glow {
   position: absolute;
   z-index: 0;
-  width: 56%;
-  aspect-ratio: 1;
   border-radius: 50%;
   pointer-events: none;
-  filter: blur(30px);
-  opacity: 0.65;
 }
 
 .preview-glow-one {
-  top: 13%;
-  left: 25%;
-  background: #bdece5;
+  width: 420px;
+  height: 420px;
+  background: rgba(145, 227, 216, 0.25);
+  filter: blur(3px);
 }
 
 .preview-glow-two {
-  right: 12%;
-  bottom: 2%;
-  background: #f5e9bd;
+  right: 10%;
+  bottom: 7%;
+  width: 170px;
+  height: 170px;
+  background: rgba(244, 194, 103, 0.18);
+  filter: blur(3px);
 }
 
 .dental-chart-preview-image {
+  display: block;
   position: relative;
   z-index: 1;
+  width: min(100%, 650px);
+  height: auto;
+  border: 1px solid #c9e6e2;
+  border-radius: 24px;
+  box-shadow: 0 35px 80px rgba(31, 99, 101, 0.16);
 }
 
 .dental-chart-preview {
@@ -912,16 +927,6 @@
 
 .dental-footer-links a:hover {
   color: var(--dental-teal);
-}
-
-.dental-chart-preview-image {
-  display: block;
-  width: calc(100% + 28px);
-  max-width: none;
-  height: auto;
-  margin-left: -14px;
-  border-radius: 25px;
-  filter: drop-shadow(0 28px 34px rgba(31, 99, 101, 0.15));
 }
 
 @media (max-width: 1000px) {
