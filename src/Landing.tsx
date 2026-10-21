@@ -153,10 +153,8 @@ export function DentalChartingLandingPage({
             alt="Snabbb"
           />
 
-          <span className="dental-brand-divider" aria-hidden="true" />
-
           <span className="dental-brand-product">
-            <strong>Dental Charting</strong>
+            Dental Charting
           </span>
         </a>
 
