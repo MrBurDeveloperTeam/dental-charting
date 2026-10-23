@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { getSupabaseClient } from "../../lib/supabaseClient";
 import { useProfileImage } from "../../../hooks/useProfileImage";
+import { fetchOdooSessionName } from "../../../hooks/useOdooSessionName";
 
 const SNABBB_APP_URL = "https://app.snabbb.com";
 
@@ -80,10 +81,21 @@ export function ProfileSettings() {
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
     fetch(`${SNABBB_APP_URL}/api/verify-token`, { credentials: "include", headers: { Accept: "application/json" } })
       .then((response) => response.ok ? response.json() : null)
-      .then((payload) => setUser(readUser(payload)))
+      .then((payload) => {
+        const next = readUser(payload);
+        if (!cancelled) setUser(next);
+        return next.email;
+      })
+      // Name from Odoo get_session_info (same source as the App Gallery).
+      .then((email) => fetchOdooSessionName(email))
+      .then((odooName) => {
+        if (odooName && !cancelled) setUser((current) => ({ ...current, name: odooName }));
+      })
       .catch(() => undefined);
+    return () => { cancelled = true; };
   }, []);
 
   useEffect(() => {
