@@ -55,6 +55,16 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     if (url.pathname === "/api/wallet") return proxyWalletRequest(request);
-    return env.ASSETS.fetch(request);
+    const response = await env.ASSETS.fetch(request);
+
+    // The chart loads ~100 small tooth images. Pages' default "revalidate every
+    // time" policy makes each one a network round trip on every visit; let the
+    // browser reuse them for a day (and serve stale for a week while refreshing).
+    if (url.pathname.startsWith("/assets/images/teeth/") && response.ok) {
+      const headers = new Headers(response.headers);
+      headers.set("Cache-Control", "public, max-age=86400, stale-while-revalidate=604800");
+      return new Response(response.body, { status: response.status, statusText: response.statusText, headers });
+    }
+    return response;
   },
 };
