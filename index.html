@@ -38,7 +38,7 @@ html[data-theme="dark"]{--ls-bg:#0F1115;--ls-fg:#F1F5F9;--ls-ring:rgba(255,255,2
 .ls-status{margin:0;padding:0;min-height:1.5em;font-family:inherit;font-size:clamp(1rem,4vw,1.125rem);font-weight:400;line-height:1.5;letter-spacing:normal;color:var(--ls-muted)}
 @keyframes ls-spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.ls-spinner{animation-duration:2.4s}}</style>
-<link rel="stylesheet" href="./css/base.css?v=17">
+<link rel="stylesheet" href="./css/base.css?v=18">
 <link rel="stylesheet" href="./css/chart.css?v=24">
 <link rel="stylesheet" href="./css/editor.css?v=6">
 <link rel="stylesheet" href="./css/dialogs.css?v=29">
@@ -78,10 +78,16 @@ html[data-theme="dark"]{--ls-bg:#0F1115;--ls-fg:#F1F5F9;--ls-ring:rgba(255,255,2
 
     <section class="contextbar" aria-label="Chart context">
       <div class="dentition-switch">
-        <span class="dentition-label">Dentition</span>
-        <div class="dentition-pills" id="dentition-switch">
-          <button class="dentition-btn active" type="button" data-mode="permanent">Permanent</button>
-          <button class="dentition-btn" type="button" data-mode="primary">Primary</button>
+        <span class="dentition-label" id="dentition-label">Dentition</span>
+        <div class="dentition-pills" id="dentition-switch" role="radiogroup" aria-labelledby="dentition-label" data-active="permanent">
+          <button class="dentition-btn active" type="button" role="radio" aria-checked="true" tabindex="0" data-mode="permanent">
+            <span class="dentition-btn-title">Permanent</span>
+            <span class="dentition-btn-sub">32 teeth &middot; Adult</span>
+          </button>
+          <button class="dentition-btn" type="button" role="radio" aria-checked="false" tabindex="-1" data-mode="primary">
+            <span class="dentition-btn-title">Primary</span>
+            <span class="dentition-btn-sub">20 teeth &middot; Child</span>
+          </button>
         </div>
         <span class="dentition-hint" id="dentition-hint"></span>
       </div>

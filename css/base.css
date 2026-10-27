@@ -122,6 +122,22 @@ body:has(.modal-backdrop.show) .profile-settings-fallback{z-index:90;pointer-eve
 .dentition-btn.active:hover{background:var(--primary);color:#fff;box-shadow:0 7px 15px rgba(26,120,232,.28)}
 .dentition-btn:active{transform:translateY(0)}
 .dentition-hint{display:none!important}
+/* Segmented control: a single thumb slides between the two options. Only active
+   when the markup carries data-active (older preview pages keep the plain pills). */
+.dentition-pills[data-active]{position:relative;display:grid;grid-template-columns:1fr 1fr;isolation:isolate}
+.dentition-pills[data-active]::before{content:"";position:absolute;z-index:-1;top:4px;bottom:4px;left:4px;width:calc((100% - 8px) / 2);border-radius:12px;background:var(--primary);box-shadow:0 3px 8px rgba(26,120,232,.28);transition:transform .24s cubic-bezier(.4,0,.2,1)}
+.dentition-pills[data-active="primary"]::before{transform:translateX(100%)}
+.dentition-pills[data-active] .dentition-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;min-height:46px;padding:0 22px;white-space:nowrap}
+.dentition-pills[data-active] .dentition-btn:hover{transform:none;box-shadow:none;background:rgba(26,120,232,.08);color:#1e4d8c}
+.dentition-pills[data-active] .dentition-btn.active,
+.dentition-pills[data-active] .dentition-btn.active:hover{background:transparent;box-shadow:none;color:#fff}
+.dentition-btn-title{font-size:14px;font-weight:700;line-height:1.2}
+.dentition-btn-sub{font-size:10px;font-weight:600;letter-spacing:.02em;line-height:1.2;opacity:.78}
+.dentition-pills[data-active] .dentition-btn:disabled{cursor:not-allowed;opacity:.55}
+.dentition-pills[data-active] .dentition-btn.active:disabled{opacity:.85}
+@media (max-width:600px){.dentition-btn-sub{display:none}.dentition-pills[data-active] .dentition-btn{min-height:30px;padding:0 14px}.dentition-pills[data-active]::before{border-radius:8px}}
+@media (prefers-reduced-motion:reduce){.dentition-pills[data-active]::before{transition:none}}
+
 .meta{display:grid;grid-template-columns:minmax(300px,1.35fr) minmax(230px,1fr);gap:0;min-width:0;border-right:1px solid var(--line)}
 .meta-block small{display:block;font-size:10px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
 .meta-block strong{display:block;font-size:16px;font-weight:750;line-height:1.25;color:var(--ink)}
