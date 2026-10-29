@@ -149,7 +149,7 @@ export function DentalChartingLandingPage({
           </span> */}
           <img
             className="dental-brand-logo"
-            src="/assets/images/snabbb-teal.png"
+            src="/assets/images/snabbb-teal.webp"
             alt="Snabbb"
           />
 
@@ -509,7 +509,7 @@ export function DentalChartingLandingPage({
           </span> */}
           <img
             className="dental-brand-logo"
-            src="/assets/images/snabbb-teal.png"
+            src="/assets/images/snabbb-teal.webp"
             alt="Snabbb"
           />
 
