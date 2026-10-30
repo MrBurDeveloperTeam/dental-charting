@@ -15,7 +15,7 @@ export function LaunchScreen({
     <div className="ls" role="status" aria-live="polite">
       <img
         className="ls-icon"
-        src="https://app.snabbb.com/icons/new-icons/charting.png?v=1"
+        src="./assets/images/favicon_charting.webp"
         alt=""
         width={160}
         height={160}
